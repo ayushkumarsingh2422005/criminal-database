@@ -1,0 +1,274 @@
+"use client";
+
+import { FormEvent, useEffect, useState } from "react";
+import { Card } from "@/components/ui/Card";
+import { Input } from "@/components/ui/Input";
+import { Select } from "@/components/ui/Select";
+import { Button } from "@/components/ui/Button";
+import { SectionTitle } from "@/components/ui/FieldLabel";
+import { CriminalTable } from "@/components/criminals/CriminalTable";
+import { PageHeader } from "@/components/layout/PageHeader";
+import { fieldLabel } from "@/lib/criminal-fields";
+import { EXTENDED_FIELDS, extLabel } from "@/lib/criminal-extended-fields";
+import {
+  emptySearchFilters,
+  filtersToSearchParams,
+  type CriminalSearchFilters,
+} from "@/lib/criminal-search";
+import { useCaseTypes, usePoliceStations } from "@/lib/hooks/use-lookups";
+import type { CriminalRecord } from "@/lib/criminal-mapper";
+
+export default function SearchPage() {
+  const [filters, setFilters] = useState<CriminalSearchFilters>(emptySearchFilters);
+  const [items, setItems] = useState<CriminalRecord[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [limit, setLimit] = useState(10);
+  const { items: caseTypes } = useCaseTypes();
+  const { items: policeStations } = usePoliceStations();
+
+  const set =
+    (key: keyof CriminalSearchFilters) =>
+    (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) =>
+      setFilters((f) => ({ ...f, [key]: e.target.value }));
+
+  async function fetchResults(
+    p = 1,
+    activeFilters = filters,
+    activeLimit = limit
+  ) {
+    setLoading(true);
+    const params = filtersToSearchParams(activeFilters, p, activeLimit);
+    const res = await fetch(`/api/criminals?${params}`);
+    const data = await res.json();
+    setLoading(false);
+    if (res.ok) {
+      setItems(data.items);
+      setTotalPages(data.totalPages);
+      setPage(data.page);
+    }
+  }
+
+  useEffect(() => {
+    fetchResults(1);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  function handleSearch(e: FormEvent) {
+    e.preventDefault();
+    fetchResults(1);
+  }
+
+  function handleReset() {
+    const cleared = emptySearchFilters();
+    setFilters(cleared);
+    setPage(1);
+    fetchResults(1, cleared);
+  }
+
+  return (
+    <section className="w-full space-y-6">
+      <PageHeader
+        title="Search Criminals"
+        subtitle="अपराधी खोज — filter by personal details, criminal history, vehicles, associates, and more."
+      />
+
+      <Card title="Search Filters" subtitle="खोज फ़िल्टर">
+        <form onSubmit={handleSearch} className="space-y-8">
+          <section className="space-y-4">
+            <SectionTitle en="Personal & Address" hi="व्यक्तिगत व पता" />
+            <section className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+              <Input
+                label={fieldLabel("pid")}
+                value={filters.pid}
+                onChange={set("pid")}
+                placeholder="269517"
+              />
+              <Input
+                label={fieldLabel("name")}
+                value={filters.name}
+                onChange={set("name")}
+              />
+              <Input
+                label={fieldLabel("mobileNumber")}
+                value={filters.mobileNumber}
+                onChange={set("mobileNumber")}
+              />
+              <Select
+                label={fieldLabel("crimeTypes")}
+                value={filters.crimeType}
+                onChange={set("crimeType")}
+                options={[
+                  { value: "all", label: "All / सभी" },
+                  ...caseTypes.map((c) => ({ value: c.name, label: c.name })),
+                ]}
+              />
+              <Input
+                label={fieldLabel("fatherName")}
+                value={filters.fatherName}
+                onChange={set("fatherName")}
+              />
+              <Input
+                label={fieldLabel("aadhaarNumber")}
+                value={filters.aadhaarNumber}
+                onChange={set("aadhaarNumber")}
+              />
+              <Select
+                label={fieldLabel("casePS")}
+                value={filters.thana}
+                onChange={set("thana")}
+                options={[
+                  { value: "", label: "All police stations / सभी थाना" },
+                  ...policeStations.map((s) => ({ value: s.name, label: s.name })),
+                ]}
+              />
+              <Input
+                label={fieldLabel("district")}
+                value={filters.district}
+                onChange={set("district")}
+              />
+            </section>
+          </section>
+
+          <section className="space-y-4">
+            <SectionTitle
+              en={EXTENDED_FIELDS.criminalHistory.en}
+              hi={EXTENDED_FIELDS.criminalHistory.hi}
+            />
+            <section className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+              <Input
+                label={extLabel("firNumber")}
+                value={filters.firNumber}
+                onChange={set("firNumber")}
+                placeholder="GONDA-137/22"
+              />
+              <Input
+                label={extLabel("caseNumber")}
+                value={filters.caseNumber}
+                onChange={set("caseNumber")}
+              />
+              <Input
+                label={extLabel("sectionAct")}
+                value={filters.sectionAct}
+                onChange={set("sectionAct")}
+                placeholder="379 IPC"
+              />
+              <Input
+                label="History PS / प्राथमिकी थाना"
+                value={filters.historyPoliceStation}
+                onChange={set("historyPoliceStation")}
+                placeholder="GONDA, KOTWALI"
+              />
+              <Input
+                label="Judge Name / न्यायाधीश"
+                value={filters.judgeName}
+                onChange={set("judgeName")}
+              />
+              <Input
+                label="Court / न्यायालय"
+                value={filters.court}
+                onChange={set("court")}
+              />
+            </section>
+          </section>
+
+          <section className="space-y-4">
+            <SectionTitle en="Vehicle & Physical" hi="वाहन व शारीरिक" />
+            <section className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+              <Input
+                label={extLabel("vehicleNumber")}
+                value={filters.vehicleNumber}
+                onChange={set("vehicleNumber")}
+                placeholder="JH01CT1105"
+              />
+              <Input
+                label={extLabel("identificationMarks")}
+                value={filters.identificationMarks}
+                onChange={set("identificationMarks")}
+                placeholder="mole, scar, tattoo"
+              />
+            </section>
+          </section>
+
+          <section className="space-y-4">
+            <SectionTitle
+              en="Relatives, Gang & Bailers"
+              hi="संबंधी, गुट व बेलर"
+            />
+            <section className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+              <Input
+                label="Associate Name / संबंधी-गुट नाम"
+                value={filters.associateName}
+                onChange={set("associateName")}
+              />
+              <Input
+                label="Associate Mobile / संबंधी मोबाइल"
+                value={filters.associateMobile}
+                onChange={set("associateMobile")}
+              />
+              <Input
+                label="Associate Aadhaar / संबंधी आधार"
+                value={filters.associateAadhaar}
+                onChange={set("associateAadhaar")}
+              />
+              <Input
+                label="Bailer Name / बेलर नाम"
+                value={filters.bailerName}
+                onChange={set("bailerName")}
+              />
+            </section>
+          </section>
+
+          <footer className="flex flex-wrap items-center justify-between gap-4 border-t border-[var(--color-border)] pt-4">
+            <label className="flex items-center gap-2 text-sm text-slate-600">
+              Showing
+              <select
+                value={limit}
+                onChange={(e) => setLimit(Number(e.target.value))}
+                className="rounded border border-[var(--color-border)] px-2 py-1"
+              >
+                {[10, 25, 50].map((n) => (
+                  <option key={n} value={n}>
+                    {n}
+                  </option>
+                ))}
+              </select>
+              per page
+            </label>
+            <section className="flex gap-2">
+              <Button type="button" variant="outline" onClick={handleReset}>
+                Reset
+              </Button>
+              <Button type="submit">Search</Button>
+            </section>
+          </footer>
+        </form>
+      </Card>
+
+      <Card title="Search Results" subtitle={`Page ${page} of ${totalPages || 1}`}>
+        <CriminalTable items={items} loading={loading} linkToDetail />
+        {totalPages > 1 && (
+          <footer className="mt-4 flex justify-center gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              disabled={page <= 1}
+              onClick={() => fetchResults(page - 1)}
+            >
+              Previous
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              disabled={page >= totalPages}
+              onClick={() => fetchResults(page + 1)}
+            >
+              Next
+            </Button>
+          </footer>
+        )}
+      </Card>
+    </section>
+  );
+}
