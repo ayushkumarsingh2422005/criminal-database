@@ -12,6 +12,7 @@ import {
 } from "@/components/ui/DataTable";
 import { fieldLabel } from "@/lib/criminal-fields";
 import type { CriminalRecord } from "@/lib/criminal-mapper";
+import { DownloadPdfButton } from "./DownloadPdfButton";
 
 export function CriminalTable({
   items,
@@ -99,17 +100,18 @@ export function CriminalTable({
             <DataTableCell>
               {showActions ? (
                 <section className="flex flex-wrap gap-2">
-                    {linkToDetail ? (
-                      <Link href={`/criminals/${c.id}`}>
-                        <Button size="sm" variant="outline">
-                          View
-                        </Button>
-                      </Link>
-                    ) : (
-                      <Button size="sm" variant="outline" onClick={() => onView?.(c)}>
+                  {linkToDetail ? (
+                    <Link href={`/criminals/${c.id}`}>
+                      <Button size="sm" variant="outline">
                         View
                       </Button>
-                    )}
+                    </Link>
+                  ) : (
+                    <Button size="sm" variant="outline" onClick={() => onView?.(c)}>
+                      View
+                    </Button>
+                  )}
+                  <DownloadPdfButton criminalId={c.id} pid={c.pid} />
                   {onEdit && (
                     <Button size="sm" variant="outline" onClick={() => onEdit(c)}>
                       Edit
@@ -121,14 +123,19 @@ export function CriminalTable({
                     </Button>
                   )}
                 </section>
-              ) : linkToDetail ? (
-                <Link href={`/criminals/${c.id}`}>
-                  <Button size="sm">View Criminal</Button>
-                </Link>
               ) : (
-                <Button size="sm" onClick={() => onView?.(c)}>
-                  View Criminal
-                </Button>
+                <section className="flex flex-wrap gap-2">
+                  {linkToDetail ? (
+                    <Link href={`/criminals/${c.id}`}>
+                      <Button size="sm">View Criminal</Button>
+                    </Link>
+                  ) : (
+                    <Button size="sm" onClick={() => onView?.(c)}>
+                      View Criminal
+                    </Button>
+                  )}
+                  <DownloadPdfButton criminalId={c.id} pid={c.pid} />
+                </section>
               )}
             </DataTableCell>
           </DataTableRow>

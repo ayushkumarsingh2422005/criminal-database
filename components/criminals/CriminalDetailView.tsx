@@ -17,6 +17,7 @@ import type {
   CriminalVehicle,
   RelatedPerson,
 } from "@/models/Criminal";
+import { DownloadPdfButton } from "./DownloadPdfButton";
 
 const TABS = [
   { id: "overview", label: "Overview", hi: "अवलोकन" },
@@ -269,6 +270,7 @@ export function CriminalDetailView({ criminal }: { criminal: CriminalRecord }) {
           <Button variant="outline" onClick={() => router.back()}>
             ← Back
           </Button>
+          <DownloadPdfButton criminalId={criminal.id} pid={criminal.pid} size="md" />
           <Link href={`/criminals?edit=${criminal.id}`} className="inline-flex">
             <Button type="button">Edit Record</Button>
           </Link>
