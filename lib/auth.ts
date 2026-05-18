@@ -89,10 +89,23 @@ export async function getSessionFromCookies(): Promise<SessionPayload | null> {
   return verifySessionToken(token);
 }
 
+export function getTokenFromRequest(request: NextRequest): string | undefined {
+  const cookieToken = request.cookies.get(COOKIE_NAME)?.value;
+  if (cookieToken) return cookieToken;
+
+  const authorization = request.headers.get("authorization");
+  if (authorization?.startsWith("Bearer ")) {
+    const bearerToken = authorization.slice(7).trim();
+    return bearerToken || undefined;
+  }
+
+  return undefined;
+}
+
 export async function getSessionFromRequest(
   request: NextRequest
 ): Promise<SessionPayload | null> {
-  const token = request.cookies.get(COOKIE_NAME)?.value;
+  const token = getTokenFromRequest(request);
   if (!token) return null;
   return verifySessionToken(token);
 }

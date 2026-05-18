@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
-import { COOKIE_NAME, verifySessionToken } from "@/lib/auth";
+import { getTokenFromRequest, verifySessionToken } from "@/lib/auth";
 
 const PUBLIC_PATHS = ["/login", "/api/auth/login", "/api/auth/setup"];
 
@@ -19,7 +19,7 @@ export async function middleware(request: NextRequest) {
     (p) => pathname === p || pathname.startsWith(`${p}/`)
   );
 
-  const token = request.cookies.get(COOKIE_NAME)?.value;
+  const token = getTokenFromRequest(request);
   const session = token ? await verifySessionToken(token) : null;
 
   if (pathname === "/login" && session) {

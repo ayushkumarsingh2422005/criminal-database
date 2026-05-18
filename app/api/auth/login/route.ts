@@ -53,6 +53,7 @@ export async function POST(request: NextRequest) {
         name: admin.name,
         role: admin.role,
       },
+      token,
     });
     response.cookies.set(COOKIE_NAME, token, sessionCookieOptions());
     return response;
