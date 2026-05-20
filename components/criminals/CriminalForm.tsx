@@ -8,6 +8,7 @@ import { FieldLabel, SectionTitle } from "@/components/ui/FieldLabel";
 import { CRIMINAL_FIELDS, PHOTO_KEYS } from "@/lib/criminal-fields";
 import { toDateInputValue } from "@/lib/date-utils";
 import { useCaseTypes, usePoliceStations } from "@/lib/hooks/use-lookups";
+import { useAppSession } from "@/components/session/SessionProvider";
 import type { CriminalRecord } from "@/lib/criminal-mapper";
 import { PhotoUpload } from "./PhotoUpload";
 import {
@@ -24,6 +25,10 @@ export function CriminalForm({
   onSubmit: (data: Record<string, unknown>) => Promise<void>;
   onCancel: () => void;
 }) {
+  const session = useAppSession();
+  const scopedPsId = session.policeStationId ?? "";
+  const isScopedAdmin = session.role === "admin" && !!scopedPsId;
+
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [pid, setPid] = useState(initial?.pid ?? "");
@@ -32,12 +37,14 @@ export function CriminalForm({
   const [aadhaarVerified, setAadhaarVerified] = useState(initial?.aadhaarVerified ?? false);
   const [permanent, setPermanent] = useState({
     line: initial?.permanentAddress?.line ?? "",
-    thana: initial?.permanentAddress?.thana ?? "",
+    policeStationId:
+      initial?.permanentAddress?.policeStationId ?? (isScopedAdmin ? scopedPsId : ""),
     district: initial?.permanentAddress?.district ?? "",
   });
   const [present, setPresent] = useState({
     line: initial?.presentAddress?.line ?? "",
-    thana: initial?.presentAddress?.thana ?? "",
+    policeStationId:
+      initial?.presentAddress?.policeStationId ?? (isScopedAdmin ? scopedPsId : ""),
     district: initial?.presentAddress?.district ?? "",
   });
   const [extended, setExtended] = useState(() => initialExtended(initial));
@@ -46,7 +53,7 @@ export function CriminalForm({
 
   const psOptions = [
     { value: "", label: "Select police station / पुलिस स्टेशन चुनें" },
-    ...policeStations.map((s) => ({ value: s.name, label: s.name })),
+    ...policeStations.map((s) => ({ value: s.id, label: s.name })),
   ];
 
   function toggleCrimeType(value: string) {
@@ -207,15 +214,27 @@ export function CriminalForm({
           placeholder="Full address"
         />
         <section className="grid gap-4 sm:grid-cols-2">
-          <Select
-            label={`${CRIMINAL_FIELDS.casePS.en} (${CRIMINAL_FIELDS.casePS.hi})`}
-            name="permanentThana"
-            value={permanent.thana}
-            onChange={(e) =>
-              setPermanent((p) => ({ ...p, thana: e.target.value }))
-            }
-            options={psOptions}
-          />
+          {isScopedAdmin ? (
+            <section className="flex flex-col gap-1 sm:col-span-2">
+              <FieldLabel
+                en={CRIMINAL_FIELDS.casePS.en}
+                hi={CRIMINAL_FIELDS.casePS.hi}
+              />
+              <p className="rounded-lg border border-[var(--color-border)] bg-slate-50 px-3 py-2 text-sm font-medium text-slate-800">
+                {session.policeStationName ?? "Your allotted PS"}
+              </p>
+            </section>
+          ) : (
+            <Select
+              label={`${CRIMINAL_FIELDS.casePS.en} (${CRIMINAL_FIELDS.casePS.hi})`}
+              name="permanentPoliceStationId"
+              value={permanent.policeStationId}
+              onChange={(e) =>
+                setPermanent((p) => ({ ...p, policeStationId: e.target.value }))
+              }
+              options={psOptions}
+            />
+          )}
           <Input
             label={`${CRIMINAL_FIELDS.district.en} (${CRIMINAL_FIELDS.district.hi})`}
             name="permanentDistrict"
@@ -237,7 +256,14 @@ export function CriminalForm({
             type="button"
             variant="outline"
             size="sm"
-            onClick={() => setPresent({ ...permanent })}
+            onClick={() =>
+              setPresent({
+                ...permanent,
+                policeStationId: isScopedAdmin
+                  ? scopedPsId
+                  : permanent.policeStationId,
+              })
+            }
           >
             Same as permanent address / स्थायी पते जैसा
           </Button>
@@ -250,13 +276,17 @@ export function CriminalForm({
           className="w-full rounded-lg border border-[var(--color-border)] px-3 py-2 text-sm"
         />
         <section className="grid gap-4 sm:grid-cols-2">
-          <Select
-            label={`${CRIMINAL_FIELDS.casePS.en} (${CRIMINAL_FIELDS.casePS.hi})`}
-            name="presentThana"
-            value={present.thana}
-            onChange={(e) => setPresent((p) => ({ ...p, thana: e.target.value }))}
-            options={psOptions}
-          />
+          {!isScopedAdmin && (
+            <Select
+              label={`${CRIMINAL_FIELDS.casePS.en} (${CRIMINAL_FIELDS.casePS.hi})`}
+              name="presentPoliceStationId"
+              value={present.policeStationId}
+              onChange={(e) =>
+                setPresent((p) => ({ ...p, policeStationId: e.target.value }))
+              }
+              options={psOptions}
+            />
+          )}
           <Input
             label={`${CRIMINAL_FIELDS.district.en} (${CRIMINAL_FIELDS.district.hi})`}
             name="presentDistrict"
@@ -313,7 +343,11 @@ export function CriminalForm({
         </section>
       </section>
 
-      <CriminalExtendedForm value={extended} onChange={setExtended} />
+      <CriminalExtendedForm
+        value={extended}
+        onChange={setExtended}
+        policeStationOptions={psOptions}
+      />
       </section>
 
       <footer className="sticky bottom-0 -mx-6 mt-6 border-t border-[var(--color-border)] bg-white/95 px-6 py-4 shadow-[0_-8px_24px_rgba(15,23,42,0.08)] backdrop-blur-sm">

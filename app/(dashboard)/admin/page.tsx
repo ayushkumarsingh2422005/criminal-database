@@ -19,7 +19,7 @@ const panels = [
     description: "Manage crime/case types used in criminal records.",
     icon: "📋",
     color: "bg-green-50 text-green-700",
-    superadminOnly: false,
+    superadminOnly: true,
   },
   {
     href: "/admin/police-stations",
@@ -27,7 +27,7 @@ const panels = [
     description: "Manage police stations for Case PS field.",
     icon: "🏛️",
     color: "bg-purple-50 text-purple-700",
-    superadminOnly: false,
+    superadminOnly: true,
   },
 ];
 

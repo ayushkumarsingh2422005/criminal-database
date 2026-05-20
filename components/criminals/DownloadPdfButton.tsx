@@ -1,17 +1,16 @@
 "use client";
 
 import { useState } from "react";
-import { Button } from "@/components/ui/Button";
+import { IconButton } from "@/components/ui/IconButton";
+import { IconDownload } from "@/components/ui/icons";
 
 export function DownloadPdfButton({
   criminalId,
   pid,
-  size = "sm",
   variant = "outline",
 }: {
   criminalId: string;
   pid: string;
-  size?: "sm" | "md";
   variant?: "outline" | "primary";
 }) {
   const [loading, setLoading] = useState(false);
@@ -41,14 +40,13 @@ export function DownloadPdfButton({
   }
 
   return (
-    <Button
-      type="button"
-      size={size}
+    <IconButton
+      label={loading ? "Generating PDF…" : "Download PDF"}
       variant={variant}
       disabled={loading}
       onClick={handleDownload}
     >
-      {loading ? "Generating…" : "Download PDF"}
-    </Button>
+      <IconDownload />
+    </IconButton>
   );
 }

@@ -1,7 +1,6 @@
 "use client";
 
 import Link from "next/link";
-import { Button } from "@/components/ui/Button";
 import {
   DataTable,
   DataTableBody,
@@ -10,6 +9,8 @@ import {
   DataTableHeaderCell,
   DataTableRow,
 } from "@/components/ui/DataTable";
+import { ActionIcons, IconButton } from "@/components/ui/IconButton";
+import { IconEye, IconPencil, IconTrash } from "@/components/ui/icons";
 import { fieldLabel } from "@/lib/criminal-fields";
 import type { CriminalRecord } from "@/lib/criminal-mapper";
 import { DownloadPdfButton } from "./DownloadPdfButton";
@@ -56,8 +57,8 @@ export function CriminalTable({
         <DataTableHeaderCell>{fieldLabel("mobileNumber")}</DataTableHeaderCell>
         <DataTableHeaderCell>{fieldLabel("casePS")}</DataTableHeaderCell>
         <DataTableHeaderCell>{fieldLabel("fatherName")}</DataTableHeaderCell>
-        <DataTableHeaderCell>
-          {showActions ? "Actions" : "View"}
+        <DataTableHeaderCell className="w-[1%] whitespace-nowrap">
+          <span className="sr-only">Actions</span>
         </DataTableHeaderCell>
       </DataTableHead>
       <DataTableBody>
@@ -98,45 +99,40 @@ export function CriminalTable({
             </DataTableCell>
             <DataTableCell>{c.fatherName ?? "—"}</DataTableCell>
             <DataTableCell>
-              {showActions ? (
-                <section className="flex flex-wrap gap-2">
-                  {linkToDetail ? (
-                    <Link href={`/criminals/${c.id}`}>
-                      <Button size="sm" variant="outline">
-                        View
-                      </Button>
-                    </Link>
-                  ) : (
-                    <Button size="sm" variant="outline" onClick={() => onView?.(c)}>
-                      View
-                    </Button>
-                  )}
-                  <DownloadPdfButton criminalId={c.id} pid={c.pid} />
-                  {onEdit && (
-                    <Button size="sm" variant="outline" onClick={() => onEdit(c)}>
-                      Edit
-                    </Button>
-                  )}
-                  {onDelete && (
-                    <Button size="sm" variant="danger" onClick={() => onDelete(c)}>
-                      Delete
-                    </Button>
-                  )}
-                </section>
-              ) : (
-                <section className="flex flex-wrap gap-2">
-                  {linkToDetail ? (
-                    <Link href={`/criminals/${c.id}`}>
-                      <Button size="sm">View Criminal</Button>
-                    </Link>
-                  ) : (
-                    <Button size="sm" onClick={() => onView?.(c)}>
-                      View Criminal
-                    </Button>
-                  )}
-                  <DownloadPdfButton criminalId={c.id} pid={c.pid} />
-                </section>
-              )}
+              <ActionIcons>
+                {linkToDetail ? (
+                  <IconButton
+                    label="View criminal"
+                    href={`/criminals/${c.id}`}
+                    variant={showActions ? "outline" : "primary"}
+                  >
+                    <IconEye />
+                  </IconButton>
+                ) : (
+                  <IconButton
+                    label="View criminal"
+                    variant={showActions ? "outline" : "primary"}
+                    onClick={() => onView?.(c)}
+                  >
+                    <IconEye />
+                  </IconButton>
+                )}
+                <DownloadPdfButton criminalId={c.id} pid={c.pid} />
+                {showActions && onEdit && (
+                  <IconButton label="Edit criminal" onClick={() => onEdit(c)}>
+                    <IconPencil />
+                  </IconButton>
+                )}
+                {showActions && onDelete && (
+                  <IconButton
+                    label="Delete criminal"
+                    variant="danger"
+                    onClick={() => onDelete(c)}
+                  >
+                    <IconTrash />
+                  </IconButton>
+                )}
+              </ActionIcons>
             </DataTableCell>
           </DataTableRow>
         ))}

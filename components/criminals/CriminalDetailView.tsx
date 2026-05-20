@@ -5,18 +5,14 @@ import Link from "next/link";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { Card } from "@/components/ui/Card";
-import { Button } from "@/components/ui/Button";
+import { IconButton } from "@/components/ui/IconButton";
+import { IconArrowLeft, IconPencil } from "@/components/ui/icons";
 import { Badge } from "@/components/ui/Badge";
 import { CRIMINAL_FIELDS, PHOTO_KEYS, photoLabel } from "@/lib/criminal-fields";
 import { EXTENDED_FIELDS } from "@/lib/criminal-extended-fields";
 import { formatDateDisplay } from "@/lib/date-utils";
-import type { CriminalRecord } from "@/lib/criminal-mapper";
-import type {
-  BailerInfo,
-  CriminalHistoryEntry,
-  CriminalVehicle,
-  RelatedPerson,
-} from "@/models/Criminal";
+import type { CriminalHistoryRecord, CriminalRecord } from "@/lib/criminal-mapper";
+import type { BailerInfo, CriminalVehicle, RelatedPerson } from "@/models/Criminal";
 import { DownloadPdfButton } from "./DownloadPdfButton";
 
 const TABS = [
@@ -78,7 +74,7 @@ function hasPhysical(p: CriminalRecord["physicalDescription"]) {
   );
 }
 
-function HistoryTable({ rows }: { rows: CriminalHistoryEntry[] }) {
+function HistoryTable({ rows }: { rows: CriminalHistoryRecord[] }) {
   if (rows.length === 0) {
     return <p className="text-sm text-[var(--color-muted)]">No criminal history on file.</p>;
   }
@@ -266,14 +262,18 @@ export function CriminalDetailView({ criminal }: { criminal: CriminalRecord }) {
             <Badge variant="default">PID {criminal.pid}</Badge>
           </section>
         </section>
-        <section className="flex flex-wrap gap-2">
-          <Button variant="outline" onClick={() => router.back()}>
-            ← Back
-          </Button>
-          <DownloadPdfButton criminalId={criminal.id} pid={criminal.pid} size="md" />
-          <Link href={`/criminals?edit=${criminal.id}`} className="inline-flex">
-            <Button type="button">Edit Record</Button>
-          </Link>
+        <section className="flex flex-wrap items-center gap-1">
+          <IconButton label="Back" variant="outline" onClick={() => router.back()}>
+            <IconArrowLeft />
+          </IconButton>
+          <DownloadPdfButton criminalId={criminal.id} pid={criminal.pid} />
+          <IconButton
+            label="Edit record"
+            variant="primary"
+            href={`/criminals?edit=${criminal.id}`}
+          >
+            <IconPencil />
+          </IconButton>
         </section>
       </header>
 

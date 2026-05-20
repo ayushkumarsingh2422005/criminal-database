@@ -1,5 +1,6 @@
 import { NextRequest } from "next/server";
 import { ObjectId } from "mongodb";
+import { requireSuperAdmin } from "@/lib/auth";
 import { requireAuth, jsonError, jsonOk } from "@/lib/api";
 import { CaseType, CaseTypeModel } from "@/models/CaseType";
 
@@ -8,7 +9,8 @@ export async function PATCH(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    await requireAuth(request);
+    const session = await requireAuth(request);
+    requireSuperAdmin(session);
     const { id } = await params;
     if (!ObjectId.isValid(id)) return jsonOk({ error: "Invalid ID" }, 400);
 
@@ -30,7 +32,8 @@ export async function DELETE(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    await requireAuth(request);
+    const session = await requireAuth(request);
+    requireSuperAdmin(session);
     const { id } = await params;
     if (!ObjectId.isValid(id)) return jsonOk({ error: "Invalid ID" }, 400);
 

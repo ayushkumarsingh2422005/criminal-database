@@ -8,13 +8,8 @@ import {
 } from "@react-pdf/renderer";
 import { CRIMINAL_FIELDS, photoLabel } from "@/lib/criminal-fields";
 import type { PhotoKey } from "@/lib/criminal-fields";
-import type { CriminalRecord } from "@/lib/criminal-mapper";
-import type {
-  BailerInfo,
-  CriminalHistoryEntry,
-  CriminalVehicle,
-  RelatedPerson,
-} from "@/models/Criminal";
+import type { CriminalHistoryRecord, CriminalRecord } from "@/lib/criminal-mapper";
+import type { BailerInfo, CriminalVehicle, RelatedPerson } from "@/models/Criminal";
 import { dash, formatAddressInline, formatDobDots, formatFirDate } from "./format";
 
 const styles = StyleSheet.create({
@@ -109,7 +104,7 @@ function TableHeader({ widths, labels }: { widths: string[]; labels: string[] })
   );
 }
 
-function HistorySection({ rows }: { rows: CriminalHistoryEntry[] }) {
+function HistorySection({ rows }: { rows: CriminalHistoryRecord[] }) {
   const widths = ["7%", "9%", "24%", "28%", "32%"];
   const headers = [
     "S.No",

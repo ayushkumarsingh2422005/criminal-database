@@ -1,7 +1,8 @@
 "use client";
 
 import { ReactNode, useEffect } from "react";
-import { Button } from "./Button";
+import { IconButton } from "./IconButton";
+import { IconX } from "./icons";
 
 export function Modal({
   open,
@@ -50,9 +51,9 @@ export function Modal({
       >
         <header className="flex shrink-0 items-center justify-between border-b border-[var(--color-border)] px-6 py-4">
           <h2 className="text-lg font-semibold text-slate-900">{title}</h2>
-          <Button variant="ghost" size="sm" onClick={onClose} aria-label="Close">
-            ✕
-          </Button>
+          <IconButton label="Close" variant="ghost" onClick={onClose}>
+            <IconX />
+          </IconButton>
         </header>
         <section className="min-h-0 flex-1 overflow-y-auto p-6">{children}</section>
       </article>

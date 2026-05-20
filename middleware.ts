@@ -15,6 +15,19 @@ export async function middleware(request: NextRequest) {
     return NextResponse.next();
   }
 
+  const isCriminalPhoto =
+    pathname.startsWith("/criminals/") &&
+    /\.(jpe?g|png|webp)$/i.test(pathname);
+
+  if (isCriminalPhoto) {
+    const token = getTokenFromRequest(request);
+    const session = token ? await verifySessionToken(token) : null;
+    if (!session) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+    return NextResponse.next();
+  }
+
   const isPublic = PUBLIC_PATHS.some(
     (p) => pathname === p || pathname.startsWith(`${p}/`)
   );
@@ -37,6 +50,23 @@ export async function middleware(request: NextRequest) {
     const loginUrl = new URL("/login", request.url);
     loginUrl.searchParams.set("from", pathname);
     return NextResponse.redirect(loginUrl);
+  }
+
+  if (session.role !== "superadmin" && pathname.startsWith("/admin")) {
+    return NextResponse.redirect(new URL("/search", request.url));
+  }
+
+  if (
+    session.role === "superadmin" &&
+    (pathname.startsWith("/transfer") || pathname.startsWith("/api/transfers"))
+  ) {
+    if (pathname.startsWith("/api/")) {
+      return NextResponse.json(
+        { error: "Transfer is only for police station admins" },
+        { status: 403 }
+      );
+    }
+    return NextResponse.redirect(new URL("/search", request.url));
   }
 
   return NextResponse.next();

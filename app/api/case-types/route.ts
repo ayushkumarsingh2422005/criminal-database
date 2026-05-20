@@ -1,4 +1,5 @@
 import { NextRequest } from "next/server";
+import { requireSuperAdmin } from "@/lib/auth";
 import { requireAuth, jsonError, jsonOk } from "@/lib/api";
 import { CaseTypeModel } from "@/models/CaseType";
 
@@ -16,7 +17,8 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
-    await requireAuth(request);
+    const session = await requireAuth(request);
+    requireSuperAdmin(session);
     const body = await request.json();
     const name = String(body.name ?? "").trim();
     if (!name) return jsonOk({ error: "Name is required" }, 400);

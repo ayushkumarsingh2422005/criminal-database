@@ -1,6 +1,6 @@
+import type { CriminalHistoryRecord } from "@/lib/criminal-mapper";
 import type {
   Criminal,
-  CriminalHistoryEntry,
   CriminalVehicle,
   PhysicalDescription,
   RelatedPerson,
@@ -15,13 +15,13 @@ export const emptyPhysical = (): PhysicalDescription => ({
   deformity: "",
 });
 
-export const emptyHistory = (): CriminalHistoryEntry => ({
+export const emptyHistory = (): CriminalHistoryRecord => ({
   sNo: 1,
   caseNumber: "",
   firNumber: "",
   firDate: "",
   sectionAct: "",
-  policeStation: "",
+  policeStationId: "",
   judgeName: "",
   court: "",
 });

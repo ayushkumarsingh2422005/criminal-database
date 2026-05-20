@@ -1,7 +1,7 @@
 import type {
   Criminal,
+  CriminalAddress,
   CriminalPhotos,
-  CriminalHistoryEntry,
   CriminalVehicle,
   PhysicalDescription,
   RelatedPerson,
@@ -9,6 +9,23 @@ import type {
   VerificationInfo,
 } from "@/models/Criminal";
 import { withExtendedDefaults, emptyPhysical } from "./criminal-defaults";
+import {
+  parseAddressInput,
+  parseHistoryInput,
+} from "./police-station-ref";
+
+export type CriminalHistoryRecord = {
+  sNo?: number;
+  caseNumber?: string;
+  firNumber?: string;
+  firDate?: string;
+  sectionAct?: string;
+  policeStationId?: string;
+  /** Resolved from master list at read time — updates when station is renamed. */
+  policeStation?: string;
+  judgeName?: string;
+  court?: string;
+};
 
 export interface CriminalRecord {
   id: string;
@@ -22,12 +39,22 @@ export interface CriminalRecord {
   fatherName?: string;
   fatherNameAliases?: string;
   mobileNumber?: string;
-  permanentAddress?: { line: string; thana?: string; district?: string };
-  presentAddress?: { line: string; thana?: string; district?: string };
+  permanentAddress?: {
+    line: string;
+    policeStationId?: string;
+    thana?: string;
+    district?: string;
+  };
+  presentAddress?: {
+    line: string;
+    policeStationId?: string;
+    thana?: string;
+    district?: string;
+  };
   livelihoodMeans?: string;
   livelihoodVerification?: string;
   photos: CriminalPhotos;
-  criminalHistory: CriminalHistoryEntry[];
+  criminalHistory: CriminalHistoryRecord[];
   vehicles: CriminalVehicle[];
   physicalDescription: PhysicalDescription;
   closeRelatives: RelatedPerson[];
@@ -41,6 +68,34 @@ export interface CriminalRecord {
 
 function arr<T>(v: unknown): T[] {
   return Array.isArray(v) ? (v as T[]) : [];
+}
+
+function mapAddress(addr?: CriminalAddress): CriminalRecord["permanentAddress"] {
+  if (!addr) return undefined;
+  const id = addr.policeStationId?.toString();
+  return {
+    line: addr.line,
+    ...(id ? { policeStationId: id } : {}),
+    ...(addr.district ? { district: addr.district } : {}),
+  };
+}
+
+function mapHistory(
+  rows: Criminal["criminalHistory"]
+): CriminalHistoryRecord[] {
+  return (rows ?? []).map((row) => {
+    const id = row.policeStationId?.toString();
+    return {
+      sNo: row.sNo,
+      caseNumber: row.caseNumber,
+      firNumber: row.firNumber,
+      firDate: row.firDate,
+      sectionAct: row.sectionAct,
+      ...(id ? { policeStationId: id } : {}),
+      judgeName: row.judgeName,
+      court: row.court,
+    };
+  });
 }
 
 export function normalizeCriminal(doc: Record<string, unknown>): Criminal {
@@ -68,12 +123,12 @@ export function toCriminalRecord(c: Criminal): CriminalRecord {
     fatherName: n.fatherName,
     fatherNameAliases: n.fatherNameAliases,
     mobileNumber: n.mobileNumber,
-    permanentAddress: n.permanentAddress,
-    presentAddress: n.presentAddress,
+    permanentAddress: mapAddress(n.permanentAddress),
+    presentAddress: mapAddress(n.presentAddress),
     livelihoodMeans: n.livelihoodMeans,
     livelihoodVerification: n.livelihoodVerification,
     photos: n.photos ?? {},
-    criminalHistory: n.criminalHistory,
+    criminalHistory: mapHistory(n.criminalHistory),
     vehicles: n.vehicles,
     physicalDescription: n.physicalDescription ?? emptyPhysical(),
     closeRelatives: n.closeRelatives,
@@ -86,12 +141,15 @@ export function toCriminalRecord(c: Criminal): CriminalRecord {
   };
 }
 
-export function parseCriminalBody(body: Record<string, unknown>): Omit<Criminal, "_id"> {
+export async function parseCriminalBody(
+  body: Record<string, unknown>
+): Promise<Omit<Criminal, "_id">> {
   const photos = (body.photos as CriminalPhotos) ?? {};
   const ext = withExtendedDefaults({
-    criminalHistory: arr(body.criminalHistory),
+    criminalHistory: await parseHistoryInput(body.criminalHistory),
     vehicles: arr(body.vehicles),
-    physicalDescription: (body.physicalDescription as PhysicalDescription) ?? emptyPhysical(),
+    physicalDescription:
+      (body.physicalDescription as PhysicalDescription) ?? emptyPhysical(),
     closeRelatives: arr(body.closeRelatives),
     gangMembers: arr(body.gangMembers),
     bailers: arr(body.bailers),
@@ -120,8 +178,11 @@ export function parseCriminalBody(body: Record<string, unknown>): Omit<Criminal,
       ? String(body.fatherNameAliases).trim()
       : undefined,
     mobileNumber: body.mobileNumber ? String(body.mobileNumber).trim() : undefined,
-    permanentAddress: body.permanentAddress as Criminal["permanentAddress"],
-    presentAddress: body.presentAddress as Criminal["presentAddress"],
+    permanentAddress: await parseAddressInput(
+      body.permanentAddress,
+      "permanent address"
+    ),
+    presentAddress: await parseAddressInput(body.presentAddress, "present address"),
     livelihoodMeans: body.livelihoodMeans
       ? String(body.livelihoodMeans).trim()
       : undefined,

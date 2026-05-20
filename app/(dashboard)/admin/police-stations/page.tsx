@@ -4,6 +4,8 @@ import { FormEvent, useEffect, useState } from "react";
 import { Card } from "@/components/ui/Card";
 import { Input } from "@/components/ui/Input";
 import { Button } from "@/components/ui/Button";
+import { ActionIcons, IconButton } from "@/components/ui/IconButton";
+import { IconCheck, IconPencil, IconTrash, IconX } from "@/components/ui/icons";
 import { PageHeader } from "@/components/layout/PageHeader";
 import {
   DataTable,
@@ -22,6 +24,8 @@ interface Station {
 export default function PoliceStationsPage() {
   const [items, setItems] = useState<Station[]>([]);
   const [name, setName] = useState("");
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [editName, setEditName] = useState("");
 
   async function load() {
     const res = await fetch("/api/police-stations");
@@ -48,9 +52,30 @@ export default function PoliceStationsPage() {
     }
   }
 
+  async function handleSaveEdit(id: string) {
+    const res = await fetch(`/api/police-stations/${id}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ name: editName }),
+    });
+    const data = await res.json();
+    if (!res.ok) {
+      alert(data.error ?? "Failed to update");
+      return;
+    }
+    setEditingId(null);
+    setEditName("");
+    await load();
+  }
+
   async function handleDelete(id: string) {
     if (!confirm("Remove this police station?")) return;
-    await fetch(`/api/police-stations/${id}`, { method: "DELETE" });
+    const res = await fetch(`/api/police-stations/${id}`, { method: "DELETE" });
+    if (!res.ok) {
+      const data = await res.json();
+      alert(data.error ?? "Failed to remove");
+      return;
+    }
     await load();
   }
 
@@ -58,7 +83,7 @@ export default function PoliceStationsPage() {
     <section className="w-full space-y-6">
       <PageHeader
         title="Police Station Management"
-        subtitle="Manage police stations for the Case PS field."
+        subtitle="Renaming a station updates it everywhere criminals reference it."
         backHref="/admin"
         backLabel="← Admin Control"
       />
@@ -79,17 +104,66 @@ export default function PoliceStationsPage() {
       <Card title="All Police Stations" subtitle={`${items.length} station(s)`}>
         <DataTable>
           <DataTableHead>
-            <DataTableHeaderCell className="w-[70%]">Name</DataTableHeaderCell>
-            <DataTableHeaderCell className="w-[30%]">Actions</DataTableHeaderCell>
+            <DataTableHeaderCell className="w-[55%]">Name</DataTableHeaderCell>
+            <DataTableHeaderCell className="w-[45%]">Actions</DataTableHeaderCell>
           </DataTableHead>
           <DataTableBody>
             {items.map((item) => (
               <DataTableRow key={item.id}>
-                <DataTableCell className="font-medium">{item.name}</DataTableCell>
+                <DataTableCell className="font-medium">
+                  {editingId === item.id ? (
+                    <Input
+                      value={editName}
+                      onChange={(e) => setEditName(e.target.value)}
+                      aria-label="Edit station name"
+                    />
+                  ) : (
+                    item.name
+                  )}
+                </DataTableCell>
                 <DataTableCell>
-                  <Button size="sm" variant="danger" onClick={() => handleDelete(item.id)}>
-                    Remove
-                  </Button>
+                  <ActionIcons>
+                    {editingId === item.id ? (
+                      <>
+                        <IconButton
+                          label="Save"
+                          variant="primary"
+                          onClick={() => handleSaveEdit(item.id)}
+                        >
+                          <IconCheck />
+                        </IconButton>
+                        <IconButton
+                          label="Cancel"
+                          variant="outline"
+                          onClick={() => {
+                            setEditingId(null);
+                            setEditName("");
+                          }}
+                        >
+                          <IconX />
+                        </IconButton>
+                      </>
+                    ) : (
+                      <>
+                        <IconButton
+                          label="Rename"
+                          onClick={() => {
+                            setEditingId(item.id);
+                            setEditName(item.name);
+                          }}
+                        >
+                          <IconPencil />
+                        </IconButton>
+                        <IconButton
+                          label="Remove"
+                          variant="danger"
+                          onClick={() => handleDelete(item.id)}
+                        >
+                          <IconTrash />
+                        </IconButton>
+                      </>
+                    )}
+                  </ActionIcons>
                 </DataTableCell>
               </DataTableRow>
             ))}

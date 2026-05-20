@@ -5,6 +5,8 @@ import { Card } from "@/components/ui/Card";
 import { Input } from "@/components/ui/Input";
 import { Select } from "@/components/ui/Select";
 import { Button } from "@/components/ui/Button";
+import { IconButton } from "@/components/ui/IconButton";
+import { IconChevronLeft, IconChevronRight } from "@/components/ui/icons";
 import { SectionTitle } from "@/components/ui/FieldLabel";
 import { CriminalTable } from "@/components/criminals/CriminalTable";
 import { PageHeader } from "@/components/layout/PageHeader";
@@ -14,11 +16,15 @@ import {
   emptySearchFilters,
   filtersToSearchParams,
   type CriminalSearchFilters,
-} from "@/lib/criminal-search";
+} from "@/lib/criminal-search-filters";
 import { useCaseTypes, usePoliceStations } from "@/lib/hooks/use-lookups";
+import { useAppSession } from "@/components/session/SessionProvider";
 import type { CriminalRecord } from "@/lib/criminal-mapper";
 
 export default function SearchPage() {
+  const session = useAppSession();
+  const isScopedAdmin = session.role === "admin" && !!session.policeStationId;
+
   const [filters, setFilters] = useState<CriminalSearchFilters>(emptySearchFilters);
   const [items, setItems] = useState<CriminalRecord[]>([]);
   const [loading, setLoading] = useState(false);
@@ -71,7 +77,11 @@ export default function SearchPage() {
     <section className="w-full space-y-6">
       <PageHeader
         title="Search Criminals"
-        subtitle="अपराधी खोज — filter by personal details, criminal history, vehicles, associates, and more."
+        subtitle={
+          isScopedAdmin
+            ? `Records for your police station only: ${session.policeStationName ?? "assigned PS"}`
+            : "अपराधी खोज — filter by personal details, criminal history, vehicles, associates, and more."
+        }
       />
 
       <Card title="Search Filters" subtitle="खोज फ़िल्टर">
@@ -114,15 +124,17 @@ export default function SearchPage() {
                 value={filters.aadhaarNumber}
                 onChange={set("aadhaarNumber")}
               />
-              <Select
-                label={fieldLabel("casePS")}
-                value={filters.thana}
-                onChange={set("thana")}
-                options={[
-                  { value: "", label: "All police stations / सभी थाना" },
-                  ...policeStations.map((s) => ({ value: s.name, label: s.name })),
-                ]}
-              />
+              {!isScopedAdmin && (
+                <Select
+                  label={fieldLabel("casePS")}
+                  value={filters.thana}
+                  onChange={set("thana")}
+                  options={[
+                    { value: "", label: "All police stations / सभी थाना" },
+                    ...policeStations.map((s) => ({ value: s.id, label: s.name })),
+                  ]}
+                />
+              )}
               <Input
                 label={fieldLabel("district")}
                 value={filters.district}
@@ -154,12 +166,17 @@ export default function SearchPage() {
                 onChange={set("sectionAct")}
                 placeholder="379 IPC"
               />
-              <Input
-                label="History PS / प्राथमिकी थाना"
-                value={filters.historyPoliceStation}
-                onChange={set("historyPoliceStation")}
-                placeholder="GONDA, KOTWALI"
-              />
+              {!isScopedAdmin && (
+                <Select
+                  label="History PS / प्राथमिकी थाना"
+                  value={filters.historyPoliceStation}
+                  onChange={set("historyPoliceStation")}
+                  options={[
+                    { value: "", label: "All / सभी" },
+                    ...policeStations.map((s) => ({ value: s.id, label: s.name })),
+                  ]}
+                />
+              )}
               <Input
                 label="Judge Name / न्यायाधीश"
                 value={filters.judgeName}
@@ -249,23 +266,26 @@ export default function SearchPage() {
       <Card title="Search Results" subtitle={`Page ${page} of ${totalPages || 1}`}>
         <CriminalTable items={items} loading={loading} linkToDetail />
         {totalPages > 1 && (
-          <footer className="mt-4 flex justify-center gap-2">
-            <Button
+          <footer className="mt-4 flex justify-center gap-1">
+            <IconButton
+              label="Previous page"
               variant="outline"
-              size="sm"
               disabled={page <= 1}
               onClick={() => fetchResults(page - 1)}
             >
-              Previous
-            </Button>
-            <Button
+              <IconChevronLeft />
+            </IconButton>
+            <span className="flex items-center px-2 text-sm text-[var(--color-muted)]">
+              {page} / {totalPages}
+            </span>
+            <IconButton
+              label="Next page"
               variant="outline"
-              size="sm"
               disabled={page >= totalPages}
               onClick={() => fetchResults(page + 1)}
             >
-              Next
-            </Button>
+              <IconChevronRight />
+            </IconButton>
           </footer>
         )}
       </Card>

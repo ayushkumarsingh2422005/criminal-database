@@ -49,11 +49,19 @@ export async function verifySessionToken(
     ) {
       return null;
     }
+
+    const policeStationId =
+      typeof payload.policeStationId === "string" &&
+      payload.policeStationId.length > 0
+        ? payload.policeStationId
+        : undefined;
+
     return {
       sub: payload.sub,
       email: payload.email,
       name: payload.name,
       role: payload.role,
+      ...(policeStationId ? { policeStationId } : {}),
     };
   } catch {
     return null;

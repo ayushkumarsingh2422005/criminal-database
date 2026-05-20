@@ -3,10 +3,15 @@ import { requireAuth, jsonError, jsonOk } from "@/lib/api";
 import { Criminal, CriminalModel } from "@/models/Criminal";
 import { parseCriminalBody, toCriminalRecord } from "@/lib/criminal-mapper";
 import { buildCriminalFilter } from "@/lib/criminal-search";
+import { enrichCriminalsFromDocs } from "@/lib/police-station-ref";
+import {
+  applySessionWriteScope,
+  getScopedPoliceStationId,
+} from "@/lib/admin-scope";
 
 export async function GET(request: NextRequest) {
   try {
-    await requireAuth(request);
+    const session = await requireAuth(request);
     const { searchParams } = new URL(request.url);
     const page = Math.max(1, parseInt(searchParams.get("page") ?? "1", 10));
     const limit = Math.min(
@@ -14,15 +19,18 @@ export async function GET(request: NextRequest) {
       Math.max(1, parseInt(searchParams.get("limit") ?? "10", 10))
     );
     const skip = (page - 1) * limit;
-    const filter = buildCriminalFilter(searchParams);
+    const scopePsId = await getScopedPoliceStationId(session);
+    const filter = await buildCriminalFilter(searchParams, scopePsId);
 
     const [items, total] = await Promise.all([
       CriminalModel.findMany(filter, { skip, limit }),
       CriminalModel.count(filter),
     ]);
 
+    const records = await enrichCriminalsFromDocs(items, toCriminalRecord);
+
     return jsonOk({
-      items: items.map(toCriminalRecord),
+      items: records,
       total,
       page,
       limit,
@@ -37,7 +45,8 @@ export async function POST(request: NextRequest) {
   try {
     const session = await requireAuth(request);
     const body = await request.json();
-    const parsed = parseCriminalBody(body);
+    let parsed = await parseCriminalBody(body);
+    parsed = await applySessionWriteScope(session, parsed);
 
     if (!parsed.pid || !parsed.name) {
       return jsonOk({ error: "PID and Name are required" }, 400);
@@ -56,7 +65,11 @@ export async function POST(request: NextRequest) {
     };
 
     const inserted = await CriminalModel.create(criminal);
-    return jsonOk(toCriminalRecord(inserted!), 201);
+    const [record] = await enrichCriminalsFromDocs(
+      [inserted!],
+      toCriminalRecord
+    );
+    return jsonOk(record, 201);
   } catch (error) {
     return jsonError(error);
   }

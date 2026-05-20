@@ -2,22 +2,33 @@
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { Button } from "@/components/ui/Button";
+import { IconButton } from "@/components/ui/IconButton";
+import { IconLogOut } from "@/components/ui/icons";
 import { AppContainer } from "@/components/layout/AppContainer";
 
-interface User {
-  email: string;
-  name: string;
-  role: string;
-}
+import type { AppSessionUser } from "@/lib/types";
 
-const navItems = [
+type NavItem = {
+  href: string;
+  label: string;
+  superadminOnly?: boolean;
+  adminOnly?: boolean;
+};
+
+const navItems: NavItem[] = [
   { href: "/search", label: "Search" },
   { href: "/criminals", label: "Criminal Management" },
-  { href: "/admin", label: "Admin Control" },
+  { href: "/transfer", label: "Transfer", adminOnly: true },
+  { href: "/admin", label: "Admin Control", superadminOnly: true },
 ];
 
-export function AppHeader({ user }: { user: User }) {
+function canSeeNavItem(item: NavItem, role: AppSessionUser["role"]) {
+  if (item.superadminOnly) return role === "superadmin";
+  if (item.adminOnly) return role === "admin";
+  return true;
+}
+
+export function AppHeader({ user }: { user: AppSessionUser }) {
   const pathname = usePathname();
   const router = useRouter();
 
@@ -45,7 +56,9 @@ export function AppHeader({ user }: { user: User }) {
         </section>
 
         <nav className="hidden items-center gap-1 md:flex">
-          {navItems.map((item) => {
+          {navItems
+            .filter((item) => canSeeNavItem(item, user.role))
+            .map((item) => {
             const active = pathname.startsWith(item.href);
             return (
               <Link
@@ -64,27 +77,26 @@ export function AppHeader({ user }: { user: User }) {
         </nav>
 
         <section className="flex items-center gap-2 sm:gap-3">
-          <Link
-            href="/criminals"
-            className="hidden rounded-lg bg-[var(--color-primary)] px-3 py-2 text-sm font-medium text-white hover:bg-[var(--color-primary-dark)] sm:inline-flex"
-          >
-            + Add Criminal
-          </Link>
           <section className="hidden text-right sm:block">
             <p className="text-sm font-medium text-slate-800">{user.email}</p>
             <p className="text-xs capitalize text-[var(--color-muted)]">
               {user.role}
+              {user.policeStationName
+                ? ` · ${user.policeStationName}`
+                : ""}
             </p>
           </section>
-          <Button variant="secondary" size="sm" onClick={handleLogout}>
-            Logout
-          </Button>
+          <IconButton label="Logout" variant="secondary" onClick={handleLogout}>
+            <IconLogOut />
+          </IconButton>
         </section>
       </AppContainer>
 
       <nav className="border-t border-[var(--color-border)] md:hidden">
         <AppContainer className="flex gap-1 overflow-x-auto py-2">
-          {navItems.map((item) => {
+          {navItems
+            .filter((item) => canSeeNavItem(item, user.role))
+            .map((item) => {
             const active = pathname.startsWith(item.href);
             return (
               <Link

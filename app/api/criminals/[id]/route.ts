@@ -3,24 +3,28 @@ import { ObjectId } from "mongodb";
 import { requireAuth, jsonError, jsonOk } from "@/lib/api";
 import { CriminalModel } from "@/models/Criminal";
 import { parseCriminalBody, toCriminalRecord } from "@/lib/criminal-mapper";
+import { enrichCriminalsFromDocs } from "@/lib/police-station-ref";
+import {
+  assertCriminalAccess,
+  applySessionWriteScope,
+} from "@/lib/admin-scope";
 
 export async function GET(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    await requireAuth(request);
+    const session = await requireAuth(request);
     const { id } = await params;
     if (!ObjectId.isValid(id)) {
       return jsonOk({ error: "Invalid ID" }, 400);
     }
 
     const criminal = await CriminalModel.findById(id);
-    if (!criminal) {
-      return jsonOk({ error: "Not found" }, 404);
-    }
+    await assertCriminalAccess(session, criminal);
 
-    return jsonOk(toCriminalRecord(criminal));
+    const [record] = await enrichCriminalsFromDocs([criminal!], toCriminalRecord);
+    return jsonOk(record);
   } catch (error) {
     return jsonError(error);
   }
@@ -31,14 +35,18 @@ export async function PATCH(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    await requireAuth(request);
+    const session = await requireAuth(request);
     const { id } = await params;
     if (!ObjectId.isValid(id)) {
       return jsonOk({ error: "Invalid ID" }, 400);
     }
 
+    const existing = await CriminalModel.findById(id);
+    await assertCriminalAccess(session, existing);
+
     const body = await request.json();
-    const parsed = parseCriminalBody(body);
+    let parsed = await parseCriminalBody(body);
+    parsed = await applySessionWriteScope(session, parsed);
     const update = { ...parsed, updatedAt: new Date() };
 
     const result = await CriminalModel.update(id, update);
@@ -46,7 +54,8 @@ export async function PATCH(
       return jsonOk({ error: "Not found" }, 404);
     }
 
-    return jsonOk(toCriminalRecord(result));
+    const [record] = await enrichCriminalsFromDocs([result], toCriminalRecord);
+    return jsonOk(record);
   } catch (error) {
     return jsonError(error);
   }
@@ -57,11 +66,14 @@ export async function DELETE(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    await requireAuth(request);
+    const session = await requireAuth(request);
     const { id } = await params;
     if (!ObjectId.isValid(id)) {
       return jsonOk({ error: "Invalid ID" }, 400);
     }
+
+    const existing = await CriminalModel.findById(id);
+    await assertCriminalAccess(session, existing);
 
     const result = await CriminalModel.delete(id);
     if (result.deletedCount === 0) {

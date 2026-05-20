@@ -3,6 +3,8 @@ import { ObjectId } from "mongodb";
 import { requireAuth, jsonError } from "@/lib/api";
 import { CriminalModel } from "@/models/Criminal";
 import { toCriminalRecord } from "@/lib/criminal-mapper";
+import { enrichCriminalsFromDocs } from "@/lib/police-station-ref";
+import { assertCriminalAccess } from "@/lib/admin-scope";
 import { generateCriminalPdf } from "@/lib/pdf/generate-criminal-pdf";
 
 export async function GET(
@@ -10,7 +12,7 @@ export async function GET(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    await requireAuth(request);
+    const session = await requireAuth(request);
     const { id } = await params;
 
     if (!ObjectId.isValid(id)) {
@@ -21,14 +23,9 @@ export async function GET(
     }
 
     const criminal = await CriminalModel.findById(id);
-    if (!criminal) {
-      return new Response(JSON.stringify({ error: "Not found" }), {
-        status: 404,
-        headers: { "Content-Type": "application/json" },
-      });
-    }
+    await assertCriminalAccess(session, criminal);
 
-    const record = toCriminalRecord(criminal);
+    const [record] = await enrichCriminalsFromDocs([criminal!], toCriminalRecord);
     const pdf = await generateCriminalPdf(record);
 
     return new Response(new Uint8Array(pdf), {

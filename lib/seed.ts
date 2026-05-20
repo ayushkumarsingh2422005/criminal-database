@@ -4,6 +4,7 @@ import { CaseTypeModel } from "@/models/CaseType";
 import { PoliceStationModel } from "@/models/PoliceStation";
 import { CriminalModel } from "@/models/Criminal";
 import { CRIME_TYPE_OPTIONS } from "./criminal-fields";
+import { migratePoliceStationReferences } from "./police-station-ref";
 
 const DEFAULT_POLICE_STATIONS = [
   "Argora",
@@ -50,8 +51,26 @@ export async function ensureSeedData() {
     );
   }
 
+  await migratePoliceStationReferences();
+
+  const argora = await PoliceStationModel.findByNameInsensitive("Argora");
+  if (argora && !(await AdminModel.findByEmail("argora.admin@example.com"))) {
+    const now = new Date();
+    await AdminModel.create({
+      email: "argora.admin@example.com",
+      passwordHash: await hashPassword("admin123"),
+      name: "Argora PS Admin",
+      role: "admin",
+      policeStationId: argora._id,
+      active: true,
+      createdAt: now,
+      updatedAt: now,
+    });
+  }
+
   if ((await CriminalModel.count()) === 0) {
     const now = new Date();
+    const sukhdeonagar = await PoliceStationModel.findByNameInsensitive("Sukhdeonagar");
     await CriminalModel.create({
       pid: "269517",
       crimeTypes: ["गृह भेदन"],
@@ -64,12 +83,12 @@ export async function ensureSeedData() {
       mobileNumber: "9297788257",
       permanentAddress: {
         line: "बाबुलाल भिंडी गाड़ी खाना चौक हरमु",
-        thana: "सुखदेवनगर",
+        ...(sukhdeonagar?._id ? { policeStationId: sukhdeonagar._id } : {}),
         district: "राँची",
       },
       presentAddress: {
         line: "बाबुलाल भिंडी गाड़ी खाना चौक हरमु",
-        thana: "सुखदेवनगर",
+        ...(sukhdeonagar?._id ? { policeStationId: sukhdeonagar._id } : {}),
         district: "राँची",
       },
       livelihoodMeans:
@@ -83,7 +102,6 @@ export async function ensureSeedData() {
           firNumber: "GR-1738/15 PS-249/15",
           firDate: "2023-03-18",
           sectionAct: "P/W",
-          policeStation: "KOTWALI(P)",
           judgeName: "CJM RANCHI",
           court: "RANCHI CIVIL COURT",
         },
@@ -93,7 +111,6 @@ export async function ensureSeedData() {
           firNumber: "GONDA-137/22",
           firDate: "2022-12-20",
           sectionAct: "379 IPC",
-          policeStation: "GONDA",
           judgeName: "ASHOK KUMAR JMFC-XXI RANCHI",
           court: "RANCHI CIVIL COURT",
         },

@@ -9,8 +9,11 @@ import { CriminalTable } from "@/components/criminals/CriminalTable";
 import { CriminalForm } from "@/components/criminals/CriminalForm";
 import { PageHeader } from "@/components/layout/PageHeader";
 import type { CriminalRecord } from "@/lib/criminal-mapper";
+import { useAppSession } from "@/components/session/SessionProvider";
 
 export default function CriminalManagementPage() {
+  const session = useAppSession();
+  const isScopedAdmin = session.role === "admin" && !!session.policeStationId;
   const router = useRouter();
   const searchParams = useSearchParams();
   const editId = searchParams.get("edit");
@@ -70,7 +73,11 @@ export default function CriminalManagementPage() {
     <section className="w-full space-y-6">
       <PageHeader
         title="Criminal Management"
-        subtitle="अपराधी प्रबंधन — add, edit, delete records with photos in /public."
+        subtitle={
+          isScopedAdmin
+            ? `अपराधी प्रबंधन — ${session.policeStationName ?? "your PS"} only`
+            : "अपराधी प्रबंधन — add, edit, delete records with photos in /public."
+        }
         actions={
           <Button
             onClick={() => {

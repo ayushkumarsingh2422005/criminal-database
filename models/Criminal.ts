@@ -3,7 +3,8 @@ import { getDb, COLLECTIONS } from "@/lib/db";
 
 export interface CriminalAddress {
   line: string;
-  thana?: string;
+  /** Reference to `police_stations` collection — name resolved at read time. */
+  policeStationId?: ObjectId;
   district?: string;
 }
 
@@ -20,7 +21,8 @@ export interface CriminalHistoryEntry {
   firNumber?: string;
   firDate?: string;
   sectionAct?: string;
-  policeStation?: string;
+  /** Reference to `police_stations` collection — name resolved at read time. */
+  policeStationId?: ObjectId;
   judgeName?: string;
   court?: string;
 }

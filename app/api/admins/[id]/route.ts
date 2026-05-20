@@ -3,6 +3,7 @@ import { ObjectId } from "mongodb";
 import { hashPassword, requireSuperAdmin } from "@/lib/auth";
 import { requireAuth, jsonError, jsonOk } from "@/lib/api";
 import { Admin, AdminModel } from "@/models/Admin";
+import { PoliceStationModel } from "@/models/PoliceStation";
 
 export async function PATCH(
   request: NextRequest,
@@ -21,8 +22,24 @@ export async function PATCH(
     const update: Partial<Admin> = { updatedAt: new Date() };
 
     if (body.name !== undefined) update.name = String(body.name).trim();
-    if (body.role === "superadmin" || body.role === "admin")
+    if (body.role === "superadmin" || body.role === "admin") {
       update.role = body.role;
+      if (body.role === "superadmin") {
+        update.policeStationId = undefined;
+      }
+    }
+    if (body.policeStationId !== undefined) {
+      const psId = String(body.policeStationId).trim();
+      if (!psId) {
+        update.policeStationId = undefined;
+      } else if (ObjectId.isValid(psId)) {
+        const station = await PoliceStationModel.findById(psId);
+        if (!station) {
+          return jsonOk({ error: "Police station not found" }, 400);
+        }
+        update.policeStationId = new ObjectId(psId);
+      }
+    }
     if (typeof body.active === "boolean") update.active = body.active;
     if (body.password && String(body.password).length >= 8) {
       update.passwordHash = await hashPassword(String(body.password));
@@ -33,12 +50,18 @@ export async function PATCH(
       return jsonOk({ error: "Admin not found" }, 404);
     }
 
+    const station = result.policeStationId
+      ? await PoliceStationModel.findById(result.policeStationId.toString())
+      : null;
+
     return jsonOk({
       id: result._id!.toString(),
       email: result.email,
       name: result.name,
       role: result.role,
       active: result.active,
+      policeStationId: result.policeStationId?.toString(),
+      policeStationName: station?.name,
     });
   } catch (error) {
     return jsonError(error);

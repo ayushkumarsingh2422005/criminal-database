@@ -31,4 +31,5 @@ export const COLLECTIONS = {
   criminals: "criminals",
   caseTypes: "case_types",
   policeStations: "police_stations",
+  criminalTransfers: "criminal_transfers",
 } as const;

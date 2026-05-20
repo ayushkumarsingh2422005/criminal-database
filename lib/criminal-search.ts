@@ -1,51 +1,14 @@
+import "server-only";
+
+import { ObjectId } from "mongodb";
 import type { Filter } from "mongodb";
 import type { Criminal } from "@/models/Criminal";
-
-export interface CriminalSearchFilters {
-  name: string;
-  pid: string;
-  mobileNumber: string;
-  crimeType: string;
-  fatherName: string;
-  district: string;
-  thana: string;
-  aadhaarNumber: string;
-  firNumber: string;
-  caseNumber: string;
-  sectionAct: string;
-  historyPoliceStation: string;
-  court: string;
-  judgeName: string;
-  vehicleNumber: string;
-  identificationMarks: string;
-  associateName: string;
-  associateMobile: string;
-  associateAadhaar: string;
-  bailerName: string;
-}
-
-export const emptySearchFilters = (): CriminalSearchFilters => ({
-  name: "",
-  pid: "",
-  mobileNumber: "",
-  crimeType: "all",
-  fatherName: "",
-  district: "",
-  thana: "",
-  aadhaarNumber: "",
-  firNumber: "",
-  caseNumber: "",
-  sectionAct: "",
-  historyPoliceStation: "",
-  court: "",
-  judgeName: "",
-  vehicleNumber: "",
-  identificationMarks: "",
-  associateName: "",
-  associateMobile: "",
-  associateAadhaar: "",
-  bailerName: "",
-});
+import { PoliceStationModel } from "@/models/PoliceStation";
+import type { CriminalSearchFilters } from "@/lib/criminal-search-filters";
+import {
+  buildPoliceStationScopeFilter,
+  mergeCriminalFilters,
+} from "@/lib/admin-scope";
 
 function regex(value: string) {
   return { $regex: value, $options: "i" as const };
@@ -56,9 +19,20 @@ function pushRegex(conditions: Filter<Criminal>[], field: string, value: string 
   conditions.push({ [field]: regex(value.trim()) } as Filter<Criminal>);
 }
 
-export function buildCriminalFilter(
-  params: URLSearchParams | CriminalSearchFilters
-): Filter<Criminal> {
+async function resolvePoliceStationObjectId(
+  value: string | null
+): Promise<ObjectId | null> {
+  if (!value?.trim()) return null;
+  const trimmed = value.trim();
+  if (ObjectId.isValid(trimmed)) return new ObjectId(trimmed);
+  const station = await PoliceStationModel.findByNameInsensitive(trimmed);
+  return station?._id ?? null;
+}
+
+export async function buildCriminalFilter(
+  params: URLSearchParams | CriminalSearchFilters,
+  scopePoliceStationId?: ObjectId | null
+): Promise<Filter<Criminal>> {
   const get = (key: keyof CriminalSearchFilters) =>
     params instanceof URLSearchParams
       ? params.get(key)
@@ -87,12 +61,12 @@ export function buildCriminalFilter(
     });
   }
 
-  const thana = get("thana");
-  if (thana?.trim()) {
+  const thanaId = await resolvePoliceStationObjectId(get("thana"));
+  if (thanaId) {
     conditions.push({
       $or: [
-        { "permanentAddress.thana": regex(thana.trim()) },
-        { "presentAddress.thana": regex(thana.trim()) },
+        { "permanentAddress.policeStationId": thanaId },
+        { "presentAddress.policeStationId": thanaId },
       ],
     });
   }
@@ -100,7 +74,11 @@ export function buildCriminalFilter(
   pushRegex(conditions, "criminalHistory.firNumber", get("firNumber"));
   pushRegex(conditions, "criminalHistory.caseNumber", get("caseNumber"));
   pushRegex(conditions, "criminalHistory.sectionAct", get("sectionAct"));
-  pushRegex(conditions, "criminalHistory.policeStation", get("historyPoliceStation"));
+
+  const historyPsId = await resolvePoliceStationObjectId(get("historyPoliceStation"));
+  if (historyPsId) {
+    conditions.push({ "criminalHistory.policeStationId": historyPsId });
+  }
   pushRegex(conditions, "criminalHistory.court", get("court"));
   pushRegex(conditions, "criminalHistory.judgeName", get("judgeName"));
 
@@ -164,22 +142,16 @@ export function buildCriminalFilter(
     });
   }
 
-  if (conditions.length === 0) return {};
-  if (conditions.length === 1) return conditions[0]!;
-  return { $and: conditions };
-}
+  let filter: Filter<Criminal> = {};
+  if (conditions.length === 1) filter = conditions[0]!;
+  else if (conditions.length > 1) filter = { $and: conditions };
 
-export function filtersToSearchParams(
-  filters: CriminalSearchFilters,
-  page: number,
-  limit: number
-): URLSearchParams {
-  const params = new URLSearchParams({
-    page: String(page),
-    limit: String(limit),
-  });
-  Object.entries(filters).forEach(([k, v]) => {
-    if (v && v !== "all") params.set(k, v);
-  });
-  return params;
+  if (scopePoliceStationId) {
+    filter = mergeCriminalFilters(
+      filter,
+      buildPoliceStationScopeFilter(scopePoliceStationId)
+    );
+  }
+
+  return filter;
 }

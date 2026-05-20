@@ -6,9 +6,12 @@ import { Card } from "@/components/ui/Card";
 import { Input } from "@/components/ui/Input";
 import { Select } from "@/components/ui/Select";
 import { Button } from "@/components/ui/Button";
+import { ActionIcons, IconButton } from "@/components/ui/IconButton";
+import { IconTrash, IconUserCheck, IconUserOff } from "@/components/ui/icons";
 import { Modal } from "@/components/ui/Modal";
 import { Badge } from "@/components/ui/Badge";
 import { PageHeader } from "@/components/layout/PageHeader";
+import { usePoliceStations } from "@/lib/hooks/use-lookups";
 import {
   DataTable,
   DataTableBody,
@@ -24,6 +27,8 @@ interface AdminUser {
   name: string;
   role: "superadmin" | "admin";
   active: boolean;
+  policeStationId?: string;
+  policeStationName?: string;
 }
 
 export default function AdminUsersPage() {
@@ -31,6 +36,8 @@ export default function AdminUsersPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [modalOpen, setModalOpen] = useState(false);
+  const [createRole, setCreateRole] = useState<"admin" | "superadmin">("admin");
+  const { items: policeStations } = usePoliceStations();
   const [currentUser, setCurrentUser] = useState<{ id: string; role: string } | null>(
     null
   );
@@ -73,6 +80,7 @@ export default function AdminUsersPage() {
         email: fd.get("email"),
         password: fd.get("password"),
         role: fd.get("role"),
+        policeStationId: fd.get("policeStationId"),
       }),
     });
     if (res.ok) {
@@ -142,10 +150,11 @@ export default function AdminUsersPage() {
         <DataTable>
           <DataTableHead>
             <DataTableHeaderCell className="w-[18%]">Name</DataTableHeaderCell>
-            <DataTableHeaderCell className="w-[28%]">Email</DataTableHeaderCell>
-            <DataTableHeaderCell className="w-[14%]">Role</DataTableHeaderCell>
-            <DataTableHeaderCell className="w-[14%]">Status</DataTableHeaderCell>
-            <DataTableHeaderCell className="w-[26%]">Actions</DataTableHeaderCell>
+            <DataTableHeaderCell className="w-[24%]">Email</DataTableHeaderCell>
+            <DataTableHeaderCell className="w-[12%]">Role</DataTableHeaderCell>
+            <DataTableHeaderCell className="w-[18%]">Police Station</DataTableHeaderCell>
+            <DataTableHeaderCell className="w-[12%]">Status</DataTableHeaderCell>
+            <DataTableHeaderCell className="w-[22%]">Actions</DataTableHeaderCell>
           </DataTableHead>
           <DataTableBody>
             {admins.map((a) => (
@@ -154,21 +163,34 @@ export default function AdminUsersPage() {
                 <DataTableCell>{a.email}</DataTableCell>
                 <DataTableCell className="capitalize">{a.role}</DataTableCell>
                 <DataTableCell>
+                  {a.role === "admin"
+                    ? a.policeStationName ?? "—"
+                    : "All stations"}
+                </DataTableCell>
+                <DataTableCell>
                   <Badge variant={a.active ? "success" : "danger"}>
                     {a.active ? "Active" : "Inactive"}
                   </Badge>
                 </DataTableCell>
                 <DataTableCell>
-                  <section className="flex flex-wrap gap-2">
-                    <Button size="sm" variant="outline" onClick={() => toggleActive(a)}>
-                      {a.active ? "Deactivate" : "Activate"}
-                    </Button>
+                  <ActionIcons>
+                    <IconButton
+                      label={a.active ? "Deactivate user" : "Activate user"}
+                      variant="outline"
+                      onClick={() => toggleActive(a)}
+                    >
+                      {a.active ? <IconUserOff /> : <IconUserCheck />}
+                    </IconButton>
                     {currentUser?.id !== a.id && (
-                      <Button size="sm" variant="danger" onClick={() => handleDelete(a)}>
-                        Delete
-                      </Button>
+                      <IconButton
+                        label="Delete user"
+                        variant="danger"
+                        onClick={() => handleDelete(a)}
+                      >
+                        <IconTrash />
+                      </IconButton>
                     )}
-                  </section>
+                  </ActionIcons>
                 </DataTableCell>
               </DataTableRow>
             ))}
@@ -184,11 +206,26 @@ export default function AdminUsersPage() {
           <Select
             label="Role"
             name="role"
+            value={createRole}
+            onChange={(e) =>
+              setCreateRole(e.target.value as "admin" | "superadmin")
+            }
             options={[
-              { value: "admin", label: "Admin" },
+              { value: "admin", label: "Admin (single PS)" },
               { value: "superadmin", label: "Super Admin" },
             ]}
           />
+          {createRole === "admin" && (
+            <Select
+              label="Allotted Police Station"
+              name="policeStationId"
+              required
+              options={[
+                { value: "", label: "Select station" },
+                ...policeStations.map((s) => ({ value: s.id, label: s.name })),
+              ]}
+            />
+          )}
           <Button type="submit" className="w-full">
             Create Admin
           </Button>

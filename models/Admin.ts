@@ -9,6 +9,8 @@ export interface Admin {
   passwordHash: string;
   name: string;
   role: AdminRole;
+  /** Required for role `admin` — limits criminal data access to this PS. */
+  policeStationId?: ObjectId;
   active: boolean;
   createdAt: Date;
   updatedAt: Date;

@@ -4,6 +4,8 @@ import { FormEvent, useEffect, useState } from "react";
 import { Card } from "@/components/ui/Card";
 import { Input } from "@/components/ui/Input";
 import { Button } from "@/components/ui/Button";
+import { IconButton } from "@/components/ui/IconButton";
+import { IconTrash } from "@/components/ui/icons";
 import { PageHeader } from "@/components/layout/PageHeader";
 import {
   DataTable,
@@ -87,9 +89,13 @@ export default function CaseTypesPage() {
               <DataTableRow key={item.id}>
                 <DataTableCell className="font-medium">{item.name}</DataTableCell>
                 <DataTableCell>
-                  <Button size="sm" variant="danger" onClick={() => handleDelete(item.id)}>
-                    Remove
-                  </Button>
+                  <IconButton
+                    label="Remove case type"
+                    variant="danger"
+                    onClick={() => handleDelete(item.id)}
+                  >
+                    <IconTrash />
+                  </IconButton>
                 </DataTableCell>
               </DataTableRow>
             ))}

@@ -1,7 +1,10 @@
 "use client";
 
 import { Input } from "@/components/ui/Input";
+import { Select } from "@/components/ui/Select";
 import { Button } from "@/components/ui/Button";
+import { IconButton } from "@/components/ui/IconButton";
+import { IconPlus, IconTrash } from "@/components/ui/icons";
 import { SectionTitle } from "@/components/ui/FieldLabel";
 import { extLabel } from "@/lib/criminal-extended-fields";
 import {
@@ -28,9 +31,9 @@ function ListHeader({
   return (
     <section className="flex items-center justify-between gap-2">
       <SectionTitle en={titleEn} hi={titleHi} />
-      <Button type="button" variant="outline" size="sm" onClick={onAdd}>
-        + Add row
-      </Button>
+      <IconButton label="Add row" variant="outline" onClick={onAdd}>
+        <IconPlus />
+      </IconButton>
     </section>
   );
 }
@@ -38,6 +41,7 @@ function ListHeader({
 export function CriminalExtendedForm({
   value,
   onChange,
+  policeStationOptions = [{ value: "", label: "Select police station" }],
 }: {
   value: Pick<
     CriminalRecord,
@@ -51,6 +55,7 @@ export function CriminalExtendedForm({
     | "verification"
   >;
   onChange: (v: typeof value) => void;
+  policeStationOptions?: { value: string; label: string }[];
 }) {
   const set = (patch: Partial<typeof value>) => onChange({ ...value, ...patch });
 
@@ -77,18 +82,17 @@ export function CriminalExtendedForm({
           >
             <section className="mb-2 flex justify-between">
               <span className="text-xs font-medium text-slate-600">#{i + 1}</span>
-              <Button
-                type="button"
+              <IconButton
+                label="Remove row"
                 variant="ghost"
-                size="sm"
                 onClick={() =>
                   set({
                     criminalHistory: value.criminalHistory.filter((_, j) => j !== i),
                   })
                 }
               >
-                Remove
-              </Button>
+                <IconTrash />
+              </IconButton>
             </section>
             <section className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
               <Input
@@ -138,14 +142,15 @@ export function CriminalExtendedForm({
                   set({ criminalHistory: next });
                 }}
               />
-              <Input
+              <Select
                 label="Police Station (PS)"
-                value={row.policeStation ?? ""}
+                value={row.policeStationId ?? ""}
                 onChange={(e) => {
                   const next = [...value.criminalHistory];
-                  next[i] = { ...row, policeStation: e.target.value };
+                  next[i] = { ...row, policeStationId: e.target.value };
                   set({ criminalHistory: next });
                 }}
+                options={policeStationOptions}
               />
               <Input
                 label="Judge Name"
@@ -180,16 +185,15 @@ export function CriminalExtendedForm({
         {value.vehicles.map((row, i) => (
           <article key={i} className="rounded-lg border border-[var(--color-border)] p-4">
             <section className="mb-2 flex justify-end">
-              <Button
-                type="button"
+              <IconButton
+                label="Remove row"
                 variant="ghost"
-                size="sm"
                 onClick={() =>
                   set({ vehicles: value.vehicles.filter((_, j) => j !== i) })
                 }
               >
-                Remove
-              </Button>
+                <IconTrash />
+              </IconButton>
             </section>
             <section className="grid gap-3 sm:grid-cols-3">
               <Input
@@ -310,14 +314,13 @@ export function CriminalExtendedForm({
         {value.bailers.map((row, i) => (
           <article key={i} className="rounded-lg border border-[var(--color-border)] p-4">
             <section className="mb-2 flex justify-end">
-              <Button
-                type="button"
+              <IconButton
+                label="Remove row"
                 variant="ghost"
-                size="sm"
                 onClick={() => set({ bailers: value.bailers.filter((_, j) => j !== i) })}
               >
-                Remove
-              </Button>
+                <IconTrash />
+              </IconButton>
             </section>
             <section className="grid gap-3 sm:grid-cols-2">
               <Input
@@ -460,14 +463,13 @@ function RepeatablePeople({
       {rows.map((row, i) => (
         <article key={i} className="rounded-lg border border-[var(--color-border)] p-4">
           <section className="mb-2 flex justify-end">
-            <Button
-              type="button"
+            <IconButton
+              label="Remove row"
               variant="ghost"
-              size="sm"
               onClick={() => onChange(rows.filter((_, j) => j !== i))}
             >
-              Remove
-            </Button>
+              <IconTrash />
+            </IconButton>
           </section>
           <section className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
             <Input

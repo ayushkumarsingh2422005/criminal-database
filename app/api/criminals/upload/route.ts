@@ -3,10 +3,12 @@ import { writeFile, mkdir } from "fs/promises";
 import path from "path";
 import { requireAuth, jsonError, jsonOk } from "@/lib/api";
 import { PHOTO_KEYS, type PhotoKey } from "@/lib/criminal-fields";
+import { CriminalModel } from "@/models/Criminal";
+import { assertCriminalAccess } from "@/lib/admin-scope";
 
 export async function POST(request: NextRequest) {
   try {
-    await requireAuth(request);
+    const session = await requireAuth(request);
     const formData = await request.formData();
     const file = formData.get("file") as File | null;
     const pid = String(formData.get("pid") ?? "").trim();
@@ -14,6 +16,11 @@ export async function POST(request: NextRequest) {
 
     if (!file || !pid || !PHOTO_KEYS.includes(photoType)) {
       return jsonOk({ error: "File, PID, and valid photo type are required" }, 400);
+    }
+
+    const existing = await CriminalModel.findByPid(pid);
+    if (existing) {
+      await assertCriminalAccess(session, existing);
     }
 
     const ext = file.name.split(".").pop()?.toLowerCase() || "jpg";
