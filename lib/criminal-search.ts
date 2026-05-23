@@ -46,10 +46,12 @@ export async function buildCriminalFilter(
   pushRegex(conditions, "fatherName", get("fatherName"));
   pushRegex(conditions, "aadhaarNumber", get("aadhaarNumber"));
 
-  const crimeType = get("crimeType");
-  if (crimeType && crimeType !== "all") {
-    conditions.push({ crimeTypes: crimeType });
+  const historyCrimeType = get("historyCrimeType");
+  if (historyCrimeType && historyCrimeType !== "all") {
+    conditions.push({ "criminalHistory.crimeType": historyCrimeType });
   }
+
+  pushRegex(conditions, "criminalHistory.year", get("historyYear"));
 
   const district = get("district");
   if (district?.trim()) {
@@ -61,26 +63,36 @@ export async function buildCriminalFilter(
     });
   }
 
-  const thanaId = await resolvePoliceStationObjectId(get("thana"));
-  if (thanaId) {
+  const addressPsId = await resolvePoliceStationObjectId(
+    get("addressPoliceStation") ?? (params instanceof URLSearchParams ? params.get("thana") : null)
+  );
+  if (addressPsId) {
+    const addressType = get("addressType") || "any";
+    if (addressType === "permanent") {
+      conditions.push({ "permanentAddress.policeStationId": addressPsId });
+    } else if (addressType === "present") {
+      conditions.push({ "presentAddress.policeStationId": addressPsId });
+    } else {
+      conditions.push({
+        $or: [
+          { "permanentAddress.policeStationId": addressPsId },
+          { "presentAddress.policeStationId": addressPsId },
+        ],
+      });
+    }
+  }
+
+  pushRegex(conditions, "criminalHistory.sectionAct", get("sectionAct"));
+
+  const historyPsId = await resolvePoliceStationObjectId(get("historyCasePS"));
+  if (historyPsId) {
     conditions.push({
       $or: [
-        { "permanentAddress.policeStationId": thanaId },
-        { "presentAddress.policeStationId": thanaId },
+        { "criminalHistory.casePoliceStationId": historyPsId },
+        { "criminalHistory.policeStationId": historyPsId },
       ],
     });
   }
-
-  pushRegex(conditions, "criminalHistory.firNumber", get("firNumber"));
-  pushRegex(conditions, "criminalHistory.caseNumber", get("caseNumber"));
-  pushRegex(conditions, "criminalHistory.sectionAct", get("sectionAct"));
-
-  const historyPsId = await resolvePoliceStationObjectId(get("historyPoliceStation"));
-  if (historyPsId) {
-    conditions.push({ "criminalHistory.policeStationId": historyPsId });
-  }
-  pushRegex(conditions, "criminalHistory.court", get("court"));
-  pushRegex(conditions, "criminalHistory.judgeName", get("judgeName"));
 
   const vehicleNumber = get("vehicleNumber");
   if (vehicleNumber?.trim()) {

@@ -6,6 +6,7 @@ import {
   Image,
   StyleSheet,
 } from "@react-pdf/renderer";
+import { aggregateCrimeTypes } from "@/lib/criminal-history-utils";
 import { CRIMINAL_FIELDS, photoLabel } from "@/lib/criminal-fields";
 import type { PhotoKey } from "@/lib/criminal-fields";
 import type { CriminalHistoryRecord, CriminalRecord } from "@/lib/criminal-mapper";
@@ -105,13 +106,14 @@ function TableHeader({ widths, labels }: { widths: string[]; labels: string[] })
 }
 
 function HistorySection({ rows }: { rows: CriminalHistoryRecord[] }) {
-  const widths = ["7%", "9%", "24%", "28%", "32%"];
+  const widths = ["8%", "10%", "22%", "22%", "18%", "20%"];
   const headers = [
     "S.No",
-    "Case #",
-    "FIR No.\nDate of FIR",
-    "Section / Act\nPolice Station",
-    "Judge Name\nCourt",
+    "Year",
+    "Crime Type",
+    "Case PS",
+    "Date of FIR",
+    "Section / Act",
   ];
 
   if (rows.length === 0) {
@@ -132,19 +134,15 @@ function HistorySection({ rows }: { rows: CriminalHistoryRecord[] }) {
           ]}
         >
           <Text style={[styles.td, { width: widths[0] }]}>{row.sNo ?? i + 1}</Text>
-          <Text style={[styles.td, { width: widths[1] }]}>{dash(row.caseNumber)}</Text>
-          <View style={[styles.td, { width: widths[2] }]}>
-            <Text style={styles.cellStack}>{dash(row.firNumber)}</Text>
-            <Text style={styles.tdSmall}>{formatFirDate(row.firDate) || "—"}</Text>
-          </View>
-          <View style={[styles.td, { width: widths[3] }]}>
-            <Text style={styles.cellStack}>{dash(row.sectionAct)}</Text>
-            <Text style={styles.tdSmall}>{dash(row.policeStation)}</Text>
-          </View>
-          <View style={[styles.td, { width: widths[4], borderRightWidth: 0 }]}>
-            <Text style={styles.cellStack}>{dash(row.judgeName)}</Text>
-            <Text style={styles.tdSmall}>{dash(row.court)}</Text>
-          </View>
+          <Text style={[styles.td, { width: widths[1] }]}>{dash(row.year)}</Text>
+          <Text style={[styles.td, { width: widths[2] }]}>{dash(row.crimeType)}</Text>
+          <Text style={[styles.td, { width: widths[3] }]}>{dash(row.casePoliceStation)}</Text>
+          <Text style={[styles.td, { width: widths[4] }]}>
+            {formatFirDate(row.firDate) || "—"}
+          </Text>
+          <Text style={[styles.td, { width: widths[5], borderRightWidth: 0 }]}>
+            {dash(row.sectionAct)}
+          </Text>
         </View>
       ))}
     </View>
@@ -229,10 +227,9 @@ export function CriminalReportDocument({
     ? `ADDRESS PS- ${ps} थाना${district ? `, ${district}` : ""}।`
     : "ADDRESS PS- —";
 
+  const crimeTypes = aggregateCrimeTypes(criminal.criminalHistory);
   const crimeLine =
-    criminal.crimeTypes.length > 0
-      ? `${criminal.crimeTypes.join(" / ")} ।`
-      : "—";
+    crimeTypes.length > 0 ? `${crimeTypes.join(" / ")} ।` : "—";
 
   const vehicleRows: string[][] = criminal.vehicles.map((v: CriminalVehicle) => [
     dash(v.vehicleNumber),

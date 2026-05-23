@@ -5,6 +5,7 @@ import { PoliceStationModel } from "@/models/PoliceStation";
 import { CriminalModel } from "@/models/Criminal";
 import { CRIME_TYPE_OPTIONS } from "./criminal-fields";
 import { migratePoliceStationReferences } from "./police-station-ref";
+import { migrateCriminalHistorySchema } from "./migrate-criminal-history-schema";
 
 const DEFAULT_POLICE_STATIONS = [
   "Argora",
@@ -52,6 +53,7 @@ export async function ensureSeedData() {
   }
 
   await migratePoliceStationReferences();
+  await migrateCriminalHistorySchema();
 
   const argora = await PoliceStationModel.findByNameInsensitive("Argora");
   if (argora && !(await AdminModel.findByEmail("argora.admin@example.com"))) {
@@ -73,7 +75,6 @@ export async function ensureSeedData() {
     const sukhdeonagar = await PoliceStationModel.findByNameInsensitive("Sukhdeonagar");
     await CriminalModel.create({
       pid: "269517",
-      crimeTypes: ["गृह भेदन"],
       name: "धीरज जालान उर्फ धीरज कुमार जालान",
       nameAliases: "धीरज कुमार जालान",
       dateOfBirth: "1984-09-05",
@@ -98,21 +99,19 @@ export async function ensureSeedData() {
       criminalHistory: [
         {
           sNo: 1,
-          caseNumber: "32",
-          firNumber: "GR-1738/15 PS-249/15",
+          year: "2023",
+          crimeType: "गृह भेदन",
+          ...(sukhdeonagar?._id ? { casePoliceStationId: sukhdeonagar._id } : {}),
           firDate: "2023-03-18",
           sectionAct: "P/W",
-          judgeName: "CJM RANCHI",
-          court: "RANCHI CIVIL COURT",
         },
         {
           sNo: 2,
-          caseNumber: "30",
-          firNumber: "GONDA-137/22",
+          year: "2022",
+          crimeType: "अन्य चोरी",
+          ...(sukhdeonagar?._id ? { casePoliceStationId: sukhdeonagar._id } : {}),
           firDate: "2022-12-20",
           sectionAct: "379 IPC",
-          judgeName: "ASHOK KUMAR JMFC-XXI RANCHI",
-          court: "RANCHI CIVIL COURT",
         },
       ],
       vehicles: [

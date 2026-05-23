@@ -79,29 +79,32 @@ export async function parseHistoryInput(
   for (let i = 0; i < rows.length; i++) {
     const row = rows[i] as Record<string, unknown>;
     const legacyName =
-      typeof row.policeStation === "string" ? row.policeStation.trim() : undefined;
-    let policeStationId = await requirePoliceStationId(
-      row.policeStationId,
-      `criminal history row ${i + 1}`
+      typeof row.casePoliceStation === "string"
+        ? row.casePoliceStation.trim()
+        : typeof row.policeStation === "string"
+          ? row.policeStation.trim()
+          : undefined;
+    const psValue = row.casePoliceStationId ?? row.policeStationId;
+    let casePoliceStationId = await requirePoliceStationId(
+      psValue,
+      `criminal history row ${i + 1} case police station`
     );
-    if (!policeStationId && legacyName) {
-      policeStationId = await resolvePoliceStationIdFromLegacy(undefined, legacyName);
-      if (!policeStationId) {
+    if (!casePoliceStationId && legacyName) {
+      casePoliceStationId = await resolvePoliceStationIdFromLegacy(undefined, legacyName);
+      if (!casePoliceStationId) {
         throw new Error(
-          `History row ${i + 1}: police station "${legacyName}" is not in the master list.`
+          `History row ${i + 1}: case police station "${legacyName}" is not in the master list.`
         );
       }
     }
 
     result.push({
       sNo: row.sNo != null ? Number(row.sNo) : undefined,
-      caseNumber: row.caseNumber ? String(row.caseNumber).trim() : undefined,
-      firNumber: row.firNumber ? String(row.firNumber).trim() : undefined,
+      year: row.year ? String(row.year).trim() : undefined,
+      crimeType: row.crimeType ? String(row.crimeType).trim() : undefined,
+      ...(casePoliceStationId ? { casePoliceStationId } : {}),
       firDate: row.firDate ? String(row.firDate).trim() : undefined,
       sectionAct: row.sectionAct ? String(row.sectionAct).trim() : undefined,
-      ...(policeStationId ? { policeStationId } : {}),
-      judgeName: row.judgeName ? String(row.judgeName).trim() : undefined,
-      court: row.court ? String(row.court).trim() : undefined,
     });
   }
 
@@ -128,18 +131,16 @@ function resolveHistoryForApi(
   map: PoliceStationNameMap
 ): CriminalHistoryRecord[] {
   return rows.map((row) => {
-    const id = row.policeStationId;
+    const id = row.casePoliceStationId;
     const name = id ? map.get(id) : undefined;
     return {
       sNo: row.sNo,
-      caseNumber: row.caseNumber,
-      firNumber: row.firNumber,
+      year: row.year,
+      crimeType: row.crimeType,
+      ...(id ? { casePoliceStationId: id } : {}),
+      ...(name ? { casePoliceStation: name } : {}),
       firDate: row.firDate,
       sectionAct: row.sectionAct,
-      ...(id ? { policeStationId: id } : {}),
-      ...(name ? { policeStation: name } : {}),
-      judgeName: row.judgeName,
-      court: row.court,
     };
   });
 }
@@ -179,7 +180,9 @@ function collectPoliceStationIds(c: Criminal, ids: Set<string>) {
   add(c.permanentAddress?.policeStationId);
   add(c.presentAddress?.policeStationId);
   for (const h of c.criminalHistory ?? []) {
-    add(h.policeStationId);
+    add(h.casePoliceStationId);
+    const legacy = h as { policeStationId?: ObjectId };
+    add(legacy.policeStationId);
   }
 }
 
@@ -200,6 +203,7 @@ export async function countPoliceStationReferences(
     $or: [
       { "permanentAddress.policeStationId": oid },
       { "presentAddress.policeStationId": oid },
+      { "criminalHistory.casePoliceStationId": oid },
       { "criminalHistory.policeStationId": oid },
     ],
   });
@@ -246,8 +250,17 @@ export async function migratePoliceStationReferences(): Promise<{
     const history = [...(c.criminalHistory ?? [])];
     let historyChanged = false;
     for (let i = 0; i < history.length; i++) {
-      const row = history[i] as CriminalHistoryEntry & { policeStation?: string };
-      if (row.policeStationId) continue;
+      const row = history[i] as CriminalHistoryEntry & {
+        policeStation?: string;
+        policeStationId?: ObjectId;
+      };
+      if (row.casePoliceStationId) continue;
+      if (row.policeStationId) {
+        history[i] = { ...row, casePoliceStationId: row.policeStationId };
+        delete (history[i] as { policeStationId?: ObjectId }).policeStationId;
+        historyChanged = true;
+        continue;
+      }
       const legacy = row.policeStation?.trim();
       if (!legacy) continue;
       const id = nameToId.get(legacy.toLowerCase());
@@ -256,7 +269,7 @@ export async function migratePoliceStationReferences(): Promise<{
         continue;
       }
       const { policeStation: _removed, ...rest } = row;
-      history[i] = { ...rest, policeStationId: new ObjectId(id) };
+      history[i] = { ...rest, casePoliceStationId: new ObjectId(id) };
       historyChanged = true;
     }
     if (historyChanged) {

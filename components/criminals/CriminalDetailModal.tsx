@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/Badge";
 import { FieldLabel, SectionTitle } from "@/components/ui/FieldLabel";
 import { CRIMINAL_FIELDS, PHOTO_KEYS, photoLabel } from "@/lib/criminal-fields";
 import { formatDateDisplay } from "@/lib/date-utils";
+import { aggregateCrimeTypes } from "@/lib/criminal-history-utils";
 import type { CriminalRecord } from "@/lib/criminal-mapper";
 
 export type { CriminalRecord };
@@ -56,6 +57,7 @@ export function CriminalDetailModal({
   onClose: () => void;
 }) {
   if (!criminal) return null;
+  const crimeTypes = aggregateCrimeTypes(criminal.criminalHistory);
 
   return (
     <Modal open={open} onClose={onClose} title="Criminal Record / आपराधिक विवरण" size="xl">
@@ -66,10 +68,10 @@ export function CriminalDetailModal({
             hi={CRIMINAL_FIELDS.crimeTypes.hi}
           />
           <section className="mt-3 flex flex-wrap gap-2">
-            {criminal.crimeTypes.length === 0 ? (
+            {crimeTypes.length === 0 ? (
               <span className="text-sm text-[var(--color-muted)]">—</span>
             ) : (
-              criminal.crimeTypes.map((t) => (
+              crimeTypes.map((t) => (
                 <Badge key={t} variant="default">
                   {t}
                 </Badge>

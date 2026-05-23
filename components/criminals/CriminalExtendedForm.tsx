@@ -17,6 +17,7 @@ import {
 } from "@/lib/criminal-defaults";
 import type { CriminalRecord } from "@/lib/criminal-mapper";
 import { toDateInputValue } from "@/lib/date-utils";
+import { useCaseTypes } from "@/lib/hooks/use-lookups";
 import type { BailerInfo, RelatedPerson } from "@/models/Criminal";
 
 function ListHeader({
@@ -42,6 +43,7 @@ export function CriminalExtendedForm({
   value,
   onChange,
   policeStationOptions = [{ value: "", label: "Select police station" }],
+  caseTypeOptions,
 }: {
   value: Pick<
     CriminalRecord,
@@ -56,8 +58,14 @@ export function CriminalExtendedForm({
   >;
   onChange: (v: typeof value) => void;
   policeStationOptions?: { value: string; label: string }[];
+  caseTypeOptions?: { value: string; label: string }[];
 }) {
   const set = (patch: Partial<typeof value>) => onChange({ ...value, ...patch });
+  const { items: caseTypes } = useCaseTypes();
+  const crimeTypeOptions = caseTypeOptions ?? [
+    { value: "", label: "Select crime type / अपराध चुनें" },
+    ...caseTypes.map((c) => ({ value: c.name, label: c.name })),
+  ];
 
   return (
     <section className="space-y-8 border-t border-[var(--color-border)] pt-8">
@@ -106,22 +114,34 @@ export function CriminalExtendedForm({
                 }}
               />
               <Input
-                label={extLabel("caseNumber")}
-                value={row.caseNumber ?? ""}
+                label={extLabel("year")}
+                value={row.year ?? ""}
+                placeholder="2024"
                 onChange={(e) => {
                   const next = [...value.criminalHistory];
-                  next[i] = { ...row, caseNumber: e.target.value };
+                  next[i] = { ...row, year: e.target.value };
                   set({ criminalHistory: next });
                 }}
               />
-              <Input
-                label={extLabel("firNumber")}
-                value={row.firNumber ?? ""}
+              <Select
+                label={extLabel("crimeType")}
+                value={row.crimeType ?? ""}
                 onChange={(e) => {
                   const next = [...value.criminalHistory];
-                  next[i] = { ...row, firNumber: e.target.value };
+                  next[i] = { ...row, crimeType: e.target.value };
                   set({ criminalHistory: next });
                 }}
+                options={crimeTypeOptions}
+              />
+              <Select
+                label={extLabel("casePoliceStation")}
+                value={row.casePoliceStationId ?? ""}
+                onChange={(e) => {
+                  const next = [...value.criminalHistory];
+                  next[i] = { ...row, casePoliceStationId: e.target.value };
+                  set({ criminalHistory: next });
+                }}
+                options={policeStationOptions}
               />
               <Input
                 label={extLabel("firDate")}
@@ -139,34 +159,6 @@ export function CriminalExtendedForm({
                 onChange={(e) => {
                   const next = [...value.criminalHistory];
                   next[i] = { ...row, sectionAct: e.target.value };
-                  set({ criminalHistory: next });
-                }}
-              />
-              <Select
-                label="Police Station (PS)"
-                value={row.policeStationId ?? ""}
-                onChange={(e) => {
-                  const next = [...value.criminalHistory];
-                  next[i] = { ...row, policeStationId: e.target.value };
-                  set({ criminalHistory: next });
-                }}
-                options={policeStationOptions}
-              />
-              <Input
-                label="Judge Name"
-                value={row.judgeName ?? ""}
-                onChange={(e) => {
-                  const next = [...value.criminalHistory];
-                  next[i] = { ...row, judgeName: e.target.value };
-                  set({ criminalHistory: next });
-                }}
-              />
-              <Input
-                label="Court"
-                value={row.court ?? ""}
-                onChange={(e) => {
-                  const next = [...value.criminalHistory];
-                  next[i] = { ...row, court: e.target.value };
                   set({ criminalHistory: next });
                 }}
               />

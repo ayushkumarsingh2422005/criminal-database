@@ -4,17 +4,18 @@ export interface CriminalSearchFilters {
   name: string;
   pid: string;
   mobileNumber: string;
-  crimeType: string;
   fatherName: string;
   district: string;
-  thana: string;
+  /** Permanent or present address police station ID */
+  addressPoliceStation: string;
+  /** Which address to match: any, permanent, or present */
+  addressType: string;
   aadhaarNumber: string;
-  firNumber: string;
-  caseNumber: string;
+  /** Crime type on a criminal history row */
+  historyCrimeType: string;
+  historyYear: string;
+  historyCasePS: string;
   sectionAct: string;
-  historyPoliceStation: string;
-  court: string;
-  judgeName: string;
   vehicleNumber: string;
   identificationMarks: string;
   associateName: string;
@@ -27,17 +28,15 @@ export const emptySearchFilters = (): CriminalSearchFilters => ({
   name: "",
   pid: "",
   mobileNumber: "",
-  crimeType: "all",
   fatherName: "",
   district: "",
-  thana: "",
+  addressPoliceStation: "",
+  addressType: "any",
   aadhaarNumber: "",
-  firNumber: "",
-  caseNumber: "",
+  historyCrimeType: "all",
+  historyYear: "",
+  historyCasePS: "",
   sectionAct: "",
-  historyPoliceStation: "",
-  court: "",
-  judgeName: "",
   vehicleNumber: "",
   identificationMarks: "",
   associateName: "",
@@ -56,7 +55,7 @@ export function filtersToSearchParams(
     limit: String(limit),
   });
   Object.entries(filters).forEach(([k, v]) => {
-    if (v && v !== "all") params.set(k, v);
+    if (v && v !== "all" && v !== "any") params.set(k, v);
   });
   return params;
 }

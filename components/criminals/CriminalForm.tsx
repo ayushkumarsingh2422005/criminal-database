@@ -5,9 +5,9 @@ import { Input } from "@/components/ui/Input";
 import { Select } from "@/components/ui/Select";
 import { Button } from "@/components/ui/Button";
 import { FieldLabel, SectionTitle } from "@/components/ui/FieldLabel";
-import { CRIMINAL_FIELDS, PHOTO_KEYS } from "@/lib/criminal-fields";
+import { CRIMINAL_FIELDS, PHOTO_KEYS, fieldLabel } from "@/lib/criminal-fields";
 import { toDateInputValue } from "@/lib/date-utils";
-import { useCaseTypes, usePoliceStations } from "@/lib/hooks/use-lookups";
+import { usePoliceStations } from "@/lib/hooks/use-lookups";
 import { useAppSession } from "@/components/session/SessionProvider";
 import type { CriminalRecord } from "@/lib/criminal-mapper";
 import { PhotoUpload } from "./PhotoUpload";
@@ -32,7 +32,6 @@ export function CriminalForm({
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [pid, setPid] = useState(initial?.pid ?? "");
-  const [crimeTypes, setCrimeTypes] = useState<string[]>(initial?.crimeTypes ?? []);
   const [photos, setPhotos] = useState(initial?.photos ?? {});
   const [aadhaarVerified, setAadhaarVerified] = useState(initial?.aadhaarVerified ?? false);
   const [permanent, setPermanent] = useState({
@@ -49,18 +48,11 @@ export function CriminalForm({
   });
   const [extended, setExtended] = useState(() => initialExtended(initial));
   const { items: policeStations, loading: psLoading } = usePoliceStations();
-  const { items: caseTypes, loading: ctLoading } = useCaseTypes();
 
   const psOptions = [
     { value: "", label: "Select police station / पुलिस स्टेशन चुनें" },
     ...policeStations.map((s) => ({ value: s.id, label: s.name })),
   ];
-
-  function toggleCrimeType(value: string) {
-    setCrimeTypes((prev) =>
-      prev.includes(value) ? prev.filter((v) => v !== value) : [...prev, value]
-    );
-  }
 
   async function handleSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -71,7 +63,6 @@ export function CriminalForm({
     try {
       await onSubmit({
         pid: fd.get("pid"),
-        crimeTypes,
         name: fd.get("name"),
         nameAliases: fd.get("nameAliases"),
         dateOfBirth: fd.get("dateOfBirth"),
@@ -106,33 +97,6 @@ export function CriminalForm({
       <section className="space-y-6 pr-1">
 
       <section className="space-y-3">
-        <SectionTitle
-          en={CRIMINAL_FIELDS.crimeTypes.en}
-          hi={CRIMINAL_FIELDS.crimeTypes.hi}
-        />
-        {ctLoading ? (
-          <p className="text-sm text-[var(--color-muted)]">Loading crime types...</p>
-        ) : caseTypes.length === 0 ? (
-          <p className="text-sm text-amber-600">
-            No crime types in database. Add them under Admin Control → Case Type Management.
-          </p>
-        ) : (
-          <fieldset className="grid gap-2 sm:grid-cols-2">
-            {caseTypes.map((opt) => (
-              <label
-                key={opt.id}
-                className="flex cursor-pointer items-center gap-2 rounded-lg border border-[var(--color-border)] px-3 py-2 text-sm hover:bg-slate-50"
-              >
-                <input
-                  type="checkbox"
-                  checked={crimeTypes.includes(opt.name)}
-                  onChange={() => toggleCrimeType(opt.name)}
-                />
-                <span>{opt.name}</span>
-              </label>
-            ))}
-          </fieldset>
-        )}
         <Input
           label={`${CRIMINAL_FIELDS.pid.en} (${CRIMINAL_FIELDS.pid.hi})`}
           name="pid"
@@ -217,8 +181,8 @@ export function CriminalForm({
           {isScopedAdmin ? (
             <section className="flex flex-col gap-1 sm:col-span-2">
               <FieldLabel
-                en={CRIMINAL_FIELDS.casePS.en}
-                hi={CRIMINAL_FIELDS.casePS.hi}
+                en={CRIMINAL_FIELDS.addressPoliceStation.en}
+                hi={CRIMINAL_FIELDS.addressPoliceStation.hi}
               />
               <p className="rounded-lg border border-[var(--color-border)] bg-slate-50 px-3 py-2 text-sm font-medium text-slate-800">
                 {session.policeStationName ?? "Your allotted PS"}
@@ -226,7 +190,7 @@ export function CriminalForm({
             </section>
           ) : (
             <Select
-              label={`${CRIMINAL_FIELDS.casePS.en} (${CRIMINAL_FIELDS.casePS.hi})`}
+              label={fieldLabel("addressPoliceStation")}
               name="permanentPoliceStationId"
               value={permanent.policeStationId}
               onChange={(e) =>
@@ -278,7 +242,7 @@ export function CriminalForm({
         <section className="grid gap-4 sm:grid-cols-2">
           {!isScopedAdmin && (
             <Select
-              label={`${CRIMINAL_FIELDS.casePS.en} (${CRIMINAL_FIELDS.casePS.hi})`}
+              label={fieldLabel("addressPoliceStation")}
               name="presentPoliceStationId"
               value={present.policeStationId}
               onChange={(e) =>

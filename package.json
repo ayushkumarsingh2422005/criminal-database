@@ -6,7 +6,8 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "migrate:history": "npx tsx scripts/migrate-criminal-history.ts"
   },
   "dependencies": {
     "@fontsource/noto-sans-devanagari": "^5.2.8",

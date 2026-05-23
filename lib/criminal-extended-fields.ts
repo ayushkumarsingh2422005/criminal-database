@@ -1,8 +1,9 @@
 export const EXTENDED_FIELDS = {
   criminalHistory: { en: "Criminal History", hi: "आपराधिक इतिहास" },
   sNo: { en: "S.No.", hi: "क्र." },
-  caseNumber: { en: "Case #", hi: "केस नं." },
-  firNumber: { en: "FIR No.", hi: "प्राथमिकी नं." },
+  year: { en: "Year", hi: "वर्ष" },
+  crimeType: { en: "Crime Type", hi: "अपराध का प्रकार" },
+  casePoliceStation: { en: "Case Police Station", hi: "केस पुलिस स्टेशन" },
   firDate: { en: "Date of FIR", hi: "प्राथमिकी की तिथि" },
   sectionAct: { en: "Section / Act", hi: "धारा / अधिनियम" },
   vehicles: { en: "Vehicle Details", hi: "वाहन की विवरणी" },

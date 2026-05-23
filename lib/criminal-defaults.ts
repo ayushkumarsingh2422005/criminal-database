@@ -17,13 +17,11 @@ export const emptyPhysical = (): PhysicalDescription => ({
 
 export const emptyHistory = (): CriminalHistoryRecord => ({
   sNo: 1,
-  caseNumber: "",
-  firNumber: "",
+  year: "",
+  crimeType: "",
+  casePoliceStationId: "",
   firDate: "",
   sectionAct: "",
-  policeStationId: "",
-  judgeName: "",
-  court: "",
 });
 
 export const emptyVehicle = (): CriminalVehicle => ({

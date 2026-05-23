@@ -16,21 +16,18 @@ import {
 
 export type CriminalHistoryRecord = {
   sNo?: number;
-  caseNumber?: string;
-  firNumber?: string;
+  year?: string;
+  crimeType?: string;
+  casePoliceStationId?: string;
+  /** Resolved from master list at read time */
+  casePoliceStation?: string;
   firDate?: string;
   sectionAct?: string;
-  policeStationId?: string;
-  /** Resolved from master list at read time — updates when station is renamed. */
-  policeStation?: string;
-  judgeName?: string;
-  court?: string;
 };
 
 export interface CriminalRecord {
   id: string;
   pid: string;
-  crimeTypes: string[];
   name: string;
   nameAliases?: string;
   dateOfBirth?: string;
@@ -84,16 +81,14 @@ function mapHistory(
   rows: Criminal["criminalHistory"]
 ): CriminalHistoryRecord[] {
   return (rows ?? []).map((row) => {
-    const id = row.policeStationId?.toString();
+    const id = row.casePoliceStationId?.toString();
     return {
       sNo: row.sNo,
-      caseNumber: row.caseNumber,
-      firNumber: row.firNumber,
+      year: row.year,
+      crimeType: row.crimeType,
+      ...(id ? { casePoliceStationId: id } : {}),
       firDate: row.firDate,
       sectionAct: row.sectionAct,
-      ...(id ? { policeStationId: id } : {}),
-      judgeName: row.judgeName,
-      court: row.court,
     };
   });
 }
@@ -104,7 +99,6 @@ export function normalizeCriminal(doc: Record<string, unknown>): Criminal {
   return {
     ...(base as Criminal),
     photos: base.photos ?? {},
-    crimeTypes: base.crimeTypes ?? [],
     ...ext,
   };
 }
@@ -114,7 +108,6 @@ export function toCriminalRecord(c: Criminal): CriminalRecord {
   return {
     id: c._id!.toString(),
     pid: n.pid,
-    crimeTypes: n.crimeTypes ?? [],
     name: n.name,
     nameAliases: n.nameAliases,
     dateOfBirth: n.dateOfBirth,
@@ -161,11 +154,6 @@ export async function parseCriminalBody(
 
   return {
     pid: String(body.pid ?? "").trim(),
-    crimeTypes: Array.isArray(body.crimeTypes)
-      ? body.crimeTypes.map(String)
-      : body.crimeTypes
-        ? [String(body.crimeTypes)]
-        : [],
     name: String(body.name ?? "").trim(),
     nameAliases: body.nameAliases ? String(body.nameAliases).trim() : undefined,
     dateOfBirth: body.dateOfBirth ? String(body.dateOfBirth).trim() : undefined,

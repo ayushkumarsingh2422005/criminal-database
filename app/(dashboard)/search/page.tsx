@@ -105,15 +105,6 @@ export default function SearchPage() {
                 value={filters.mobileNumber}
                 onChange={set("mobileNumber")}
               />
-              <Select
-                label={fieldLabel("crimeTypes")}
-                value={filters.crimeType}
-                onChange={set("crimeType")}
-                options={[
-                  { value: "all", label: "All / सभी" },
-                  ...caseTypes.map((c) => ({ value: c.name, label: c.name })),
-                ]}
-              />
               <Input
                 label={fieldLabel("fatherName")}
                 value={filters.fatherName}
@@ -125,15 +116,27 @@ export default function SearchPage() {
                 onChange={set("aadhaarNumber")}
               />
               {!isScopedAdmin && (
-                <Select
-                  label={fieldLabel("casePS")}
-                  value={filters.thana}
-                  onChange={set("thana")}
-                  options={[
-                    { value: "", label: "All police stations / सभी थाना" },
-                    ...policeStations.map((s) => ({ value: s.id, label: s.name })),
-                  ]}
-                />
+                <>
+                  <Select
+                    label={fieldLabel("addressPoliceStation")}
+                    value={filters.addressPoliceStation}
+                    onChange={set("addressPoliceStation")}
+                    options={[
+                      { value: "", label: "All police stations / सभी थाना" },
+                      ...policeStations.map((s) => ({ value: s.id, label: s.name })),
+                    ]}
+                  />
+                  <Select
+                    label={fieldLabel("addressType")}
+                    value={filters.addressType}
+                    onChange={set("addressType")}
+                    options={[
+                      { value: "any", label: "Permanent or present / स्थायी या वर्तमान" },
+                      { value: "permanent", label: "Permanent address only / केवल स्थायी पता" },
+                      { value: "present", label: "Present address only / केवल वर्तमान पता" },
+                    ]}
+                  />
+                </>
               )}
               <Input
                 label={fieldLabel("district")}
@@ -149,16 +152,20 @@ export default function SearchPage() {
               hi={EXTENDED_FIELDS.criminalHistory.hi}
             />
             <section className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-              <Input
-                label={extLabel("firNumber")}
-                value={filters.firNumber}
-                onChange={set("firNumber")}
-                placeholder="GONDA-137/22"
+              <Select
+                label={extLabel("crimeType")}
+                value={filters.historyCrimeType}
+                onChange={set("historyCrimeType")}
+                options={[
+                  { value: "all", label: "All / सभी" },
+                  ...caseTypes.map((c) => ({ value: c.name, label: c.name })),
+                ]}
               />
               <Input
-                label={extLabel("caseNumber")}
-                value={filters.caseNumber}
-                onChange={set("caseNumber")}
+                label={extLabel("year")}
+                value={filters.historyYear}
+                onChange={set("historyYear")}
+                placeholder="2024"
               />
               <Input
                 label={extLabel("sectionAct")}
@@ -168,25 +175,15 @@ export default function SearchPage() {
               />
               {!isScopedAdmin && (
                 <Select
-                  label="History PS / प्राथमिकी थाना"
-                  value={filters.historyPoliceStation}
-                  onChange={set("historyPoliceStation")}
+                  label={extLabel("casePoliceStation")}
+                  value={filters.historyCasePS}
+                  onChange={set("historyCasePS")}
                   options={[
                     { value: "", label: "All / सभी" },
                     ...policeStations.map((s) => ({ value: s.id, label: s.name })),
                   ]}
                 />
               )}
-              <Input
-                label="Judge Name / न्यायाधीश"
-                value={filters.judgeName}
-                onChange={set("judgeName")}
-              />
-              <Input
-                label="Court / न्यायालय"
-                value={filters.court}
-                onChange={set("court")}
-              />
             </section>
           </section>
 

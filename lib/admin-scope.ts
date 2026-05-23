@@ -40,7 +40,9 @@ export function criminalBelongsToPoliceStation(
   if (matches(criminal.presentAddress?.policeStationId)) return true;
 
   for (const row of criminal.criminalHistory ?? []) {
-    if (matches(row.policeStationId)) return true;
+    if (matches(row.casePoliceStationId)) return true;
+    const legacy = row as { policeStationId?: ObjectId };
+    if (matches(legacy.policeStationId)) return true;
   }
 
   return false;
@@ -53,6 +55,7 @@ export function buildPoliceStationScopeFilter(
     $or: [
       { "permanentAddress.policeStationId": policeStationId },
       { "presentAddress.policeStationId": policeStationId },
+      { "criminalHistory.casePoliceStationId": policeStationId },
       { "criminalHistory.policeStationId": policeStationId },
     ],
   };
@@ -105,7 +108,7 @@ export function applyScopedAdminWrite(
   const history: CriminalHistoryEntry[] = (parsed.criminalHistory ?? []).map(
     (row) => ({
       ...row,
-      policeStationId,
+      casePoliceStationId: policeStationId,
     })
   );
 

@@ -33,7 +33,14 @@ export const CRIMINAL_FIELDS = {
   mobileNumber: { en: "Mobile Number", hi: "मोबाइल नंबर" },
   permanentAddress: { en: "Permanent Address", hi: "स्थायी पता" },
   presentAddress: { en: "Present Address", hi: "वर्तमान पता" },
-  casePS: { en: "Case PS (Police Station)", hi: "केस पुलिस स्टेशन / थाना" },
+  addressPoliceStation: {
+    en: "Address Police Station",
+    hi: "पता पुलिस स्टेशन",
+  },
+  addressType: {
+    en: "Address Type",
+    hi: "पता का प्रकार",
+  },
   thana: { en: "Police Station (PS)", hi: "पुलिस स्टेशन / थाना" },
   district: { en: "District (Zilla)", hi: "जिला" },
   livelihoodMeans: {

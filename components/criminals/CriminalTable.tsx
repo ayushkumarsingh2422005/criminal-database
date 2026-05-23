@@ -11,6 +11,7 @@ import {
 } from "@/components/ui/DataTable";
 import { ActionIcons, IconButton } from "@/components/ui/IconButton";
 import { IconEye, IconPencil, IconTrash } from "@/components/ui/icons";
+import { aggregateCrimeTypes } from "@/lib/criminal-history-utils";
 import { fieldLabel } from "@/lib/criminal-fields";
 import type { CriminalRecord } from "@/lib/criminal-mapper";
 import { DownloadPdfButton } from "./DownloadPdfButton";
@@ -55,8 +56,7 @@ export function CriminalTable({
         <DataTableHeaderCell>{fieldLabel("name")}</DataTableHeaderCell>
         <DataTableHeaderCell>{fieldLabel("crimeTypes")}</DataTableHeaderCell>
         <DataTableHeaderCell>{fieldLabel("mobileNumber")}</DataTableHeaderCell>
-        <DataTableHeaderCell>{fieldLabel("casePS")}</DataTableHeaderCell>
-        <DataTableHeaderCell>{fieldLabel("fatherName")}</DataTableHeaderCell>
+        <DataTableHeaderCell>{fieldLabel("addressPoliceStation")}</DataTableHeaderCell>
         <DataTableHeaderCell className="w-[1%] whitespace-nowrap">
           <span className="sr-only">Actions</span>
         </DataTableHeaderCell>
@@ -82,22 +82,45 @@ export function CriminalTable({
                   href={`/criminals/${c.id}`}
                   className="text-[var(--color-primary)] hover:underline"
                 >
-                  {c.name}
+                  <span className="block">{c.name}</span>
+                  {c.fatherName ? (
+                    <span className="mt-0.5 block text-xs font-normal text-[var(--color-muted)]">
+                      S/O {c.fatherName}
+                    </span>
+                  ) : null}
                 </Link>
               ) : (
-                c.name
+                <>
+                  <span className="block">{c.name}</span>
+                  {c.fatherName ? (
+                    <span className="mt-0.5 block text-xs font-normal text-[var(--color-muted)]">
+                      S/O {c.fatherName}
+                    </span>
+                  ) : null}
+                </>
               )}
             </DataTableCell>
             <DataTableCell>
               <span className="line-clamp-2 text-xs">
-                {c.crimeTypes.join(", ") || "—"}
+                {aggregateCrimeTypes(c.criminalHistory).join(", ") || "—"}
               </span>
             </DataTableCell>
             <DataTableCell>{c.mobileNumber ?? "—"}</DataTableCell>
             <DataTableCell>
-              {c.permanentAddress?.thana ?? c.presentAddress?.thana ?? "—"}
+              {(() => {
+                const perm = c.permanentAddress?.thana;
+                const pres = c.presentAddress?.thana;
+                if (perm && pres && perm !== pres) {
+                  return (
+                    <span className="text-xs leading-snug">
+                      <span className="block">Perm: {perm}</span>
+                      <span className="block text-[var(--color-muted)]">Pres: {pres}</span>
+                    </span>
+                  );
+                }
+                return perm ?? pres ?? "—";
+              })()}
             </DataTableCell>
-            <DataTableCell>{c.fatherName ?? "—"}</DataTableCell>
             <DataTableCell>
               <ActionIcons>
                 {linkToDetail ? (

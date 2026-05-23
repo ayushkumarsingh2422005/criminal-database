@@ -11,6 +11,7 @@ import { Badge } from "@/components/ui/Badge";
 import { CRIMINAL_FIELDS, PHOTO_KEYS, photoLabel } from "@/lib/criminal-fields";
 import { EXTENDED_FIELDS } from "@/lib/criminal-extended-fields";
 import { formatDateDisplay } from "@/lib/date-utils";
+import { aggregateCrimeTypes } from "@/lib/criminal-history-utils";
 import type { CriminalHistoryRecord, CriminalRecord } from "@/lib/criminal-mapper";
 import type { BailerInfo, CriminalVehicle, RelatedPerson } from "@/models/Criminal";
 import { DownloadPdfButton } from "./DownloadPdfButton";
@@ -84,26 +85,22 @@ function HistoryTable({ rows }: { rows: CriminalHistoryRecord[] }) {
         <thead>
           <tr className="border-b border-[var(--color-border)] bg-slate-50 text-left text-xs font-semibold uppercase tracking-wide text-slate-600">
             <th className="px-3 py-2">{EXTENDED_FIELDS.sNo.en}</th>
-            <th className="px-3 py-2">{EXTENDED_FIELDS.caseNumber.en}</th>
-            <th className="px-3 py-2">{EXTENDED_FIELDS.firNumber.en}</th>
+            <th className="px-3 py-2">{EXTENDED_FIELDS.year.en}</th>
+            <th className="px-3 py-2">{EXTENDED_FIELDS.crimeType.en}</th>
+            <th className="px-3 py-2">{EXTENDED_FIELDS.casePoliceStation.en}</th>
             <th className="px-3 py-2">{EXTENDED_FIELDS.firDate.en}</th>
             <th className="px-3 py-2">{EXTENDED_FIELDS.sectionAct.en}</th>
-            <th className="px-3 py-2">PS</th>
-            <th className="px-3 py-2">Judge</th>
-            <th className="px-3 py-2">Court</th>
           </tr>
         </thead>
         <tbody>
           {rows.map((row, i) => (
             <tr key={i} className="border-b border-[var(--color-border)] align-top">
               <td className="px-3 py-2">{row.sNo ?? i + 1}</td>
-              <td className="px-3 py-2">{row.caseNumber || "—"}</td>
-              <td className="px-3 py-2">{row.firNumber || "—"}</td>
+              <td className="px-3 py-2">{row.year || "—"}</td>
+              <td className="px-3 py-2">{row.crimeType || "—"}</td>
+              <td className="px-3 py-2">{row.casePoliceStation || "—"}</td>
               <td className="px-3 py-2">{formatDateDisplay(row.firDate) || "—"}</td>
               <td className="px-3 py-2">{row.sectionAct || "—"}</td>
-              <td className="px-3 py-2">{row.policeStation || "—"}</td>
-              <td className="px-3 py-2">{row.judgeName || "—"}</td>
-              <td className="px-3 py-2">{row.court || "—"}</td>
             </tr>
           ))}
         </tbody>
@@ -224,7 +221,8 @@ export function CriminalDetailView({ criminal }: { criminal: CriminalRecord }) {
     criminal.permanentAddress?.district ??
     criminal.presentAddress?.district ??
     "—";
-  const crimeSummary = criminal.crimeTypes.join(" • ") || "—";
+  const crimeTypes = aggregateCrimeTypes(criminal.criminalHistory);
+  const crimeSummary = crimeTypes.join(" • ") || "—";
 
   return (
     <section className="w-full space-y-6">
@@ -251,7 +249,7 @@ export function CriminalDetailView({ criminal }: { criminal: CriminalRecord }) {
             {crimeSummary !== "—" ? ` • ${crimeSummary}` : ""}
           </p>
           <section className="mt-3 flex flex-wrap gap-2">
-            {criminal.crimeTypes.map((t) => (
+            {crimeTypes.map((t) => (
               <Badge key={t} variant="warning">
                 {t}
               </Badge>
@@ -285,7 +283,7 @@ export function CriminalDetailView({ criminal }: { criminal: CriminalRecord }) {
           label="Criminal History"
           value={String(criminal.criminalHistory.length)}
         />
-        <StatBox label="Crime Types" value={String(criminal.crimeTypes.length)} />
+        <StatBox label="Crime Types" value={String(crimeTypes.length)} />
         <StatBox label="Mobile" value={criminal.mobileNumber ?? "—"} />
         <StatBox label="District" value={district} />
       </section>
@@ -328,7 +326,7 @@ export function CriminalDetailView({ criminal }: { criminal: CriminalRecord }) {
             <SummaryRow
               labelEn={CRIMINAL_FIELDS.crimeTypes.en}
               labelHi={CRIMINAL_FIELDS.crimeTypes.hi}
-              value={criminal.crimeTypes.join(", ")}
+              value={crimeTypes.join(", ")}
             />
             <SummaryRow
               labelEn={CRIMINAL_FIELDS.fatherName.en}

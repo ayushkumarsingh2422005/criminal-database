@@ -17,14 +17,12 @@ export interface CriminalPhotos {
 
 export interface CriminalHistoryEntry {
   sNo?: number;
-  caseNumber?: string;
-  firNumber?: string;
+  year?: string;
+  crimeType?: string;
+  /** Case police station — reference to `police_stations` (name resolved at read time). */
+  casePoliceStationId?: ObjectId;
   firDate?: string;
   sectionAct?: string;
-  /** Reference to `police_stations` collection — name resolved at read time. */
-  policeStationId?: ObjectId;
-  judgeName?: string;
-  court?: string;
 }
 
 export interface CriminalVehicle {
@@ -68,7 +66,6 @@ export interface VerificationInfo {
 export interface Criminal {
   _id?: ObjectId;
   pid: string;
-  crimeTypes: string[];
   name: string;
   nameAliases?: string;
   dateOfBirth?: string;
