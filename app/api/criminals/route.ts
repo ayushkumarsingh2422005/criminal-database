@@ -4,10 +4,13 @@ import { Criminal, CriminalModel } from "@/models/Criminal";
 import { parseCriminalBody, toCriminalRecord } from "@/lib/criminal-mapper";
 import { buildCriminalFilter } from "@/lib/criminal-search";
 import { enrichCriminalsFromDocs } from "@/lib/police-station-ref";
+import { enrichCriminalRecords, enrichCriminalRecord } from "@/lib/enrich-criminal-records";
 import {
   applySessionWriteScope,
   getScopedPoliceStationId,
 } from "@/lib/admin-scope";
+import { applyVerificationWritePolicy } from "@/lib/verification-write";
+import { DEFAULT_VERIFICATION_SEED_DATE } from "@/lib/verification";
 
 export async function GET(request: NextRequest) {
   try {
@@ -28,9 +31,10 @@ export async function GET(request: NextRequest) {
     ]);
 
     const records = await enrichCriminalsFromDocs(items, toCriminalRecord);
+    const enriched = await enrichCriminalRecords(records);
 
     return jsonOk({
-      items: records,
+      items: enriched,
       total,
       page,
       limit,
@@ -47,6 +51,7 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     let parsed = await parseCriminalBody(body);
     parsed = await applySessionWriteScope(session, parsed);
+    parsed = applyVerificationWritePolicy(session, null, parsed, body);
 
     if (!parsed.pid || !parsed.name) {
       return jsonOk({ error: "PID and Name are required" }, 400);
@@ -59,6 +64,14 @@ export async function POST(request: NextRequest) {
 
     const criminal: Criminal = {
       ...parsed,
+      verificationHistory: parsed.verificationHistory?.length
+        ? parsed.verificationHistory
+        : [
+            {
+              verifiedAt: DEFAULT_VERIFICATION_SEED_DATE,
+              officerName: "System (initial seed)",
+            },
+          ],
       createdAt: new Date(),
       updatedAt: new Date(),
       createdBy: session.sub,
@@ -69,7 +82,7 @@ export async function POST(request: NextRequest) {
       [inserted!],
       toCriminalRecord
     );
-    return jsonOk(record, 201);
+    return jsonOk(await enrichCriminalRecord(record), 201);
   } catch (error) {
     return jsonError(error);
   }

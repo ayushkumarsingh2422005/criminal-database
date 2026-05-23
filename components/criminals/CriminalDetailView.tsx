@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
@@ -14,6 +14,9 @@ import { formatDateDisplay } from "@/lib/date-utils";
 import { aggregateCrimeTypes } from "@/lib/criminal-history-utils";
 import type { CriminalHistoryRecord, CriminalRecord } from "@/lib/criminal-mapper";
 import type { BailerInfo, CriminalVehicle, RelatedPerson } from "@/models/Criminal";
+import { VerificationStatusBadge } from "@/components/criminals/VerificationStatusBadge";
+import { VerificationPanel } from "@/components/criminals/VerificationPanel";
+import { VerifyCriminalButton } from "@/components/criminals/VerifyCriminalButton";
 import { DownloadPdfButton } from "./DownloadPdfButton";
 
 const TABS = [
@@ -58,9 +61,14 @@ function StatBox({ label, value }: { label: string; value: string }) {
   );
 }
 
-function formatAddress(addr?: { line: string; thana?: string; district?: string }) {
+function formatAddress(addr?: { line: string; thana?: string; district?: string; state?: string }) {
   if (!addr) return "";
-  return [addr.line, addr.thana && `Thana: ${addr.thana}`, addr.district && `District: ${addr.district}`]
+  return [
+    addr.line,
+    addr.thana && `Thana: ${addr.thana}`,
+    addr.district && `District: ${addr.district}`,
+    addr.state && `State: ${addr.state}`,
+  ]
     .filter(Boolean)
     .join("\n");
 }
@@ -211,9 +219,18 @@ function BailersTable({ rows }: { rows: BailerInfo[] }) {
   );
 }
 
-export function CriminalDetailView({ criminal }: { criminal: CriminalRecord }) {
+export function CriminalDetailView({ criminal: initialCriminal }: { criminal: CriminalRecord }) {
   const router = useRouter();
+  const [criminal, setCriminal] = useState(initialCriminal);
   const [tab, setTab] = useState<TabId>("overview");
+
+  useEffect(() => {
+    setCriminal(initialCriminal);
+  }, [initialCriminal]);
+
+  function handleVerified(record: CriminalRecord) {
+    setCriminal(record);
+  }
 
   const ps =
     criminal.permanentAddress?.thana ?? criminal.presentAddress?.thana ?? "—";
@@ -257,6 +274,9 @@ export function CriminalDetailView({ criminal }: { criminal: CriminalRecord }) {
             {criminal.aadhaarVerified && (
               <Badge variant="success">Aadhaar Verified / आधार सत्यापित</Badge>
             )}
+            {criminal.verificationStatus ? (
+              <VerificationStatusBadge status={criminal.verificationStatus} />
+            ) : null}
             <Badge variant="default">PID {criminal.pid}</Badge>
           </section>
         </section>
@@ -572,20 +592,21 @@ export function CriminalDetailView({ criminal }: { criminal: CriminalRecord }) {
               </p>
             </Card>
             <Card title="Verification" subtitle="सत्यापन">
-              <SummaryRow
-                labelEn={EXTENDED_FIELDS.verificationDate.en}
-                labelHi={EXTENDED_FIELDS.verificationDate.hi}
-                value={formatDateDisplay(criminal.verification?.verificationDate)}
-              />
-              <SummaryRow
-                labelEn={EXTENDED_FIELDS.verifyingOfficer.en}
-                labelHi={EXTENDED_FIELDS.verifyingOfficer.hi}
-                value={criminal.verification?.verifyingOfficer}
+              <VerificationPanel
+                criminal={criminal}
+                showVerifyButton={false}
+                onVerified={handleVerified}
               />
             </Card>
           </section>
         </section>
       )}
+
+      <VerifyCriminalButton
+        variant="fab"
+        criminalId={criminal.id}
+        onVerified={handleVerified}
+      />
     </section>
   );
 }

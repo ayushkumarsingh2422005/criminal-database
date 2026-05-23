@@ -6,6 +6,12 @@ import { Select } from "@/components/ui/Select";
 import { Button } from "@/components/ui/Button";
 import { FieldLabel, SectionTitle } from "@/components/ui/FieldLabel";
 import { CRIMINAL_FIELDS, PHOTO_KEYS, fieldLabel } from "@/lib/criminal-fields";
+import { districtSelectOptions, normalizeDistrictValue } from "@/lib/jharkhand-districts";
+import {
+  DEFAULT_STATE,
+  normalizeStateValue,
+  stateSelectOptions,
+} from "@/lib/indian-states";
 import { toDateInputValue } from "@/lib/date-utils";
 import { usePoliceStations } from "@/lib/hooks/use-lookups";
 import { useAppSession } from "@/components/session/SessionProvider";
@@ -26,25 +32,33 @@ export function CriminalForm({
   onCancel: () => void;
 }) {
   const session = useAppSession();
+  const isSuperAdmin = session.role === "superadmin";
   const scopedPsId = session.policeStationId ?? "";
   const isScopedAdmin = session.role === "admin" && !!scopedPsId;
+  const [verificationHistory, setVerificationHistory] = useState(
+    initial?.verificationHistory ?? []
+  );
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [pid, setPid] = useState(initial?.pid ?? "");
   const [photos, setPhotos] = useState(initial?.photos ?? {});
   const [aadhaarVerified, setAadhaarVerified] = useState(initial?.aadhaarVerified ?? false);
+  const districtOptions = districtSelectOptions();
+  const stateOptions = stateSelectOptions();
   const [permanent, setPermanent] = useState({
     line: initial?.permanentAddress?.line ?? "",
     policeStationId:
       initial?.permanentAddress?.policeStationId ?? (isScopedAdmin ? scopedPsId : ""),
-    district: initial?.permanentAddress?.district ?? "",
+    district: normalizeDistrictValue(initial?.permanentAddress?.district),
+    state: normalizeStateValue(initial?.permanentAddress?.state) || DEFAULT_STATE,
   });
   const [present, setPresent] = useState({
     line: initial?.presentAddress?.line ?? "",
     policeStationId:
       initial?.presentAddress?.policeStationId ?? (isScopedAdmin ? scopedPsId : ""),
-    district: initial?.presentAddress?.district ?? "",
+    district: normalizeDistrictValue(initial?.presentAddress?.district),
+    state: normalizeStateValue(initial?.presentAddress?.state) || DEFAULT_STATE,
   });
   const [extended, setExtended] = useState(() => initialExtended(initial));
   const { items: policeStations, loading: psLoading } = usePoliceStations();
@@ -77,6 +91,7 @@ export function CriminalForm({
         livelihoodVerification: fd.get("livelihoodVerification"),
         photos,
         ...extended,
+        ...(isSuperAdmin ? { verificationHistory } : {}),
       });
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to save");
@@ -199,13 +214,23 @@ export function CriminalForm({
               options={psOptions}
             />
           )}
-          <Input
-            label={`${CRIMINAL_FIELDS.district.en} (${CRIMINAL_FIELDS.district.hi})`}
+          <Select
+            label={fieldLabel("district")}
             name="permanentDistrict"
             value={permanent.district}
             onChange={(e) =>
               setPermanent((p) => ({ ...p, district: e.target.value }))
             }
+            options={districtOptions}
+          />
+          <Select
+            label={fieldLabel("state")}
+            name="permanentState"
+            value={permanent.state}
+            onChange={(e) =>
+              setPermanent((p) => ({ ...p, state: e.target.value }))
+            }
+            options={stateOptions}
           />
         </section>
       </section>
@@ -251,13 +276,23 @@ export function CriminalForm({
               options={psOptions}
             />
           )}
-          <Input
-            label={`${CRIMINAL_FIELDS.district.en} (${CRIMINAL_FIELDS.district.hi})`}
+          <Select
+            label={fieldLabel("district")}
             name="presentDistrict"
             value={present.district}
             onChange={(e) =>
               setPresent((p) => ({ ...p, district: e.target.value }))
             }
+            options={districtOptions}
+          />
+          <Select
+            label={fieldLabel("state")}
+            name="presentState"
+            value={present.state}
+            onChange={(e) =>
+              setPresent((p) => ({ ...p, state: e.target.value }))
+            }
+            options={stateOptions}
           />
         </section>
       </section>
@@ -311,6 +346,9 @@ export function CriminalForm({
         value={extended}
         onChange={setExtended}
         policeStationOptions={psOptions}
+        isSuperAdmin={isSuperAdmin}
+        verificationHistory={verificationHistory}
+        onVerificationHistoryChange={setVerificationHistory}
       />
       </section>
 

@@ -64,7 +64,6 @@ export function withExtendedDefaults(
   | "gangMembers"
   | "bailers"
   | "confessionStatement"
-  | "verification"
 > {
   return {
     criminalHistory: partial.criminalHistory ?? [],
@@ -74,9 +73,5 @@ export function withExtendedDefaults(
     gangMembers: partial.gangMembers ?? [],
     bailers: partial.bailers ?? [],
     confessionStatement: partial.confessionStatement ?? "",
-    verification: partial.verification ?? {
-      verificationDate: "",
-      verifyingOfficer: "",
-    },
   };
 }

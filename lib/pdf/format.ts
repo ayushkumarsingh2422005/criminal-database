@@ -34,9 +34,10 @@ export function formatAddressInline(addr?: {
   line?: string;
   thana?: string;
   district?: string;
+  state?: string;
 }): string {
-  if (!addr?.line && !addr?.thana && !addr?.district) return "";
-  return [addr.line, addr.thana && `थाना-${addr.thana}`, addr.district]
+  if (!addr?.line && !addr?.thana && !addr?.district && !addr?.state) return "";
+  return [addr.line, addr.thana && `थाना-${addr.thana}`, addr.district, addr.state]
     .filter(Boolean)
     .join(", ");
 }

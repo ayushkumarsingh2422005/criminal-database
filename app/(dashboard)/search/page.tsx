@@ -17,6 +17,7 @@ import {
   filtersToSearchParams,
   type CriminalSearchFilters,
 } from "@/lib/criminal-search-filters";
+import { districtSelectOptions } from "@/lib/jharkhand-districts";
 import { useCaseTypes, usePoliceStations } from "@/lib/hooks/use-lookups";
 import { useAppSession } from "@/components/session/SessionProvider";
 import type { CriminalRecord } from "@/lib/criminal-mapper";
@@ -33,6 +34,7 @@ export default function SearchPage() {
   const [limit, setLimit] = useState(10);
   const { items: caseTypes } = useCaseTypes();
   const { items: policeStations } = usePoliceStations();
+  const districtOptions = districtSelectOptions("All districts / सभी जिले");
 
   const set =
     (key: keyof CriminalSearchFilters) =>
@@ -138,10 +140,11 @@ export default function SearchPage() {
                   />
                 </>
               )}
-              <Input
+              <Select
                 label={fieldLabel("district")}
                 value={filters.district}
                 onChange={set("district")}
+                options={districtOptions}
               />
             </section>
           </section>

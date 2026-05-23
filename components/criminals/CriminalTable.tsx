@@ -14,6 +14,7 @@ import { IconEye, IconPencil, IconTrash } from "@/components/ui/icons";
 import { aggregateCrimeTypes } from "@/lib/criminal-history-utils";
 import { fieldLabel } from "@/lib/criminal-fields";
 import type { CriminalRecord } from "@/lib/criminal-mapper";
+import { VerificationStatusCell } from "@/components/criminals/VerificationStatusCell";
 import { DownloadPdfButton } from "./DownloadPdfButton";
 
 export function CriminalTable({
@@ -57,6 +58,7 @@ export function CriminalTable({
         <DataTableHeaderCell>{fieldLabel("crimeTypes")}</DataTableHeaderCell>
         <DataTableHeaderCell>{fieldLabel("mobileNumber")}</DataTableHeaderCell>
         <DataTableHeaderCell>{fieldLabel("addressPoliceStation")}</DataTableHeaderCell>
+        <DataTableHeaderCell>Verification</DataTableHeaderCell>
         <DataTableHeaderCell className="w-[1%] whitespace-nowrap">
           <span className="sr-only">Actions</span>
         </DataTableHeaderCell>
@@ -120,6 +122,9 @@ export function CriminalTable({
                 }
                 return perm ?? pres ?? "—";
               })()}
+            </DataTableCell>
+            <DataTableCell>
+              <VerificationStatusCell criminal={c} />
             </DataTableCell>
             <DataTableCell>
               <ActionIcons>

@@ -16,9 +16,9 @@ import {
   emptyPhysical,
 } from "@/lib/criminal-defaults";
 import type { CriminalRecord } from "@/lib/criminal-mapper";
-import { toDateInputValue } from "@/lib/date-utils";
+import { formatDateTimeDisplay, toDateInputValue } from "@/lib/date-utils";
 import { useCaseTypes } from "@/lib/hooks/use-lookups";
-import type { BailerInfo, RelatedPerson } from "@/models/Criminal";
+import type { BailerInfo, RelatedPerson, VerificationRecord } from "@/models/Criminal";
 
 function ListHeader({
   titleEn,
@@ -44,6 +44,9 @@ export function CriminalExtendedForm({
   onChange,
   policeStationOptions = [{ value: "", label: "Select police station" }],
   caseTypeOptions,
+  isSuperAdmin = false,
+  verificationHistory = [],
+  onVerificationHistoryChange,
 }: {
   value: Pick<
     CriminalRecord,
@@ -54,11 +57,13 @@ export function CriminalExtendedForm({
     | "gangMembers"
     | "bailers"
     | "confessionStatement"
-    | "verification"
   >;
   onChange: (v: typeof value) => void;
   policeStationOptions?: { value: string; label: string }[];
   caseTypeOptions?: { value: string; label: string }[];
+  isSuperAdmin?: boolean;
+  verificationHistory?: VerificationRecord[];
+  onVerificationHistoryChange?: (rows: VerificationRecord[]) => void;
 }) {
   const set = (patch: Partial<typeof value>) => onChange({ ...value, ...patch });
   const { items: caseTypes } = useCaseTypes();
@@ -387,33 +392,83 @@ export function CriminalExtendedForm({
           className="w-full rounded-lg border border-[var(--color-border)] px-3 py-2 text-sm"
         />
       </section>
-      <section className="grid gap-3 sm:grid-cols-2">
-        <Input
-          label={extLabel("verificationDate")}
-          type="date"
-          value={value.verification?.verificationDate ?? ""}
-          onChange={(e) =>
-            set({
-              verification: {
-                ...value.verification,
-                verificationDate: e.target.value,
-              },
-            })
-          }
-        />
-        <Input
-          label={extLabel("verifyingOfficer")}
-          value={value.verification?.verifyingOfficer ?? ""}
-          onChange={(e) =>
-            set({
-              verification: {
-                ...value.verification,
-                verifyingOfficer: e.target.value,
-              },
-            })
-          }
-        />
-      </section>
+      {isSuperAdmin && onVerificationHistoryChange ? (
+        <section className="space-y-3">
+          <ListHeader
+            titleEn="Verification History (Superadmin)"
+            titleHi="सत्यापन इतिहास"
+            onAdd={() =>
+              onVerificationHistoryChange([
+                ...verificationHistory,
+                {
+                  verifiedAt: new Date().toISOString(),
+                  officerName: "",
+                },
+              ])
+            }
+          />
+          {verificationHistory.map((row, i) => (
+            <article
+              key={i}
+              className="rounded-lg border border-[var(--color-border)] bg-slate-50 p-4"
+            >
+              <section className="mb-2 flex justify-between">
+                <span className="text-xs font-medium text-slate-600">#{i + 1}</span>
+                <IconButton
+                  label="Remove row"
+                  variant="ghost"
+                  onClick={() =>
+                    onVerificationHistoryChange(
+                      verificationHistory.filter((_, j) => j !== i)
+                    )
+                  }
+                >
+                  <IconTrash />
+                </IconButton>
+              </section>
+              <section className="grid gap-3 sm:grid-cols-2">
+                <Input
+                  label="Verified at (ISO datetime)"
+                  type="datetime-local"
+                  value={row.verifiedAt?.slice(0, 16) ?? ""}
+                  onChange={(e) => {
+                    const next = [...verificationHistory];
+                    next[i] = {
+                      ...row,
+                      verifiedAt: e.target.value
+                        ? new Date(e.target.value).toISOString()
+                        : "",
+                    };
+                    onVerificationHistoryChange(next);
+                  }}
+                />
+                <Input
+                  label={extLabel("verifyingOfficer")}
+                  value={row.officerName ?? ""}
+                  onChange={(e) => {
+                    const next = [...verificationHistory];
+                    next[i] = { ...row, officerName: e.target.value };
+                    onVerificationHistoryChange(next);
+                  }}
+                />
+              </section>
+              {row.verifiedAt ? (
+                <p className="mt-2 text-xs text-[var(--color-muted)]">
+                  {formatDateTimeDisplay(row.verifiedAt)}
+                </p>
+              ) : null}
+            </article>
+          ))}
+          <p className="text-xs text-[var(--color-muted)]">
+            PS admins record verification via the Verify button; only superadmin can edit history here.
+          </p>
+        </section>
+      ) : (
+        <p className="text-sm text-[var(--color-muted)]">
+          Physical verification is recorded with the Verify button on the criminal detail page.
+          Officer name and timestamp are captured automatically.
+        </p>
+      )}
     </section>
   );
 }
@@ -542,6 +597,5 @@ export function initialExtended(
     gangMembers: initial?.gangMembers ?? [],
     bailers: initial?.bailers ?? [],
     confessionStatement: initial?.confessionStatement ?? "",
-    verification: initial?.verification ?? {},
   };
 }

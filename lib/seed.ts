@@ -6,6 +6,9 @@ import { CriminalModel } from "@/models/Criminal";
 import { CRIME_TYPE_OPTIONS } from "./criminal-fields";
 import { migratePoliceStationReferences } from "./police-station-ref";
 import { migrateCriminalHistorySchema } from "./migrate-criminal-history-schema";
+import { migrateAddressStateField } from "./migrate-address-state";
+import { migrateVerificationHistory } from "./migrate-verification-history";
+import { AppSettingsModel } from "@/models/AppSettings";
 
 const DEFAULT_POLICE_STATIONS = [
   "Argora",
@@ -54,6 +57,9 @@ export async function ensureSeedData() {
 
   await migratePoliceStationReferences();
   await migrateCriminalHistorySchema();
+  await migrateAddressStateField();
+  await migrateVerificationHistory();
+  await AppSettingsModel.get();
 
   const argora = await PoliceStationModel.findByNameInsensitive("Argora");
   if (argora && !(await AdminModel.findByEmail("argora.admin@example.com"))) {
@@ -86,11 +92,13 @@ export async function ensureSeedData() {
         line: "बाबुलाल भिंडी गाड़ी खाना चौक हरमु",
         ...(sukhdeonagar?._id ? { policeStationId: sukhdeonagar._id } : {}),
         district: "राँची",
+        state: "Jharkhand",
       },
       presentAddress: {
         line: "बाबुलाल भिंडी गाड़ी खाना चौक हरमु",
         ...(sukhdeonagar?._id ? { policeStationId: sukhdeonagar._id } : {}),
         district: "राँची",
+        state: "Jharkhand",
       },
       livelihoodMeans:
         "पिता के कपड़ा दुकान में काम करने की बात धीरज जालान के द्वारा बताया गया है।",
@@ -133,10 +141,12 @@ export async function ensureSeedData() {
       gangMembers: [],
       bailers: [],
       confessionStatement: "",
-      verification: {
-        verificationDate: "",
-        verifyingOfficer: "",
-      },
+      verificationHistory: [
+        {
+          verifiedAt: "2026-01-01T00:00:00.000Z",
+          officerName: "System (initial seed)",
+        },
+      ],
       createdAt: now,
       updatedAt: now,
     });

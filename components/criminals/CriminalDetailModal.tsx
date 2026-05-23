@@ -38,10 +38,15 @@ function AddressBlock({
 }: {
   titleEn: string;
   titleHi: string;
-  addr?: { line: string; thana?: string; district?: string };
+  addr?: { line: string; thana?: string; district?: string; state?: string };
 }) {
-  if (!addr?.line && !addr?.thana && !addr?.district) return null;
-  const parts = [addr.line, addr.thana && `Thana: ${addr.thana}`, addr.district && `District: ${addr.district}`]
+  if (!addr?.line && !addr?.thana && !addr?.district && !addr?.state) return null;
+  const parts = [
+    addr.line,
+    addr.thana && `Thana: ${addr.thana}`,
+    addr.district && `District: ${addr.district}`,
+    addr.state && `State: ${addr.state}`,
+  ]
     .filter(Boolean)
     .join("\n");
   return <DetailField en={titleEn} hi={titleHi} value={parts} />;

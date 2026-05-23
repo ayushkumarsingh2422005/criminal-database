@@ -6,13 +6,14 @@ import type {
   PhysicalDescription,
   RelatedPerson,
   BailerInfo,
-  VerificationInfo,
+  VerificationRecord,
 } from "@/models/Criminal";
 import { withExtendedDefaults, emptyPhysical } from "./criminal-defaults";
 import {
   parseAddressInput,
   parseHistoryInput,
 } from "./police-station-ref";
+import type { CriminalVerificationMeta } from "@/lib/criminal-verification-types";
 
 export type CriminalHistoryRecord = {
   sNo?: number;
@@ -25,7 +26,7 @@ export type CriminalHistoryRecord = {
   sectionAct?: string;
 };
 
-export interface CriminalRecord {
+interface CriminalRecordBase {
   id: string;
   pid: string;
   name: string;
@@ -41,12 +42,14 @@ export interface CriminalRecord {
     policeStationId?: string;
     thana?: string;
     district?: string;
+    state?: string;
   };
   presentAddress?: {
     line: string;
     policeStationId?: string;
     thana?: string;
     district?: string;
+    state?: string;
   };
   livelihoodMeans?: string;
   livelihoodVerification?: string;
@@ -58,10 +61,12 @@ export interface CriminalRecord {
   gangMembers: RelatedPerson[];
   bailers: BailerInfo[];
   confessionStatement?: string;
-  verification: VerificationInfo;
+  verificationHistory: VerificationRecord[];
   createdAt?: Date;
   updatedAt?: Date;
 }
+
+export type CriminalRecord = CriminalRecordBase & CriminalVerificationMeta;
 
 function arr<T>(v: unknown): T[] {
   return Array.isArray(v) ? (v as T[]) : [];
@@ -74,6 +79,7 @@ function mapAddress(addr?: CriminalAddress): CriminalRecord["permanentAddress"] 
     line: addr.line,
     ...(id ? { policeStationId: id } : {}),
     ...(addr.district ? { district: addr.district } : {}),
+    ...(addr.state ? { state: addr.state } : {}),
   };
 }
 
@@ -128,7 +134,7 @@ export function toCriminalRecord(c: Criminal): CriminalRecord {
     gangMembers: n.gangMembers,
     bailers: n.bailers,
     confessionStatement: n.confessionStatement,
-    verification: n.verification ?? {},
+    verificationHistory: n.verificationHistory ?? [],
     createdAt: n.createdAt,
     updatedAt: n.updatedAt,
   };
@@ -149,7 +155,6 @@ export async function parseCriminalBody(
     confessionStatement: body.confessionStatement
       ? String(body.confessionStatement)
       : "",
-    verification: (body.verification as VerificationInfo) ?? {},
   });
 
   return {

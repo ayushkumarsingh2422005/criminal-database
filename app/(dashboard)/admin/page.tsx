@@ -22,6 +22,14 @@ const panels = [
     superadminOnly: true,
   },
   {
+    href: "/admin/verification",
+    title: "Verification Settings",
+    description: "Set how often criminals must be physically verified (e.g. every 30 days).",
+    icon: "✅",
+    color: "bg-amber-50 text-amber-700",
+    superadminOnly: true,
+  },
+  {
     href: "/admin/police-stations",
     title: "Police Station Management",
     description: "Manage police stations for Case PS field.",

@@ -8,6 +8,8 @@ import {
   assertCriminalAccess,
   applySessionWriteScope,
 } from "@/lib/admin-scope";
+import { applyVerificationWritePolicy } from "@/lib/verification-write";
+import { enrichCriminalRecord } from "@/lib/enrich-criminal-records";
 
 export async function GET(
   request: NextRequest,
@@ -24,7 +26,7 @@ export async function GET(
     await assertCriminalAccess(session, criminal);
 
     const [record] = await enrichCriminalsFromDocs([criminal!], toCriminalRecord);
-    return jsonOk(record);
+    return jsonOk(await enrichCriminalRecord(record));
   } catch (error) {
     return jsonError(error);
   }
@@ -47,6 +49,7 @@ export async function PATCH(
     const body = await request.json();
     let parsed = await parseCriminalBody(body);
     parsed = await applySessionWriteScope(session, parsed);
+    parsed = applyVerificationWritePolicy(session, existing, parsed, body);
     const update = { ...parsed, updatedAt: new Date() };
 
     const result = await CriminalModel.update(id, update);
@@ -55,7 +58,7 @@ export async function PATCH(
     }
 
     const [record] = await enrichCriminalsFromDocs([result], toCriminalRecord);
-    return jsonOk(record);
+    return jsonOk(await enrichCriminalRecord(record));
   } catch (error) {
     return jsonError(error);
   }

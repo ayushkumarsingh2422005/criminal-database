@@ -407,13 +407,15 @@ export function CriminalReportDocument({
 
         <View style={styles.footer}>
           <Text style={styles.footerText}>
-            सत्यापन की तिथि:- {formatDobDots(criminal.verification?.verificationDate) || "—"}
+            सत्यापन की तिथि:-{" "}
+            {formatDobDots(criminal.lastVerifiedAt ?? criminal.verificationHistory?.[0]?.verifiedAt) ||
+              "—"}
           </Text>
           <Text style={[styles.footerText, { marginTop: 6 }]}>
             सत्यापन करने वाले पदाधिकारी का नाम / पदनाम:-
           </Text>
           <Text style={[styles.footerText, { marginTop: 4 }]}>
-            {dash(criminal.verification?.verifyingOfficer)}
+            {dash(criminal.verificationHistory?.[0]?.officerName)}
           </Text>
         </View>
       </Page>

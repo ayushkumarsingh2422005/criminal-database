@@ -5,6 +5,7 @@ import { CriminalModel } from "@/models/Criminal";
 import { toCriminalRecord } from "@/lib/criminal-mapper";
 import { enrichCriminalsFromDocs } from "@/lib/police-station-ref";
 import { assertCriminalAccess } from "@/lib/admin-scope";
+import { enrichCriminalRecord } from "@/lib/enrich-criminal-records";
 import { generateCriminalPdf } from "@/lib/pdf/generate-criminal-pdf";
 
 export async function GET(
@@ -26,7 +27,8 @@ export async function GET(
     await assertCriminalAccess(session, criminal);
 
     const [record] = await enrichCriminalsFromDocs([criminal!], toCriminalRecord);
-    const pdf = await generateCriminalPdf(record);
+    const enriched = await enrichCriminalRecord(record);
+    const pdf = await generateCriminalPdf(enriched);
 
     return new Response(new Uint8Array(pdf), {
       status: 200,

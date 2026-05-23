@@ -1,4 +1,5 @@
 import { ObjectId } from "mongodb";
+import { resolveAddressState } from "@/lib/indian-states";
 import type { Criminal, CriminalAddress, CriminalHistoryEntry } from "@/models/Criminal";
 import { PoliceStationModel } from "@/models/PoliceStation";
 import { CriminalModel } from "@/models/Criminal";
@@ -49,6 +50,9 @@ export async function parseAddressInput(
   const o = raw as Record<string, unknown>;
   const line = String(o.line ?? "").trim();
   const district = o.district ? String(o.district).trim() : undefined;
+  const state = resolveAddressState(
+    o.state != null && String(o.state).trim() ? String(o.state).trim() : undefined
+  );
   const legacyName = typeof o.thana === "string" ? o.thana.trim() : undefined;
 
   let policeStationId = await requirePoliceStationId(o.policeStationId, fieldLabel);
@@ -67,6 +71,7 @@ export async function parseAddressInput(
     line: line || "—",
     ...(policeStationId ? { policeStationId } : {}),
     ...(district ? { district } : {}),
+    state,
   };
 }
 
@@ -123,6 +128,7 @@ function resolveAddressForApi(
     ...(id ? { policeStationId: id } : {}),
     ...(thana ? { thana } : {}),
     ...(addr.district ? { district: addr.district } : {}),
+    ...(addr.state ? { state: addr.state } : {}),
   };
 }
 

@@ -1,3 +1,4 @@
+import { DEFAULT_STATE } from "@/lib/indian-states";
 import "server-only";
 
 import { ObjectId, type Filter } from "mongodb";
@@ -97,6 +98,7 @@ function withPoliceStation(
     line,
     policeStationId: psId,
     ...(addr?.district ? { district: addr.district } : {}),
+    state: addr?.state ?? DEFAULT_STATE,
   };
 }
 

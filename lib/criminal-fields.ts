@@ -43,6 +43,7 @@ export const CRIMINAL_FIELDS = {
   },
   thana: { en: "Police Station (PS)", hi: "पुलिस स्टेशन / थाना" },
   district: { en: "District (Zilla)", hi: "जिला" },
+  state: { en: "State", hi: "राज्य" },
   livelihoodMeans: {
     en: "Current Livelihood / Occupation",
     hi: "जीविकोपाजन का वर्तमान साधन",

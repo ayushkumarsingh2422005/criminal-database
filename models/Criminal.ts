@@ -6,6 +6,7 @@ export interface CriminalAddress {
   /** Reference to `police_stations` collection — name resolved at read time. */
   policeStationId?: ObjectId;
   district?: string;
+  state?: string;
 }
 
 export interface CriminalPhotos {
@@ -58,6 +59,14 @@ export interface BailerInfo {
   firDetails?: string;
 }
 
+export interface VerificationRecord {
+  /** ISO 8601 date-time when verification was recorded */
+  verifiedAt: string;
+  officerName: string;
+  officerId?: string;
+}
+
+/** @deprecated Use verificationHistory */
 export interface VerificationInfo {
   verificationDate?: string;
   verifyingOfficer?: string;
@@ -86,6 +95,8 @@ export interface Criminal {
   gangMembers: RelatedPerson[];
   bailers: BailerInfo[];
   confessionStatement?: string;
+  verificationHistory?: VerificationRecord[];
+  /** @deprecated Migrated to verificationHistory */
   verification?: VerificationInfo;
   createdAt?: Date;
   updatedAt?: Date;

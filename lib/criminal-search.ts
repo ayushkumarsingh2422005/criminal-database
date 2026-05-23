@@ -57,8 +57,8 @@ export async function buildCriminalFilter(
   if (district?.trim()) {
     conditions.push({
       $or: [
-        { "permanentAddress.district": regex(district.trim()) },
-        { "presentAddress.district": regex(district.trim()) },
+        { "permanentAddress.district": district.trim() },
+        { "presentAddress.district": district.trim() },
       ],
     });
   }
