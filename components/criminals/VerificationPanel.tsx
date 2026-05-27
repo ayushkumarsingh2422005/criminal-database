@@ -65,6 +65,11 @@ export function VerificationPanel({
                 <p className="text-[var(--color-muted)]">
                   Officer / अधिकारी: {row.officerName}
                 </p>
+                {row.remark ? (
+                  <p className="mt-1 text-[var(--color-muted)]">
+                    Remark / टिप्पणी: {row.remark}
+                  </p>
+                ) : null}
               </li>
             ))}
           </ul>

@@ -5,8 +5,8 @@ export interface SessionPayload {
   sub: string;
   email: string;
   name: string;
-  role: "superadmin" | "admin";
-  /** Set for PS-scoped admins (included in JWT). */
+  role: "superadmin" | "admin" | "io";
+  /** Set for PS-scoped users (included in JWT). */
   policeStationId?: string;
 }
 
@@ -14,7 +14,7 @@ export type AppSessionUser = {
   id: string;
   email: string;
   name: string;
-  role: "superadmin" | "admin";
+  role: "superadmin" | "admin" | "io";
   policeStationId?: string;
   policeStationName?: string;
 };

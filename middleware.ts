@@ -52,7 +52,33 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(loginUrl);
   }
 
+  if (session.role === "io") {
+    if (
+      pathname === "/criminals" ||
+      pathname.startsWith("/transfer") ||
+      pathname.startsWith("/investigation-officers") ||
+      pathname.startsWith("/admin")
+    ) {
+      return NextResponse.redirect(new URL("/search", request.url));
+    }
+    if (
+      pathname.startsWith("/api/admins") ||
+      pathname.startsWith("/api/transfers") ||
+      pathname.startsWith("/api/investigation-officers")
+    ) {
+      return NextResponse.json({ error: "Access denied" }, { status: 403 });
+    }
+  }
+
   if (session.role !== "superadmin" && pathname.startsWith("/admin")) {
+    return NextResponse.redirect(new URL("/search", request.url));
+  }
+
+  if (
+    session.role === "admin" &&
+    !session.policeStationId &&
+    pathname.startsWith("/investigation-officers")
+  ) {
     return NextResponse.redirect(new URL("/search", request.url));
   }
 

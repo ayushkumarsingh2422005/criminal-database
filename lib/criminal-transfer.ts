@@ -2,11 +2,11 @@ import "server-only";
 
 import { ObjectId } from "mongodb";
 import type { Criminal } from "@/models/Criminal";
-import { CriminalModel } from "@/models/Criminal";
+import { CriminalModel, getCriminalCollection } from "@/models/Criminal";
 import { CriminalTransferModel } from "@/models/CriminalTransfer";
 import { PoliceStationModel } from "@/models/PoliceStation";
 import { AdminModel } from "@/models/Admin";
-import { AuthError } from "@/lib/auth";
+import { AuthError, isIo } from "@/lib/auth";
 import type { SessionPayload } from "@/lib/types";
 import {
   applyScopedAdminWrite,
@@ -21,6 +21,12 @@ import { enrichCriminalRecord, loadPoliceStationNameMap } from "@/lib/police-sta
 export function requireTransferAdmin(session: SessionPayload): void {
   if (isSuperAdmin(session)) {
     throw new AuthError("Transfer is only available for police station admins", 403);
+  }
+  if (isIo(session)) {
+    throw new AuthError("Investigation officers cannot access transfers", 403);
+  }
+  if (session.role !== "admin") {
+    throw new AuthError("Police station admin access required", 403);
   }
 }
 
@@ -188,10 +194,14 @@ async function applyTransferToCriminal(
     criminal as Omit<Criminal, "_id">,
     toPsId
   );
-  await CriminalModel.update(criminal._id!.toString(), {
-    ...patch,
-    updatedAt: new Date(),
-  });
+  const col = await getCriminalCollection();
+  await col.updateOne(
+    { _id: criminal._id! },
+    {
+      $set: { ...patch, updatedAt: new Date() },
+      $unset: { assignedIoId: "" },
+    }
+  );
 }
 
 export async function acceptTransfer(

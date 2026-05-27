@@ -29,11 +29,14 @@ export async function POST(request: NextRequest) {
       return jsonOk({ error: "Invalid email or password" }, 401);
     }
 
-    if (admin.role === "admin" && !admin.policeStationId) {
+    if (
+      (admin.role === "admin" || admin.role === "io") &&
+      !admin.policeStationId
+    ) {
       return jsonOk(
         {
           error:
-            "This admin account has no police station assigned. Contact superadmin.",
+            "This account has no police station assigned. Contact superadmin.",
         },
         403
       );

@@ -14,6 +14,7 @@ import {
 } from "@/lib/indian-states";
 import { toDateInputValue } from "@/lib/date-utils";
 import { usePoliceStations } from "@/lib/hooks/use-lookups";
+import { useInvestigationOfficers } from "@/lib/hooks/use-investigation-officers";
 import { useAppSession } from "@/components/session/SessionProvider";
 import type { CriminalRecord } from "@/lib/criminal-mapper";
 import { PhotoUpload } from "./PhotoUpload";
@@ -60,8 +61,12 @@ export function CriminalForm({
     district: normalizeDistrictValue(initial?.presentAddress?.district),
     state: normalizeStateValue(initial?.presentAddress?.state) || DEFAULT_STATE,
   });
+  const [assignedIoId, setAssignedIoId] = useState(initial?.assignedIoId ?? "");
   const [extended, setExtended] = useState(() => initialExtended(initial));
   const { items: policeStations, loading: psLoading } = usePoliceStations();
+  const ioPsId = isScopedAdmin ? scopedPsId : permanent.policeStationId;
+  const { items: investigationOfficers, loading: ioLoading } =
+    useInvestigationOfficers(ioPsId);
 
   const psOptions = [
     { value: "", label: "Select police station / पुलिस स्टेशन चुनें" },
@@ -90,6 +95,7 @@ export function CriminalForm({
         livelihoodMeans: fd.get("livelihoodMeans"),
         livelihoodVerification: fd.get("livelihoodVerification"),
         photos,
+        assignedIoId: assignedIoId || undefined,
         ...extended,
         ...(isSuperAdmin ? { verificationHistory } : {}),
       });
@@ -231,6 +237,24 @@ export function CriminalForm({
               setPermanent((p) => ({ ...p, state: e.target.value }))
             }
             options={stateOptions}
+          />
+          <Select
+            label={fieldLabel("assignedIo")}
+            value={assignedIoId}
+            onChange={(e) => setAssignedIoId(e.target.value)}
+            disabled={!ioPsId || ioLoading}
+            options={[
+              {
+                value: "",
+                label: ioPsId
+                  ? "No IO assigned / कोई जांच अधिकारी नहीं"
+                  : "Select address PS first / पहले पता थाना चुनें",
+              },
+              ...investigationOfficers.map((io) => ({
+                value: io.id,
+                label: `${io.name} (${io.email})`,
+              })),
+            ]}
           />
         </section>
       </section>

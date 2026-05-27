@@ -7,8 +7,9 @@ import { enrichCriminalsFromDocs } from "@/lib/police-station-ref";
 import { enrichCriminalRecords, enrichCriminalRecord } from "@/lib/enrich-criminal-records";
 import {
   applySessionWriteScope,
-  getScopedPoliceStationId,
+  buildSessionCriminalScopeFilter,
 } from "@/lib/admin-scope";
+import { assertCanWriteCriminal } from "@/lib/auth";
 import { applyVerificationWritePolicy } from "@/lib/verification-write";
 import { DEFAULT_VERIFICATION_SEED_DATE } from "@/lib/verification";
 
@@ -22,8 +23,8 @@ export async function GET(request: NextRequest) {
       Math.max(1, parseInt(searchParams.get("limit") ?? "10", 10))
     );
     const skip = (page - 1) * limit;
-    const scopePsId = await getScopedPoliceStationId(session);
-    const filter = await buildCriminalFilter(searchParams, scopePsId);
+    const scopeFilter = await buildSessionCriminalScopeFilter(session);
+    const filter = await buildCriminalFilter(searchParams, scopeFilter);
 
     const [items, total] = await Promise.all([
       CriminalModel.findMany(filter, { skip, limit }),
@@ -48,6 +49,7 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     const session = await requireAuth(request);
+    assertCanWriteCriminal(session);
     const body = await request.json();
     let parsed = await parseCriminalBody(body);
     parsed = await applySessionWriteScope(session, parsed);

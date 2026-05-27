@@ -25,6 +25,7 @@ import type { CriminalRecord } from "@/lib/criminal-mapper";
 export default function SearchPage() {
   const session = useAppSession();
   const isScopedAdmin = session.role === "admin" && !!session.policeStationId;
+  const isIo = session.role === "io";
 
   const [filters, setFilters] = useState<CriminalSearchFilters>(emptySearchFilters);
   const [items, setItems] = useState<CriminalRecord[]>([]);
@@ -80,7 +81,9 @@ export default function SearchPage() {
       <PageHeader
         title="Search Criminals"
         subtitle={
-          isScopedAdmin
+          isIo
+            ? "Assigned criminals only — view, upload photos, and verify."
+            : isScopedAdmin
             ? `Records for your police station only: ${session.policeStationName ?? "assigned PS"}`
             : "अपराधी खोज — filter by personal details, criminal history, vehicles, associates, and more."
         }

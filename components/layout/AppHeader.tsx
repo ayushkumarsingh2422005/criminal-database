@@ -13,16 +13,24 @@ type NavItem = {
   label: string;
   superadminOnly?: boolean;
   adminOnly?: boolean;
+  ioHidden?: boolean;
 };
 
 const navItems: NavItem[] = [
   { href: "/search", label: "Search" },
-  { href: "/criminals", label: "Criminal Management" },
-  { href: "/transfer", label: "Transfer", adminOnly: true },
-  { href: "/admin", label: "Admin Control", superadminOnly: true },
+  { href: "/criminals", label: "Criminal Management", adminOnly: true, ioHidden: true },
+  { href: "/transfer", label: "Transfer", adminOnly: true, ioHidden: true },
+  {
+    href: "/investigation-officers",
+    label: "Investigation Officers",
+    adminOnly: true,
+    ioHidden: true,
+  },
+  { href: "/admin", label: "Admin Control", superadminOnly: true, ioHidden: true },
 ];
 
 function canSeeNavItem(item: NavItem, role: AppSessionUser["role"]) {
+  if (item.ioHidden && role === "io") return false;
   if (item.superadminOnly) return role === "superadmin";
   if (item.adminOnly) return role === "admin";
   return true;

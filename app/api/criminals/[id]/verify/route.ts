@@ -24,12 +24,16 @@ export async function POST(
 
     const body = (await request.json().catch(() => ({}))) as {
       verifiedAt?: string;
+      remark?: string;
     };
+
+    const remark = body.remark ? String(body.remark).trim() : undefined;
 
     const record = {
       verifiedAt: parseVerifiedAtFromClient(body.verifiedAt),
       officerName: session.name,
       officerId: session.sub,
+      ...(remark ? { remark } : {}),
     };
 
     const col = await getCriminalCollection();

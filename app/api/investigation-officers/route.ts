@@ -1,9 +1,11 @@
 import { NextRequest } from "next/server";
 import { ObjectId } from "mongodb";
-import { hashPassword, requireSuperAdmin } from "@/lib/auth";
+import { hashPassword, canManageInvestigationOfficers } from "@/lib/auth";
 import { requireAuth, jsonError, jsonOk } from "@/lib/api";
 import { Admin, AdminModel } from "@/models/Admin";
 import { PoliceStationModel } from "@/models/PoliceStation";
+import { getScopedPoliceStationId } from "@/lib/admin-scope";
+import { AuthError } from "@/lib/auth";
 
 async function policeStationLabel(id?: ObjectId) {
   if (!id) return undefined;
@@ -11,12 +13,12 @@ async function policeStationLabel(id?: ObjectId) {
   return station?.name;
 }
 
-async function sanitizeAdmin(admin: Admin) {
+async function sanitizeIo(admin: Admin) {
   return {
     id: admin._id!.toString(),
     email: admin.email,
     name: admin.name,
-    role: admin.role,
+    role: "io" as const,
     active: admin.active,
     policeStationId: admin.policeStationId?.toString(),
     policeStationName: await policeStationLabel(admin.policeStationId),
@@ -27,13 +29,25 @@ async function sanitizeAdmin(admin: Admin) {
 export async function GET(request: NextRequest) {
   try {
     const session = await requireAuth(request);
-    requireSuperAdmin(session);
+    if (!canManageInvestigationOfficers(session)) {
+      throw new AuthError("Access denied", 403);
+    }
 
-    const admins = await AdminModel.findAll();
-    const adminManagementUsers = admins.filter(
-      (a) => a.role === "admin" || a.role === "superadmin"
-    );
-    return jsonOk(await Promise.all(adminManagementUsers.map(sanitizeAdmin)));
+    const { searchParams } = new URL(request.url);
+    let psFilter: ObjectId | undefined;
+
+    const scopedPs = await getScopedPoliceStationId(session);
+    if (scopedPs) {
+      psFilter = scopedPs;
+    } else {
+      const queryPs = searchParams.get("policeStationId")?.trim();
+      if (queryPs && ObjectId.isValid(queryPs)) {
+        psFilter = new ObjectId(queryPs);
+      }
+    }
+
+    const ios = await AdminModel.findInvestigationOfficers(psFilter);
+    return jsonOk(await Promise.all(ios.map(sanitizeIo)));
   } catch (error) {
     return jsonError(error);
   }
@@ -42,7 +56,9 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     const session = await requireAuth(request);
-    requireSuperAdmin(session);
+    if (!canManageInvestigationOfficers(session)) {
+      throw new AuthError("Access denied", 403);
+    }
 
     const body = await request.json();
     const email = String(body.email ?? "")
@@ -50,7 +66,6 @@ export async function POST(request: NextRequest) {
       .toLowerCase();
     const name = String(body.name ?? "").trim();
     const password = String(body.password ?? "");
-    const role = body.role === "superadmin" ? "superadmin" : "admin";
 
     if (!email || !name || password.length < 8) {
       return jsonOk(
@@ -59,14 +74,14 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    let policeStationId: ObjectId | undefined;
-    if (role === "admin") {
+    let policeStationId: ObjectId;
+    const scopedPs = await getScopedPoliceStationId(session);
+    if (scopedPs) {
+      policeStationId = scopedPs;
+    } else {
       const psId = String(body.policeStationId ?? "").trim();
       if (!ObjectId.isValid(psId)) {
-        return jsonOk(
-          { error: "Police station is required for admin accounts" },
-          400
-        );
+        return jsonOk({ error: "Police station is required" }, 400);
       }
       const station = await PoliceStationModel.findById(psId);
       if (!station?.active) {
@@ -77,7 +92,7 @@ export async function POST(request: NextRequest) {
 
     const existing = await AdminModel.findByEmail(email);
     if (existing) {
-      return jsonOk({ error: "Admin with this email already exists" }, 409);
+      return jsonOk({ error: "User with this email already exists" }, 409);
     }
 
     const now = new Date();
@@ -85,14 +100,14 @@ export async function POST(request: NextRequest) {
       email,
       name,
       passwordHash: await hashPassword(password),
-      role,
-      ...(policeStationId ? { policeStationId } : {}),
+      role: "io",
+      policeStationId,
       active: true,
       createdAt: now,
       updatedAt: now,
     });
 
-    return jsonOk(await sanitizeAdmin(admin!), 201);
+    return jsonOk(await sanitizeIo(admin!), 201);
   } catch (error) {
     return jsonError(error);
   }

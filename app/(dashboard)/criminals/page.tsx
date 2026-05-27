@@ -13,9 +13,14 @@ import { useAppSession } from "@/components/session/SessionProvider";
 
 export default function CriminalManagementPage() {
   const session = useAppSession();
-  const isScopedAdmin = session.role === "admin" && !!session.policeStationId;
   const router = useRouter();
   const searchParams = useSearchParams();
+  const isScopedAdmin = session.role === "admin" && !!session.policeStationId;
+
+  useEffect(() => {
+    if (session.role === "io") router.replace("/search");
+  }, [session.role, router]);
+
   const editId = searchParams.get("edit");
 
   const [items, setItems] = useState<CriminalRecord[]>([]);

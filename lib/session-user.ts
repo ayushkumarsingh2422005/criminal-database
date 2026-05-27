@@ -10,7 +10,7 @@ export async function buildAppSessionUser(
   let policeStationId = session.policeStationId;
   let policeStationName: string | undefined;
 
-  if (session.role === "admin") {
+  if (session.role === "admin" || session.role === "io") {
     if (!policeStationId) {
       const admin = await AdminModel.findById(session.sub);
       policeStationId = admin?.policeStationId?.toString();

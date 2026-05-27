@@ -8,6 +8,7 @@ import {
   assertCriminalAccess,
   applySessionWriteScope,
 } from "@/lib/admin-scope";
+import { assertCanWriteCriminal } from "@/lib/auth";
 import { applyVerificationWritePolicy } from "@/lib/verification-write";
 import { enrichCriminalRecord } from "@/lib/enrich-criminal-records";
 
@@ -38,6 +39,7 @@ export async function PATCH(
 ) {
   try {
     const session = await requireAuth(request);
+    assertCanWriteCriminal(session);
     const { id } = await params;
     if (!ObjectId.isValid(id)) {
       return jsonOk({ error: "Invalid ID" }, 400);
@@ -70,6 +72,7 @@ export async function DELETE(
 ) {
   try {
     const session = await requireAuth(request);
+    assertCanWriteCriminal(session);
     const { id } = await params;
     if (!ObjectId.isValid(id)) {
       return jsonOk({ error: "Invalid ID" }, 400);

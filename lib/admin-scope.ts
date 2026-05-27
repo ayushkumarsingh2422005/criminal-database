@@ -4,7 +4,7 @@ import "server-only";
 import { ObjectId, type Filter } from "mongodb";
 import type { Criminal, CriminalAddress, CriminalHistoryEntry } from "@/models/Criminal";
 import { AdminModel } from "@/models/Admin";
-import { AuthError } from "@/lib/auth";
+import { AuthError, isIo } from "@/lib/auth";
 import type { SessionPayload } from "@/lib/types";
 
 export function isSuperAdmin(session: SessionPayload): boolean {
@@ -30,6 +30,26 @@ export async function getScopedPoliceStationId(
   return admin.policeStationId;
 }
 
+export function buildIoAssignmentFilter(ioId: string | ObjectId): Filter<Criminal> {
+  const oid = typeof ioId === "string" ? new ObjectId(ioId) : ioId;
+  return { assignedIoId: oid };
+}
+
+export async function buildSessionCriminalScopeFilter(
+  session: SessionPayload
+): Promise<Filter<Criminal>> {
+  if (isIo(session)) {
+    const psId = await getScopedPoliceStationId(session);
+    const ioFilter = buildIoAssignmentFilter(session.sub);
+    if (!psId) return ioFilter;
+    return mergeCriminalFilters(ioFilter, buildPoliceStationScopeFilter(psId));
+  }
+
+  const psId = await getScopedPoliceStationId(session);
+  if (psId) return buildPoliceStationScopeFilter(psId);
+  return {};
+}
+
 export function criminalBelongsToPoliceStation(
   criminal: Criminal,
   policeStationId: ObjectId
@@ -47,6 +67,10 @@ export function criminalBelongsToPoliceStation(
   }
 
   return false;
+}
+
+export function criminalAssignedToIo(criminal: Criminal, ioId: string): boolean {
+  return criminal.assignedIoId?.toString() === ioId;
 }
 
 export function buildPoliceStationScopeFilter(
@@ -79,6 +103,17 @@ export async function assertCriminalAccess(
 ): Promise<void> {
   if (!criminal) {
     throw new AuthError("Not found", 404);
+  }
+
+  if (isIo(session)) {
+    if (!criminalAssignedToIo(criminal, session.sub)) {
+      throw new AuthError("This criminal is not assigned to you", 403);
+    }
+    const psId = await getScopedPoliceStationId(session);
+    if (psId && !criminalBelongsToPoliceStation(criminal, psId)) {
+      throw new AuthError("You do not have access to this record", 403);
+    }
+    return;
   }
 
   const psId = await getScopedPoliceStationId(session);

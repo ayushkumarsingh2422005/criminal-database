@@ -128,10 +128,12 @@ export function parseVerificationHistoryInput(raw: unknown): VerificationRecord[
     const officerName = o.officerName ? String(o.officerName).trim() : "";
     if (!verifiedAt || !officerName) continue;
     const officerId = o.officerId ? String(o.officerId).trim() : undefined;
+    const remark = o.remark ? String(o.remark).trim() : undefined;
     result.push({
       verifiedAt,
       officerName,
       ...(officerId ? { officerId } : {}),
+      ...(remark ? { remark } : {}),
     });
   }
   return sortVerificationHistory(result);

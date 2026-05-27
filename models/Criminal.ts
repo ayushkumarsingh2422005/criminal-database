@@ -64,6 +64,7 @@ export interface VerificationRecord {
   verifiedAt: string;
   officerName: string;
   officerId?: string;
+  remark?: string;
 }
 
 /** @deprecated Use verificationHistory */
@@ -98,6 +99,8 @@ export interface Criminal {
   verificationHistory?: VerificationRecord[];
   /** @deprecated Migrated to verificationHistory */
   verification?: VerificationInfo;
+  /** Assigned investigation officer (`admins` with role `io`). */
+  assignedIoId?: ObjectId;
   createdAt?: Date;
   updatedAt?: Date;
   createdBy?: string;

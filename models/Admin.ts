@@ -1,7 +1,7 @@
 import { ObjectId, type Collection } from "mongodb";
 import { getDb, COLLECTIONS } from "@/lib/db";
 
-export type AdminRole = "superadmin" | "admin";
+export type AdminRole = "superadmin" | "admin" | "io";
 
 export interface Admin {
   _id?: ObjectId;
@@ -9,7 +9,7 @@ export interface Admin {
   passwordHash: string;
   name: string;
   role: AdminRole;
-  /** Required for role `admin` — limits criminal data access to this PS. */
+  /** Required for `admin` and `io` — PS scope. */
   policeStationId?: ObjectId;
   active: boolean;
   createdAt: Date;
@@ -44,6 +44,15 @@ export const AdminModel = {
   async findById(id: string | ObjectId) {
     const _id = typeof id === "string" ? new ObjectId(id) : id;
     return (await getAdminCollection()).findOne({ _id });
+  },
+
+  async findInvestigationOfficers(policeStationId?: ObjectId) {
+    const filter: { role: "io"; policeStationId?: ObjectId } = { role: "io" };
+    if (policeStationId) filter.policeStationId = policeStationId;
+    return (await getAdminCollection())
+      .find(filter)
+      .sort({ name: 1 })
+      .toArray();
   },
 
   async create(data: Omit<Admin, "_id">) {

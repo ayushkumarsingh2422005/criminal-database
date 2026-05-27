@@ -2,6 +2,7 @@ import { SignJWT, jwtVerify } from "jose";
 import bcrypt from "bcryptjs";
 import { cookies } from "next/headers";
 import type { NextRequest } from "next/server";
+import { AdminModel } from "@/models/Admin";
 import type { SessionPayload } from "./types";
 
 const COOKIE_NAME = "criminal_db_session";
@@ -45,7 +46,9 @@ export async function verifySessionToken(
       typeof payload.sub !== "string" ||
       typeof payload.email !== "string" ||
       typeof payload.name !== "string" ||
-      (payload.role !== "superadmin" && payload.role !== "admin")
+      (payload.role !== "superadmin" &&
+        payload.role !== "admin" &&
+        payload.role !== "io")
     ) {
       return null;
     }
@@ -122,6 +125,58 @@ export function requireSuperAdmin(session: SessionPayload | null) {
   if (!session || session.role !== "superadmin") {
     throw new AuthError("Superadmin access required", 403);
   }
+}
+
+export function isIo(session: SessionPayload): boolean {
+  return session.role === "io";
+}
+
+export function isPsAdmin(session: SessionPayload): boolean {
+  return session.role === "admin" && !!session.policeStationId;
+}
+
+export function canManageInvestigationOfficers(session: SessionPayload): boolean {
+  return session.role === "superadmin" || isPsAdmin(session);
+}
+
+export function assertCanWriteCriminal(session: SessionPayload) {
+  if (isIo(session)) {
+    throw new AuthError("Investigation officers have read-only access to criminal records", 403);
+  }
+}
+
+/** Re-check account is active and matches JWT claims (revokes stale tokens). */
+export async function validateSessionAccount(
+  session: SessionPayload
+): Promise<SessionPayload> {
+  const admin = await AdminModel.findById(session.sub);
+  if (!admin || !admin.active) {
+    throw new AuthError("Account inactive or not found. Please sign in again.", 401);
+  }
+  if (admin.role !== session.role) {
+    throw new AuthError("Session expired. Please sign in again.", 401);
+  }
+  if (admin.email.toLowerCase() !== session.email.toLowerCase()) {
+    throw new AuthError("Session expired. Please sign in again.", 401);
+  }
+
+  const dbPsId = admin.policeStationId?.toString();
+  if (admin.role === "admin" || admin.role === "io") {
+    if (!dbPsId) {
+      throw new AuthError("Account is not assigned to a police station", 403);
+    }
+    if (session.policeStationId && session.policeStationId !== dbPsId) {
+      throw new AuthError("Session expired. Please sign in again.", 401);
+    }
+  }
+
+  return {
+    sub: admin._id!.toString(),
+    email: admin.email,
+    name: admin.name,
+    role: admin.role,
+    ...(dbPsId ? { policeStationId: dbPsId } : {}),
+  };
 }
 
 export class AuthError extends Error {

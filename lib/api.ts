@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { getSessionFromRequest, AuthError } from "./auth";
+import { getSessionFromRequest, validateSessionAccount, AuthError } from "./auth";
 import type { NextRequest } from "next/server";
 import type { SessionPayload } from "./types";
 
@@ -10,7 +10,7 @@ export async function requireAuth(
   if (!session) {
     throw new AuthError("Unauthorized", 401);
   }
-  return session;
+  return validateSessionAccount(session);
 }
 
 export function jsonError(error: unknown) {

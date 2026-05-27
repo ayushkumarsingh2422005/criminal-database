@@ -17,6 +17,7 @@ import type { BailerInfo, CriminalVehicle, RelatedPerson } from "@/models/Crimin
 import { VerificationStatusBadge } from "@/components/criminals/VerificationStatusBadge";
 import { VerificationPanel } from "@/components/criminals/VerificationPanel";
 import { VerifyCriminalButton } from "@/components/criminals/VerifyCriminalButton";
+import { IoPhotoPanel } from "@/components/criminals/IoPhotoPanel";
 import { DownloadPdfButton } from "./DownloadPdfButton";
 
 const TABS = [
@@ -219,10 +220,16 @@ function BailersTable({ rows }: { rows: BailerInfo[] }) {
   );
 }
 
-export function CriminalDetailView({ criminal: initialCriminal }: { criminal: CriminalRecord }) {
+export function CriminalDetailView({
+  criminal: initialCriminal,
+  ioMode = false,
+}: {
+  criminal: CriminalRecord;
+  ioMode?: boolean;
+}) {
   const router = useRouter();
   const [criminal, setCriminal] = useState(initialCriminal);
-  const [tab, setTab] = useState<TabId>("overview");
+  const [tab, setTab] = useState<TabId>(ioMode ? "records" : "overview");
 
   useEffect(() => {
     setCriminal(initialCriminal);
@@ -248,10 +255,14 @@ export function CriminalDetailView({ criminal: initialCriminal }: { criminal: Cr
         <Link href="/search" className="hover:text-[var(--color-primary)]">
           Search
         </Link>
-        <span className="mx-2">/</span>
-        <Link href="/criminals" className="hover:text-[var(--color-primary)]">
-          Criminal Management
-        </Link>
+        {!ioMode ? (
+          <>
+            <span className="mx-2">/</span>
+            <Link href="/criminals" className="hover:text-[var(--color-primary)]">
+              Criminal Management
+            </Link>
+          </>
+        ) : null}
         <span className="mx-2">/</span>
         <span className="text-slate-800">Criminal Detail</span>
       </nav>
@@ -284,14 +295,26 @@ export function CriminalDetailView({ criminal: initialCriminal }: { criminal: Cr
           <IconButton label="Back" variant="outline" onClick={() => router.back()}>
             <IconArrowLeft />
           </IconButton>
-          <DownloadPdfButton criminalId={criminal.id} pid={criminal.pid} />
-          <IconButton
-            label="Edit record"
-            variant="primary"
-            href={`/criminals?edit=${criminal.id}`}
-          >
-            <IconPencil />
-          </IconButton>
+          {!ioMode ? (
+            <>
+              <DownloadPdfButton criminalId={criminal.id} pid={criminal.pid} />
+              <IconButton
+                label="Edit record"
+                variant="primary"
+                href={`/criminals?edit=${criminal.id}`}
+              >
+                <IconPencil />
+              </IconButton>
+            </>
+          ) : (
+            <IconButton
+              label="Edit photos"
+              variant="primary"
+              onClick={() => setTab("records")}
+            >
+              <IconPencil />
+            </IconButton>
+          )}
         </section>
       </header>
 
@@ -549,48 +572,62 @@ export function CriminalDetailView({ criminal: initialCriminal }: { criminal: Cr
 
       {tab === "records" && (
         <section className="space-y-8">
-          <Card title={CRIMINAL_FIELDS.photos.en} subtitle={CRIMINAL_FIELDS.photos.hi}>
-            <section className="grid gap-4 sm:grid-cols-2">
-              {PHOTO_KEYS.map((key) => {
-                const src = criminal.photos[key];
-                return (
-                  <article
-                    key={key}
-                    className="overflow-hidden rounded-lg border border-[var(--color-border)]"
-                  >
-                    <header className="bg-slate-50 px-3 py-2 text-xs font-medium text-slate-700">
-                      {photoLabel(key)}
-                    </header>
-                    {src ? (
-                      <section className="relative aspect-[4/3] bg-slate-100">
-                        <Image
-                          src={src}
-                          alt={photoLabel(key)}
-                          fill
-                          className="object-contain"
-                          unoptimized
-                        />
-                      </section>
-                    ) : (
-                      <p className="p-8 text-center text-sm text-[var(--color-muted)]">
-                        No photo
-                      </p>
-                    )}
-                  </article>
-                );
-              })}
-            </section>
-          </Card>
-
-          <section className="grid gap-6 lg:grid-cols-2">
-            <Card
-              title={EXTENDED_FIELDS.confession.en}
-              subtitle={EXTENDED_FIELDS.confession.hi}
-            >
-              <p className="whitespace-pre-wrap text-sm text-slate-800">
-                {criminal.confessionStatement || "—"}
-              </p>
+          {ioMode ? (
+            <IoPhotoPanel criminal={criminal} onUpdated={setCriminal} />
+          ) : (
+            <Card title={CRIMINAL_FIELDS.photos.en} subtitle={CRIMINAL_FIELDS.photos.hi}>
+              <section className="grid gap-4 sm:grid-cols-2">
+                {PHOTO_KEYS.map((key) => {
+                  const src = criminal.photos[key];
+                  return (
+                    <article
+                      key={key}
+                      className="overflow-hidden rounded-lg border border-[var(--color-border)]"
+                    >
+                      <header className="bg-slate-50 px-3 py-2 text-xs font-medium text-slate-700">
+                        {photoLabel(key)}
+                      </header>
+                      {src ? (
+                        <section className="relative aspect-[4/3] bg-slate-100">
+                          <Image
+                            src={src}
+                            alt={photoLabel(key)}
+                            fill
+                            className="object-contain"
+                            unoptimized
+                          />
+                        </section>
+                      ) : (
+                        <p className="p-8 text-center text-sm text-[var(--color-muted)]">
+                          No photo
+                        </p>
+                      )}
+                    </article>
+                  );
+                })}
+              </section>
             </Card>
+          )}
+
+          {!ioMode ? (
+            <section className="grid gap-6 lg:grid-cols-2">
+              <Card
+                title={EXTENDED_FIELDS.confession.en}
+                subtitle={EXTENDED_FIELDS.confession.hi}
+              >
+                <p className="whitespace-pre-wrap text-sm text-slate-800">
+                  {criminal.confessionStatement || "—"}
+                </p>
+              </Card>
+              <Card title="Verification" subtitle="सत्यापन">
+                <VerificationPanel
+                  criminal={criminal}
+                  showVerifyButton={false}
+                  onVerified={handleVerified}
+                />
+              </Card>
+            </section>
+          ) : (
             <Card title="Verification" subtitle="सत्यापन">
               <VerificationPanel
                 criminal={criminal}
@@ -598,7 +635,7 @@ export function CriminalDetailView({ criminal: initialCriminal }: { criminal: Cr
                 onVerified={handleVerified}
               />
             </Card>
-          </section>
+          )}
         </section>
       )}
 
@@ -606,6 +643,7 @@ export function CriminalDetailView({ criminal: initialCriminal }: { criminal: Cr
         variant="fab"
         criminalId={criminal.id}
         onVerified={handleVerified}
+        withRemark={ioMode}
       />
     </section>
   );

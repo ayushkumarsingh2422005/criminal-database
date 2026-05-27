@@ -52,6 +52,10 @@ export const CRIMINAL_FIELDS = {
     en: "Livelihood Verification Process",
     hi: "जीविकोपाजन के साधन के सत्यापन की प्रक्रिया",
   },
+  assignedIo: {
+    en: "Investigation Officer (IO)",
+    hi: "जांच अधिकारी",
+  },
   photos: { en: "Photographs", hi: "विभिन्न फोटो" },
   photoFrontFull: {
     en: "Front Full-Size Photo",

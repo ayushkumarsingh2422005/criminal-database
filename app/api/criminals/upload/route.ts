@@ -5,6 +5,7 @@ import { requireAuth, jsonError, jsonOk } from "@/lib/api";
 import { PHOTO_KEYS, type PhotoKey } from "@/lib/criminal-fields";
 import { CriminalModel } from "@/models/Criminal";
 import { assertCriminalAccess } from "@/lib/admin-scope";
+import { AuthError, isIo } from "@/lib/auth";
 
 export async function POST(request: NextRequest) {
   try {
@@ -19,7 +20,11 @@ export async function POST(request: NextRequest) {
     }
 
     const existing = await CriminalModel.findByPid(pid);
-    if (existing) {
+    if (!existing) {
+      if (isIo(session)) {
+        throw new AuthError("Criminal record not found", 404);
+      }
+    } else {
       await assertCriminalAccess(session, existing);
     }
 

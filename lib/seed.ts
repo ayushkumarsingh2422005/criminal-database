@@ -76,6 +76,20 @@ export async function ensureSeedData() {
     });
   }
 
+  if (argora && !(await AdminModel.findByEmail("argora.io@example.com"))) {
+    const now = new Date();
+    await AdminModel.create({
+      email: "argora.io@example.com",
+      passwordHash: await hashPassword("admin123"),
+      name: "Argora IO",
+      role: "io",
+      policeStationId: argora._id,
+      active: true,
+      createdAt: now,
+      updatedAt: now,
+    });
+  }
+
   if ((await CriminalModel.count()) === 0) {
     const now = new Date();
     const sukhdeonagar = await PoliceStationModel.findByNameInsensitive("Sukhdeonagar");

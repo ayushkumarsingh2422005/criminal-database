@@ -4,9 +4,11 @@ import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
 import { CriminalDetailView } from "@/components/criminals/CriminalDetailView";
+import { useAppSession } from "@/components/session/SessionProvider";
 import type { CriminalRecord } from "@/lib/criminal-mapper";
 
 export default function CriminalDetailPage() {
+  const session = useAppSession();
   const params = useParams();
   const id = params.id as string;
   const [criminal, setCriminal] = useState<CriminalRecord | null>(null);
@@ -52,5 +54,5 @@ export default function CriminalDetailPage() {
     );
   }
 
-  return <CriminalDetailView criminal={criminal} />;
+  return <CriminalDetailView criminal={criminal} ioMode={session.role === "io"} />;
 }

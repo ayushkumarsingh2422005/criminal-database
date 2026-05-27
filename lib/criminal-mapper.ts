@@ -13,6 +13,10 @@ import {
   parseAddressInput,
   parseHistoryInput,
 } from "./police-station-ref";
+import {
+  parseAssignedIoId,
+  resolveIoPoliceStationId,
+} from "./io-assignment";
 import type { CriminalVerificationMeta } from "@/lib/criminal-verification-types";
 
 export type CriminalHistoryRecord = {
@@ -62,6 +66,8 @@ interface CriminalRecordBase {
   bailers: BailerInfo[];
   confessionStatement?: string;
   verificationHistory: VerificationRecord[];
+  assignedIoId?: string;
+  assignedIoName?: string;
   createdAt?: Date;
   updatedAt?: Date;
 }
@@ -135,6 +141,7 @@ export function toCriminalRecord(c: Criminal): CriminalRecord {
     bailers: n.bailers,
     confessionStatement: n.confessionStatement,
     verificationHistory: n.verificationHistory ?? [],
+    assignedIoId: c.assignedIoId?.toString(),
     createdAt: n.createdAt,
     updatedAt: n.updatedAt,
   };
@@ -144,6 +151,17 @@ export async function parseCriminalBody(
   body: Record<string, unknown>
 ): Promise<Omit<Criminal, "_id">> {
   const photos = (body.photos as CriminalPhotos) ?? {};
+  const permanentAddress = await parseAddressInput(
+    body.permanentAddress,
+    "permanent address"
+  );
+  const presentAddress = await parseAddressInput(body.presentAddress, "present address");
+  const psForIo = await resolveIoPoliceStationId(
+    permanentAddress?.policeStationId?.toString(),
+    presentAddress?.policeStationId?.toString()
+  );
+  const assignedIoId = await parseAssignedIoId(body.assignedIoId, psForIo);
+
   const ext = withExtendedDefaults({
     criminalHistory: await parseHistoryInput(body.criminalHistory),
     vehicles: arr(body.vehicles),
@@ -171,11 +189,9 @@ export async function parseCriminalBody(
       ? String(body.fatherNameAliases).trim()
       : undefined,
     mobileNumber: body.mobileNumber ? String(body.mobileNumber).trim() : undefined,
-    permanentAddress: await parseAddressInput(
-      body.permanentAddress,
-      "permanent address"
-    ),
-    presentAddress: await parseAddressInput(body.presentAddress, "present address"),
+    permanentAddress,
+    presentAddress,
+    ...(assignedIoId ? { assignedIoId } : {}),
     livelihoodMeans: body.livelihoodMeans
       ? String(body.livelihoodMeans).trim()
       : undefined,

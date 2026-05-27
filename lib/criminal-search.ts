@@ -31,7 +31,7 @@ async function resolvePoliceStationObjectId(
 
 export async function buildCriminalFilter(
   params: URLSearchParams | CriminalSearchFilters,
-  scopePoliceStationId?: ObjectId | null
+  sessionScopeFilter?: Filter<Criminal> | null
 ): Promise<Filter<Criminal>> {
   const get = (key: keyof CriminalSearchFilters) =>
     params instanceof URLSearchParams
@@ -158,11 +158,8 @@ export async function buildCriminalFilter(
   if (conditions.length === 1) filter = conditions[0]!;
   else if (conditions.length > 1) filter = { $and: conditions };
 
-  if (scopePoliceStationId) {
-    filter = mergeCriminalFilters(
-      filter,
-      buildPoliceStationScopeFilter(scopePoliceStationId)
-    );
+  if (sessionScopeFilter && Object.keys(sessionScopeFilter).length > 0) {
+    filter = mergeCriminalFilters(filter, sessionScopeFilter);
   }
 
   return filter;

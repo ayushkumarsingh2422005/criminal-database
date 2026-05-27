@@ -37,6 +37,14 @@ const panels = [
     color: "bg-purple-50 text-purple-700",
     superadminOnly: true,
   },
+  {
+    href: "/investigation-officers",
+    title: "Investigation Officers",
+    description: "Manage IO accounts for all police stations.",
+    icon: "🕵️",
+    color: "bg-cyan-50 text-cyan-700",
+    superadminOnly: true,
+  },
 ];
 
 export default async function AdminControlPage() {
