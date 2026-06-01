@@ -7,7 +7,8 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "migrate:history": "npx tsx scripts/migrate-criminal-history.ts"
+    "migrate:history": "npx tsx scripts/migrate-criminal-history.ts",
+    "create:superadmin": "npx tsx scripts/create-superadmin.ts"
   },
   "dependencies": {
     "@fontsource/noto-sans-devanagari": "^5.2.8",
