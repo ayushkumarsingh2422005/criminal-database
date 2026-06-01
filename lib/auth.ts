@@ -1,12 +1,22 @@
-import { SignJWT, jwtVerify } from "jose";
+import { SignJWT } from "jose";
 import bcrypt from "bcryptjs";
 import { cookies } from "next/headers";
 import type { NextRequest } from "next/server";
 import { AdminModel } from "@/models/Admin";
 import type { SessionPayload } from "./types";
+import {
+  COOKIE_NAME,
+  SESSION_MAX_AGE,
+  getTokenFromRequest,
+  verifySessionToken,
+} from "./auth-edge";
 
-const COOKIE_NAME = "criminal_db_session";
-const SESSION_MAX_AGE = 60 * 60 * 8; // 8 hours
+export {
+  COOKIE_NAME,
+  SESSION_MAX_AGE,
+  getTokenFromRequest,
+  verifySessionToken,
+} from "./auth-edge";
 
 function getSecret(): Uint8Array {
   const secret = process.env.JWT_SECRET;
@@ -37,40 +47,6 @@ export async function createSessionToken(
     .sign(getSecret());
 }
 
-export async function verifySessionToken(
-  token: string
-): Promise<SessionPayload | null> {
-  try {
-    const { payload } = await jwtVerify(token, getSecret());
-    if (
-      typeof payload.sub !== "string" ||
-      typeof payload.email !== "string" ||
-      typeof payload.name !== "string" ||
-      (payload.role !== "superadmin" &&
-        payload.role !== "admin" &&
-        payload.role !== "io")
-    ) {
-      return null;
-    }
-
-    const policeStationId =
-      typeof payload.policeStationId === "string" &&
-      payload.policeStationId.length > 0
-        ? payload.policeStationId
-        : undefined;
-
-    return {
-      sub: payload.sub,
-      email: payload.email,
-      name: payload.name,
-      role: payload.role,
-      ...(policeStationId ? { policeStationId } : {}),
-    };
-  } catch {
-    return null;
-  }
-}
-
 export function sessionCookieOptions(maxAge = SESSION_MAX_AGE) {
   return {
     httpOnly: true,
@@ -80,8 +56,6 @@ export function sessionCookieOptions(maxAge = SESSION_MAX_AGE) {
     maxAge,
   };
 }
-
-export { COOKIE_NAME, SESSION_MAX_AGE };
 
 export async function setSessionCookie(token: string) {
   const cookieStore = await cookies();
@@ -98,19 +72,6 @@ export async function getSessionFromCookies(): Promise<SessionPayload | null> {
   const token = cookieStore.get(COOKIE_NAME)?.value;
   if (!token) return null;
   return verifySessionToken(token);
-}
-
-export function getTokenFromRequest(request: NextRequest): string | undefined {
-  const cookieToken = request.cookies.get(COOKIE_NAME)?.value;
-  if (cookieToken) return cookieToken;
-
-  const authorization = request.headers.get("authorization");
-  if (authorization?.startsWith("Bearer ")) {
-    const bearerToken = authorization.slice(7).trim();
-    return bearerToken || undefined;
-  }
-
-  return undefined;
 }
 
 export async function getSessionFromRequest(
@@ -141,7 +102,10 @@ export function canManageInvestigationOfficers(session: SessionPayload): boolean
 
 export function assertCanWriteCriminal(session: SessionPayload) {
   if (isIo(session)) {
-    throw new AuthError("Investigation officers have read-only access to criminal records", 403);
+    throw new AuthError(
+      "Investigation officers have read-only access to criminal records",
+      403
+    );
   }
 }
 
