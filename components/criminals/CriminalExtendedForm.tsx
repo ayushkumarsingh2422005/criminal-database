@@ -7,6 +7,7 @@ import { IconButton } from "@/components/ui/IconButton";
 import { IconPlus, IconTrash } from "@/components/ui/icons";
 import { SectionTitle } from "@/components/ui/FieldLabel";
 import { extLabel } from "@/lib/criminal-extended-fields";
+import { ConfessionDocumentUpload } from "@/components/criminals/ConfessionDocumentUpload";
 import {
   emptyBailer,
   emptyGangMember,
@@ -42,6 +43,7 @@ function ListHeader({
 export function CriminalExtendedForm({
   value,
   onChange,
+  pid = "",
   policeStationOptions = [{ value: "", label: "Select police station" }],
   caseTypeOptions,
   isSuperAdmin = false,
@@ -56,9 +58,10 @@ export function CriminalExtendedForm({
     | "closeRelatives"
     | "gangMembers"
     | "bailers"
-    | "confessionStatement"
+    | "confessionDocument"
   >;
   onChange: (v: typeof value) => void;
+  pid?: string;
   policeStationOptions?: { value: string; label: string }[];
   caseTypeOptions?: { value: string; label: string }[];
   isSuperAdmin?: boolean;
@@ -382,16 +385,12 @@ export function CriminalExtendedForm({
         ))}
       </section>
 
-      {/* Confession & Verification */}
-      <section className="space-y-3">
-        <SectionTitle en="Confession Statement" hi="स्वीकारोक्ति बयान" />
-        <textarea
-          rows={4}
-          value={value.confessionStatement ?? ""}
-          onChange={(e) => set({ confessionStatement: e.target.value })}
-          className="w-full rounded-lg border border-[var(--color-border)] px-3 py-2 text-sm"
-        />
-      </section>
+      {/* Confession document */}
+      <ConfessionDocumentUpload
+        pid={pid}
+        currentPath={value.confessionDocument}
+        onUploaded={(path) => set({ confessionDocument: path })}
+      />
       {isSuperAdmin && onVerificationHistoryChange ? (
         <section className="space-y-3">
           <ListHeader
@@ -596,6 +595,6 @@ export function initialExtended(
     closeRelatives: initial?.closeRelatives ?? [],
     gangMembers: initial?.gangMembers ?? [],
     bailers: initial?.bailers ?? [],
-    confessionStatement: initial?.confessionStatement ?? "",
+    confessionDocument: initial?.confessionDocument ?? "",
   };
 }

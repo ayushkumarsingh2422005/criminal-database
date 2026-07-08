@@ -11,6 +11,8 @@ import { CRIMINAL_FIELDS, photoLabel } from "@/lib/criminal-fields";
 import type { PhotoKey } from "@/lib/criminal-fields";
 import type { CriminalHistoryRecord, CriminalRecord } from "@/lib/criminal-mapper";
 import type { BailerInfo, CriminalVehicle, RelatedPerson } from "@/models/Criminal";
+import { criminalStatusLabel } from "@/lib/criminal-status";
+import { confessionDocumentFileName } from "@/lib/confession-document";
 import { dash, formatAddressInline, formatDobDots, formatFirDate } from "./format";
 
 const styles = StyleSheet.create({
@@ -308,16 +310,19 @@ export function CriminalReportDocument({
             3. मोबाईल नम्बर:- {dash(criminal.mobileNumber)}
           </Text>
           <Text style={styles.numbered}>
-            4. स्थायी पता:- {formatAddressInline(criminal.permanentAddress) || "—"}
+            4. अपराधी की स्थिति:- {criminalStatusLabel(criminal.criminalStatus)}
           </Text>
           <Text style={styles.numbered}>
-            5. वर्तमान पता:- {formatAddressInline(criminal.presentAddress) || "—"}
+            5. स्थायी पता:- {formatAddressInline(criminal.permanentAddress) || "—"}
           </Text>
           <Text style={styles.numbered}>
-            6. जीविकोपार्जन का वर्तमान साधन:- {dash(criminal.livelihoodMeans)}
+            6. वर्तमान पता:- {formatAddressInline(criminal.presentAddress) || "—"}
           </Text>
           <Text style={styles.numbered}>
-            7. जीविकोपार्जन के साधन के सत्यापन की विवरणी:-{" "}
+            7. जीविकोपार्जन का वर्तमान साधन:- {dash(criminal.livelihoodMeans)}
+          </Text>
+          <Text style={styles.numbered}>
+            8. जीविकोपार्जन के साधन के सत्यापन की विवरणी:-{" "}
             {dash(criminal.livelihoodVerification)}
           </Text>
         </View>
@@ -401,7 +406,9 @@ export function CriminalReportDocument({
         <View style={styles.section}>
           <SectionHeading>11. स्वीकारोक्ति बयान:-</SectionHeading>
           <Text style={[styles.bodyText, { minHeight: 40 }]}>
-            {dash(criminal.confessionStatement)}
+            {criminal.confessionDocument
+              ? dash(confessionDocumentFileName(criminal.confessionDocument))
+              : "—"}
           </Text>
         </View>
 

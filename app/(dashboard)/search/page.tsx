@@ -18,6 +18,7 @@ import {
   type CriminalSearchFilters,
 } from "@/lib/criminal-search-filters";
 import { districtSelectOptions } from "@/lib/jharkhand-districts";
+import { criminalStatusSelectOptions } from "@/lib/criminal-status";
 import { useCaseTypes, usePoliceStations } from "@/lib/hooks/use-lookups";
 import { useAppSession } from "@/components/session/SessionProvider";
 import type { CriminalRecord } from "@/lib/criminal-mapper";
@@ -148,6 +149,12 @@ export default function SearchPage() {
                 value={filters.district}
                 onChange={set("district")}
                 options={districtOptions}
+              />
+              <Select
+                label={fieldLabel("criminalStatus")}
+                value={filters.criminalStatus}
+                onChange={set("criminalStatus")}
+                options={criminalStatusSelectOptions()}
               />
             </section>
           </section>

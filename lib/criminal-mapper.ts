@@ -18,6 +18,8 @@ import {
   resolveIoPoliceStationId,
 } from "./io-assignment";
 import type { CriminalVerificationMeta } from "@/lib/criminal-verification-types";
+import { resolveConfessionDocumentPath } from "@/lib/confession-document";
+import { normalizeCriminalStatus } from "@/lib/criminal-status";
 
 export type CriminalHistoryRecord = {
   sNo?: number;
@@ -64,7 +66,8 @@ interface CriminalRecordBase {
   closeRelatives: RelatedPerson[];
   gangMembers: RelatedPerson[];
   bailers: BailerInfo[];
-  confessionStatement?: string;
+  confessionDocument?: string;
+  criminalStatus: string;
   verificationHistory: VerificationRecord[];
   assignedIoId?: string;
   assignedIoName?: string;
@@ -139,7 +142,8 @@ export function toCriminalRecord(c: Criminal): CriminalRecord {
     closeRelatives: n.closeRelatives,
     gangMembers: n.gangMembers,
     bailers: n.bailers,
-    confessionStatement: n.confessionStatement,
+    confessionDocument: resolveConfessionDocumentPath(n),
+    criminalStatus: normalizeCriminalStatus(n.criminalStatus),
     verificationHistory: n.verificationHistory ?? [],
     assignedIoId: c.assignedIoId?.toString(),
     createdAt: n.createdAt,
@@ -170,14 +174,17 @@ export async function parseCriminalBody(
     closeRelatives: arr(body.closeRelatives),
     gangMembers: arr(body.gangMembers),
     bailers: arr(body.bailers),
-    confessionStatement: body.confessionStatement
-      ? String(body.confessionStatement)
+    confessionDocument: body.confessionDocument
+      ? String(body.confessionDocument).trim()
       : "",
   });
 
   return {
     pid: String(body.pid ?? "").trim(),
     name: String(body.name ?? "").trim(),
+    criminalStatus: normalizeCriminalStatus(
+      body.criminalStatus ? String(body.criminalStatus) : undefined
+    ),
     nameAliases: body.nameAliases ? String(body.nameAliases).trim() : undefined,
     dateOfBirth: body.dateOfBirth ? String(body.dateOfBirth).trim() : undefined,
     aadhaarNumber: body.aadhaarNumber

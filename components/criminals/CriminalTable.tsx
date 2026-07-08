@@ -15,6 +15,7 @@ import { aggregateCrimeTypes } from "@/lib/criminal-history-utils";
 import { fieldLabel } from "@/lib/criminal-fields";
 import type { CriminalRecord } from "@/lib/criminal-mapper";
 import { VerificationStatusCell } from "@/components/criminals/VerificationStatusCell";
+import { CriminalStatusBadge } from "@/components/criminals/CriminalStatusBadge";
 import { DownloadPdfButton } from "./DownloadPdfButton";
 
 export function CriminalTable({
@@ -55,6 +56,7 @@ export function CriminalTable({
       <DataTableHead>
         <DataTableHeaderCell>{fieldLabel("pid")}</DataTableHeaderCell>
         <DataTableHeaderCell>{fieldLabel("name")}</DataTableHeaderCell>
+        <DataTableHeaderCell>{fieldLabel("criminalStatus")}</DataTableHeaderCell>
         <DataTableHeaderCell>{fieldLabel("crimeTypes")}</DataTableHeaderCell>
         <DataTableHeaderCell>{fieldLabel("mobileNumber")}</DataTableHeaderCell>
         <DataTableHeaderCell>{fieldLabel("addressPoliceStation")}</DataTableHeaderCell>
@@ -101,6 +103,9 @@ export function CriminalTable({
                   ) : null}
                 </>
               )}
+            </DataTableCell>
+            <DataTableCell>
+              <CriminalStatusBadge status={c.criminalStatus} compact />
             </DataTableCell>
             <DataTableCell>
               <span className="line-clamp-2 text-xs">

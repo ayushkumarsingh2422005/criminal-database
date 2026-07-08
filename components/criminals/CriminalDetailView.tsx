@@ -15,6 +15,9 @@ import { aggregateCrimeTypes } from "@/lib/criminal-history-utils";
 import type { CriminalHistoryRecord, CriminalRecord } from "@/lib/criminal-mapper";
 import type { BailerInfo, CriminalVehicle, RelatedPerson } from "@/models/Criminal";
 import { VerificationStatusBadge } from "@/components/criminals/VerificationStatusBadge";
+import { confessionDocumentFileName } from "@/lib/confession-document";
+import { CriminalStatusBadge } from "@/components/criminals/CriminalStatusBadge";
+import { criminalStatusLabel } from "@/lib/criminal-status";
 import { VerificationPanel } from "@/components/criminals/VerificationPanel";
 import { VerifyCriminalButton } from "@/components/criminals/VerifyCriminalButton";
 import { IoPhotoPanel } from "@/components/criminals/IoPhotoPanel";
@@ -288,6 +291,7 @@ export function CriminalDetailView({
             {criminal.verificationStatus ? (
               <VerificationStatusBadge status={criminal.verificationStatus} />
             ) : null}
+            <CriminalStatusBadge status={criminal.criminalStatus} />
             <Badge variant="default">PID {criminal.pid}</Badge>
           </section>
         </section>
@@ -329,6 +333,10 @@ export function CriminalDetailView({
         <StatBox label="Crime Types" value={String(crimeTypes.length)} />
         <StatBox label="Mobile" value={criminal.mobileNumber ?? "—"} />
         <StatBox label="District" value={district} />
+        <StatBox
+          label="Criminal Status"
+          value={criminalStatusLabel(criminal.criminalStatus)}
+        />
       </section>
 
       {/* Tabs */}
@@ -397,6 +405,11 @@ export function CriminalDetailView({
                   ? `${criminal.aadhaarNumber}${criminal.aadhaarVerified ? " — Verified" : ""}`
                   : undefined
               }
+            />
+            <SummaryRow
+              labelEn={CRIMINAL_FIELDS.criminalStatus.en}
+              labelHi={CRIMINAL_FIELDS.criminalStatus.hi}
+              value={criminalStatusLabel(criminal.criminalStatus)}
             />
             <SummaryRow
               labelEn={CRIMINAL_FIELDS.livelihoodMeans.en}
@@ -609,25 +622,29 @@ export function CriminalDetailView({
             </Card>
           )}
 
-          {!ioMode ? (
-            <section className="grid gap-6 lg:grid-cols-2">
-              <Card
-                title={EXTENDED_FIELDS.confession.en}
-                subtitle={EXTENDED_FIELDS.confession.hi}
-              >
-                <p className="whitespace-pre-wrap text-sm text-slate-800">
-                  {criminal.confessionStatement || "—"}
-                </p>
-              </Card>
-              <Card title="Verification" subtitle="सत्यापन">
-                <VerificationPanel
-                  criminal={criminal}
-                  showVerifyButton={false}
-                  onVerified={handleVerified}
-                />
-              </Card>
-            </section>
-          ) : (
+          <section className="grid gap-6 lg:grid-cols-2">
+            <Card
+              title={EXTENDED_FIELDS.confession.en}
+              subtitle={EXTENDED_FIELDS.confession.hi}
+            >
+              {criminal.confessionDocument ? (
+                <section className="space-y-2 text-sm">
+                  <p className="font-medium text-slate-800">
+                    {confessionDocumentFileName(criminal.confessionDocument)}
+                  </p>
+                  <Link
+                    href={criminal.confessionDocument}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-[var(--color-primary)] hover:underline"
+                  >
+                    View / download confession document
+                  </Link>
+                </section>
+              ) : (
+                <p className="text-sm text-[var(--color-muted)]">No document on file.</p>
+              )}
+            </Card>
             <Card title="Verification" subtitle="सत्यापन">
               <VerificationPanel
                 criminal={criminal}
@@ -635,7 +652,7 @@ export function CriminalDetailView({
                 onVerified={handleVerified}
               />
             </Card>
-          )}
+          </section>
         </section>
       )}
 

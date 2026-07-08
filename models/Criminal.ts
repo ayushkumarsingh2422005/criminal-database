@@ -95,7 +95,12 @@ export interface Criminal {
   closeRelatives: RelatedPerson[];
   gangMembers: RelatedPerson[];
   bailers: BailerInfo[];
+  /** Public path to uploaded confession document (PDF, Word, or scan). */
+  confessionDocument?: string;
+  /** @deprecated Replaced by confessionDocument — legacy free-text or path. */
   confessionStatement?: string;
+  /** Current status of the criminal record (active, absconding, arrested, etc.). */
+  criminalStatus?: string;
   verificationHistory?: VerificationRecord[];
   /** @deprecated Migrated to verificationHistory */
   verification?: VerificationInfo;

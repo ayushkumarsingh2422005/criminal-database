@@ -56,6 +56,10 @@ export const CRIMINAL_FIELDS = {
     en: "Investigation Officer (IO)",
     hi: "जांच अधिकारी",
   },
+  criminalStatus: {
+    en: "Criminal Status",
+    hi: "अपराधी की स्थिति",
+  },
   photos: { en: "Photographs", hi: "विभिन्न फोटो" },
   photoFrontFull: {
     en: "Front Full-Size Photo",

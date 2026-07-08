@@ -17,6 +17,10 @@ import { usePoliceStations } from "@/lib/hooks/use-lookups";
 import { useInvestigationOfficers } from "@/lib/hooks/use-investigation-officers";
 import { useAppSession } from "@/components/session/SessionProvider";
 import type { CriminalRecord } from "@/lib/criminal-mapper";
+import {
+  criminalStatusSelectOptions,
+  normalizeCriminalStatus,
+} from "@/lib/criminal-status";
 import { PhotoUpload } from "./PhotoUpload";
 import {
   CriminalExtendedForm,
@@ -62,6 +66,9 @@ export function CriminalForm({
     state: normalizeStateValue(initial?.presentAddress?.state) || DEFAULT_STATE,
   });
   const [assignedIoId, setAssignedIoId] = useState(initial?.assignedIoId ?? "");
+  const [criminalStatus, setCriminalStatus] = useState(
+    normalizeCriminalStatus(initial?.criminalStatus)
+  );
   const [extended, setExtended] = useState(() => initialExtended(initial));
   const { items: policeStations, loading: psLoading } = usePoliceStations();
   const ioPsId = isScopedAdmin ? scopedPsId : permanent.policeStationId;
@@ -96,6 +103,7 @@ export function CriminalForm({
         livelihoodVerification: fd.get("livelihoodVerification"),
         photos,
         assignedIoId: assignedIoId || undefined,
+        criminalStatus,
         ...extended,
         ...(isSuperAdmin ? { verificationHistory } : {}),
       });
@@ -179,6 +187,13 @@ export function CriminalForm({
             label={`${CRIMINAL_FIELDS.mobileNumber.en} (${CRIMINAL_FIELDS.mobileNumber.hi})`}
             name="mobileNumber"
             defaultValue={initial?.mobileNumber ?? ""}
+          />
+          <Select
+            label={fieldLabel("criminalStatus")}
+            name="criminalStatus"
+            value={criminalStatus}
+            onChange={(e) => setCriminalStatus(normalizeCriminalStatus(e.target.value))}
+            options={criminalStatusSelectOptions().filter((o) => o.value !== "all")}
           />
         </section>
       </section>
@@ -369,6 +384,7 @@ export function CriminalForm({
       <CriminalExtendedForm
         value={extended}
         onChange={setExtended}
+        pid={pid}
         policeStationOptions={psOptions}
         isSuperAdmin={isSuperAdmin}
         verificationHistory={verificationHistory}

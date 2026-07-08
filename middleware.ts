@@ -15,11 +15,11 @@ export async function middleware(request: NextRequest) {
     return NextResponse.next();
   }
 
-  const isCriminalPhoto =
+  const isCriminalAsset =
     pathname.startsWith("/criminals/") &&
-    /\.(jpe?g|png|webp)$/i.test(pathname);
+    /\.(jpe?g|png|webp|pdf|doc|docx)$/i.test(pathname);
 
-  if (isCriminalPhoto) {
+  if (isCriminalAsset) {
     const token = getTokenFromRequest(request);
     const session = token ? await verifySessionToken(token) : null;
     if (!session) {
@@ -64,7 +64,8 @@ export async function middleware(request: NextRequest) {
     if (
       pathname.startsWith("/api/admins") ||
       pathname.startsWith("/api/transfers") ||
-      pathname.startsWith("/api/investigation-officers")
+      pathname.startsWith("/api/investigation-officers") ||
+      pathname.startsWith("/api/criminals/upload-document")
     ) {
       return NextResponse.json({ error: "Access denied" }, { status: 403 });
     }

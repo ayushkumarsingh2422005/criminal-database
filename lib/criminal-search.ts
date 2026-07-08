@@ -46,6 +46,11 @@ export async function buildCriminalFilter(
   pushRegex(conditions, "fatherName", get("fatherName"));
   pushRegex(conditions, "aadhaarNumber", get("aadhaarNumber"));
 
+  const criminalStatus = get("criminalStatus");
+  if (criminalStatus && criminalStatus !== "all") {
+    conditions.push({ criminalStatus });
+  }
+
   const historyCrimeType = get("historyCrimeType");
   if (historyCrimeType && historyCrimeType !== "all") {
     conditions.push({ "criminalHistory.crimeType": historyCrimeType });

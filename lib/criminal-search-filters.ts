@@ -17,6 +17,7 @@ export interface CriminalSearchFilters {
   historyCasePS: string;
   sectionAct: string;
   vehicleNumber: string;
+  criminalStatus: string;
   identificationMarks: string;
   associateName: string;
   associateMobile: string;
@@ -38,6 +39,7 @@ export const emptySearchFilters = (): CriminalSearchFilters => ({
   historyCasePS: "",
   sectionAct: "",
   vehicleNumber: "",
+  criminalStatus: "all",
   identificationMarks: "",
   associateName: "",
   associateMobile: "",

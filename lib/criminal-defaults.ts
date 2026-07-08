@@ -63,7 +63,7 @@ export function withExtendedDefaults(
   | "closeRelatives"
   | "gangMembers"
   | "bailers"
-  | "confessionStatement"
+  | "confessionDocument"
 > {
   return {
     criminalHistory: partial.criminalHistory ?? [],
@@ -72,6 +72,6 @@ export function withExtendedDefaults(
     closeRelatives: partial.closeRelatives ?? [],
     gangMembers: partial.gangMembers ?? [],
     bailers: partial.bailers ?? [],
-    confessionStatement: partial.confessionStatement ?? "",
+    confessionDocument: partial.confessionDocument ?? "",
   };
 }
