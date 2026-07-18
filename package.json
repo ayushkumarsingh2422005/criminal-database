@@ -5,7 +5,8 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
-    "start": "next start",
+    "start": "PORT=3006 next start",
+    "pm2-start": "PORT=3006 next start",
     "lint": "eslint",
     "migrate:history": "npx tsx scripts/migrate-criminal-history.ts",
     "create:superadmin": "npx tsx scripts/create-superadmin.ts"
