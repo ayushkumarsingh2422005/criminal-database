@@ -77,7 +77,7 @@ export default function LoginPage() {
           </Button>
         </form>
 
-        <section className="mt-6 rounded-lg border border-[var(--color-border)] bg-slate-50 px-4 py-3 text-center text-xs text-[var(--color-muted)]">
+        {/* <section className="mt-6 rounded-lg border border-[var(--color-border)] bg-slate-50 px-4 py-3 text-center text-xs text-[var(--color-muted)]">
           <p className="font-medium text-slate-700">Default superadmin</p>
           <p className="mt-1">
             Email: <span className="font-mono text-slate-800">admin@example.com</span>
@@ -86,7 +86,7 @@ export default function LoginPage() {
             Password: <span className="font-mono text-slate-800">admin123</span>
           </p>
           <p className="mt-2">Passwords are case-sensitive.</p>
-        </section>
+        </section> */}
       </section>
     </main>
   );
