@@ -7,17 +7,19 @@ export interface LookupItem {
   name: string;
 }
 
-export function usePoliceStations() {
+export function usePoliceStations(options?: { all?: boolean }) {
   const [items, setItems] = useState<LookupItem[]>([]);
   const [loading, setLoading] = useState(true);
+  const all = options?.all === true;
 
   useEffect(() => {
-    fetch("/api/police-stations")
+    const url = all ? "/api/police-stations?all=1" : "/api/police-stations";
+    fetch(url)
       .then((r) => r.json())
       .then((data) => setItems(Array.isArray(data) ? data : []))
       .catch(() => setItems([]))
       .finally(() => setLoading(false));
-  }, []);
+  }, [all]);
 
   return { items, loading };
 }

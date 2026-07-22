@@ -6,6 +6,8 @@ import type {
   PhysicalDescription,
   RelatedPerson,
   BailerInfo,
+  SocialMediaAccount,
+  JailVisitor,
   VerificationRecord,
 } from "@/models/Criminal";
 import { withExtendedDefaults, emptyPhysical } from "./criminal-defaults";
@@ -28,6 +30,7 @@ export type CriminalHistoryRecord = {
   casePoliceStationId?: string;
   /** Resolved from master list at read time */
   casePoliceStation?: string;
+  firNo?: string;
   firDate?: string;
   sectionAct?: string;
 };
@@ -66,6 +69,8 @@ interface CriminalRecordBase {
   closeRelatives: RelatedPerson[];
   gangMembers: RelatedPerson[];
   bailers: BailerInfo[];
+  socialMediaAccounts: SocialMediaAccount[];
+  jailVisitors: JailVisitor[];
   confessionDocument?: string;
   criminalStatus: string;
   verificationHistory: VerificationRecord[];
@@ -102,6 +107,7 @@ function mapHistory(
       year: row.year,
       crimeType: row.crimeType,
       ...(id ? { casePoliceStationId: id } : {}),
+      firNo: row.firNo,
       firDate: row.firDate,
       sectionAct: row.sectionAct,
     };
@@ -142,6 +148,8 @@ export function toCriminalRecord(c: Criminal): CriminalRecord {
     closeRelatives: n.closeRelatives,
     gangMembers: n.gangMembers,
     bailers: n.bailers,
+    socialMediaAccounts: n.socialMediaAccounts ?? [],
+    jailVisitors: n.jailVisitors ?? [],
     confessionDocument: resolveConfessionDocumentPath(n),
     criminalStatus: normalizeCriminalStatus(n.criminalStatus),
     verificationHistory: n.verificationHistory ?? [],
@@ -174,6 +182,8 @@ export async function parseCriminalBody(
     closeRelatives: arr(body.closeRelatives),
     gangMembers: arr(body.gangMembers),
     bailers: arr(body.bailers),
+    socialMediaAccounts: arr(body.socialMediaAccounts),
+    jailVisitors: arr(body.jailVisitors),
     confessionDocument: body.confessionDocument
       ? String(body.confessionDocument).trim()
       : "",

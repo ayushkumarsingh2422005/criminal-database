@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/Button";
 import { IconButton } from "@/components/ui/IconButton";
 import { IconPlus, IconTrash } from "@/components/ui/icons";
 import { SectionTitle } from "@/components/ui/FieldLabel";
-import { extLabel } from "@/lib/criminal-extended-fields";
+import { extLabel, EXTENDED_FIELDS } from "@/lib/criminal-extended-fields";
 import { ConfessionDocumentUpload } from "@/components/criminals/ConfessionDocumentUpload";
 import {
   emptyBailer,
@@ -15,11 +15,18 @@ import {
   emptyRelative,
   emptyVehicle,
   emptyPhysical,
+  emptySocialMedia,
+  emptyJailVisitor,
 } from "@/lib/criminal-defaults";
 import type { CriminalRecord } from "@/lib/criminal-mapper";
 import { formatDateTimeDisplay, toDateInputValue } from "@/lib/date-utils";
 import { useCaseTypes } from "@/lib/hooks/use-lookups";
-import type { BailerInfo, RelatedPerson, VerificationRecord } from "@/models/Criminal";
+import type {
+  BailerInfo,
+  JailVisitor,
+  RelatedPerson,
+  VerificationRecord,
+} from "@/models/Criminal";
 
 function ListHeader({
   titleEn,
@@ -58,6 +65,8 @@ export function CriminalExtendedForm({
     | "closeRelatives"
     | "gangMembers"
     | "bailers"
+    | "socialMediaAccounts"
+    | "jailVisitors"
     | "confessionDocument"
   >;
   onChange: (v: typeof value) => void;
@@ -150,6 +159,16 @@ export function CriminalExtendedForm({
                   set({ criminalHistory: next });
                 }}
                 options={policeStationOptions}
+              />
+              <Input
+                label={extLabel("firNo")}
+                value={row.firNo ?? ""}
+                placeholder="e.g. 84/2025"
+                onChange={(e) => {
+                  const next = [...value.criminalHistory];
+                  next[i] = { ...row, firNo: e.target.value };
+                  set({ criminalHistory: next });
+                }}
               />
               <Input
                 label={extLabel("firDate")}
@@ -385,6 +404,161 @@ export function CriminalExtendedForm({
         ))}
       </section>
 
+      {/* Social media accounts */}
+      <section className="space-y-3">
+        <ListHeader
+          titleEn={EXTENDED_FIELDS.socialMedia.en}
+          titleHi={EXTENDED_FIELDS.socialMedia.hi}
+          onAdd={() =>
+            set({
+              socialMediaAccounts: [
+                ...value.socialMediaAccounts,
+                emptySocialMedia(),
+              ],
+            })
+          }
+        />
+        {value.socialMediaAccounts.map((row, i) => (
+          <article key={i} className="rounded-lg border border-[var(--color-border)] p-4">
+            <section className="mb-2 flex justify-end">
+              <IconButton
+                label="Remove row"
+                variant="ghost"
+                onClick={() =>
+                  set({
+                    socialMediaAccounts: value.socialMediaAccounts.filter(
+                      (_, j) => j !== i
+                    ),
+                  })
+                }
+              >
+                <IconTrash />
+              </IconButton>
+            </section>
+            <section className="grid gap-3 sm:grid-cols-2">
+              <Input
+                label={extLabel("socialPlatform")}
+                value={row.platform ?? ""}
+                placeholder="Facebook / Instagram / WhatsApp / X"
+                onChange={(e) => {
+                  const next = [...value.socialMediaAccounts];
+                  next[i] = { ...row, platform: e.target.value };
+                  set({ socialMediaAccounts: next });
+                }}
+              />
+              <Input
+                label={extLabel("socialIdDetails")}
+                value={row.idDetails ?? ""}
+                placeholder="Username / profile link / phone"
+                onChange={(e) => {
+                  const next = [...value.socialMediaAccounts];
+                  next[i] = { ...row, idDetails: e.target.value };
+                  set({ socialMediaAccounts: next });
+                }}
+              />
+            </section>
+          </article>
+        ))}
+      </section>
+
+      {/* Jail visitors */}
+      <section className="space-y-3">
+        <ListHeader
+          titleEn={EXTENDED_FIELDS.jailVisitors.en}
+          titleHi={EXTENDED_FIELDS.jailVisitors.hi}
+          onAdd={() =>
+            set({
+              jailVisitors: [...value.jailVisitors, emptyJailVisitor()],
+            })
+          }
+        />
+        {value.jailVisitors.map((row, i) => (
+          <article key={i} className="rounded-lg border border-[var(--color-border)] p-4">
+            <section className="mb-2 flex justify-between">
+              <span className="text-xs font-medium text-slate-600">#{i + 1}</span>
+              <IconButton
+                label="Remove row"
+                variant="ghost"
+                onClick={() =>
+                  set({
+                    jailVisitors: value.jailVisitors.filter((_, j) => j !== i),
+                  })
+                }
+              >
+                <IconTrash />
+              </IconButton>
+            </section>
+            <section className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+              <Input
+                label="Name / नाम"
+                value={row.name ?? ""}
+                onChange={(e) => updateJailVisitor(value, set, i, "name", e.target.value)}
+              />
+              <Input
+                label="Father's Name / पिता का नाम"
+                value={row.fatherName ?? ""}
+                onChange={(e) =>
+                  updateJailVisitor(value, set, i, "fatherName", e.target.value)
+                }
+              />
+              <Input
+                label="Mobile / मो०नं०"
+                value={row.mobileNumber ?? ""}
+                onChange={(e) =>
+                  updateJailVisitor(value, set, i, "mobileNumber", e.target.value)
+                }
+              />
+              <Input
+                label={extLabel("idProof")}
+                value={row.idProof ?? ""}
+                onChange={(e) =>
+                  updateJailVisitor(value, set, i, "idProof", e.target.value)
+                }
+              />
+              <Input
+                label={extLabel("idNumber")}
+                value={row.idNumber ?? ""}
+                onChange={(e) =>
+                  updateJailVisitor(value, set, i, "idNumber", e.target.value)
+                }
+              />
+              <Input
+                label={extLabel("visitorVehicle")}
+                value={row.vehicle ?? ""}
+                onChange={(e) =>
+                  updateJailVisitor(value, set, i, "vehicle", e.target.value)
+                }
+              />
+              <Input
+                label={extLabel("reasonOfVisit")}
+                value={row.reasonOfVisit ?? ""}
+                onChange={(e) =>
+                  updateJailVisitor(value, set, i, "reasonOfVisit", e.target.value)
+                }
+              />
+              <Input
+                label={extLabel("visitorRemarks")}
+                value={row.remarks ?? ""}
+                onChange={(e) =>
+                  updateJailVisitor(value, set, i, "remarks", e.target.value)
+                }
+              />
+              <label className="sm:col-span-2 lg:col-span-3 flex flex-col gap-1">
+                <span className="text-sm font-medium">Address / पता</span>
+                <textarea
+                  rows={2}
+                  value={row.address ?? ""}
+                  onChange={(e) =>
+                    updateJailVisitor(value, set, i, "address", e.target.value)
+                  }
+                  className="rounded-lg border border-[var(--color-border)] px-3 py-2 text-sm"
+                />
+              </label>
+            </section>
+          </article>
+        ))}
+      </section>
+
       {/* Confession document */}
       <ConfessionDocumentUpload
         pid={pid}
@@ -595,6 +769,20 @@ export function initialExtended(
     closeRelatives: initial?.closeRelatives ?? [],
     gangMembers: initial?.gangMembers ?? [],
     bailers: initial?.bailers ?? [],
+    socialMediaAccounts: initial?.socialMediaAccounts ?? [],
+    jailVisitors: initial?.jailVisitors ?? [],
     confessionDocument: initial?.confessionDocument ?? "",
   };
+}
+
+function updateJailVisitor(
+  value: Parameters<typeof CriminalExtendedForm>[0]["value"],
+  set: (patch: Partial<Parameters<typeof CriminalExtendedForm>[0]["value"]>) => void,
+  index: number,
+  key: keyof JailVisitor,
+  val: string
+) {
+  const next = [...value.jailVisitors];
+  next[index] = { ...next[index], [key]: val };
+  set({ jailVisitors: next });
 }

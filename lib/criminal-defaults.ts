@@ -5,6 +5,8 @@ import type {
   PhysicalDescription,
   RelatedPerson,
   BailerInfo,
+  SocialMediaAccount,
+  JailVisitor,
 } from "@/models/Criminal";
 
 export const emptyPhysical = (): PhysicalDescription => ({
@@ -20,6 +22,7 @@ export const emptyHistory = (): CriminalHistoryRecord => ({
   year: "",
   crimeType: "",
   casePoliceStationId: "",
+  firNo: "",
   firDate: "",
   sectionAct: "",
 });
@@ -53,6 +56,23 @@ export const emptyBailer = (): BailerInfo => ({
   firDetails: "",
 });
 
+export const emptySocialMedia = (): SocialMediaAccount => ({
+  platform: "",
+  idDetails: "",
+});
+
+export const emptyJailVisitor = (): JailVisitor => ({
+  name: "",
+  fatherName: "",
+  address: "",
+  mobileNumber: "",
+  idProof: "",
+  idNumber: "",
+  reasonOfVisit: "",
+  vehicle: "",
+  remarks: "",
+});
+
 export function withExtendedDefaults(
   partial: Partial<Criminal>
 ): Pick<
@@ -63,6 +83,8 @@ export function withExtendedDefaults(
   | "closeRelatives"
   | "gangMembers"
   | "bailers"
+  | "socialMediaAccounts"
+  | "jailVisitors"
   | "confessionDocument"
 > {
   return {
@@ -72,6 +94,8 @@ export function withExtendedDefaults(
     closeRelatives: partial.closeRelatives ?? [],
     gangMembers: partial.gangMembers ?? [],
     bailers: partial.bailers ?? [],
+    socialMediaAccounts: partial.socialMediaAccounts ?? [],
+    jailVisitors: partial.jailVisitors ?? [],
     confessionDocument: partial.confessionDocument ?? "",
   };
 }

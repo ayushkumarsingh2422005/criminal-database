@@ -108,6 +108,7 @@ export async function parseHistoryInput(
       year: row.year ? String(row.year).trim() : undefined,
       crimeType: row.crimeType ? String(row.crimeType).trim() : undefined,
       ...(casePoliceStationId ? { casePoliceStationId } : {}),
+      firNo: row.firNo ? String(row.firNo).trim() : undefined,
       firDate: row.firDate ? String(row.firDate).trim() : undefined,
       sectionAct: row.sectionAct ? String(row.sectionAct).trim() : undefined,
     });
@@ -145,6 +146,7 @@ function resolveHistoryForApi(
       crimeType: row.crimeType,
       ...(id ? { casePoliceStationId: id } : {}),
       ...(name ? { casePoliceStation: name } : {}),
+      firNo: row.firNo,
       firDate: row.firDate,
       sectionAct: row.sectionAct,
     };

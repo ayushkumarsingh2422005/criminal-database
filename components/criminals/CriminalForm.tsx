@@ -71,6 +71,7 @@ export function CriminalForm({
   );
   const [extended, setExtended] = useState(() => initialExtended(initial));
   const { items: policeStations, loading: psLoading } = usePoliceStations();
+  const { items: allPoliceStations } = usePoliceStations({ all: true });
   const ioPsId = isScopedAdmin ? scopedPsId : permanent.policeStationId;
   const { items: investigationOfficers, loading: ioLoading } =
     useInvestigationOfficers(ioPsId);
@@ -78,6 +79,11 @@ export function CriminalForm({
   const psOptions = [
     { value: "", label: "Select police station / पुलिस स्टेशन चुनें" },
     ...policeStations.map((s) => ({ value: s.id, label: s.name })),
+  ];
+
+  const allPsOptions = [
+    { value: "", label: "Select police station / पुलिस स्टेशन चुनें" },
+    ...allPoliceStations.map((s) => ({ value: s.id, label: s.name })),
   ];
 
   async function handleSubmit(e: FormEvent<HTMLFormElement>) {
@@ -385,7 +391,7 @@ export function CriminalForm({
         value={extended}
         onChange={setExtended}
         pid={pid}
-        policeStationOptions={psOptions}
+        policeStationOptions={allPsOptions}
         isSuperAdmin={isSuperAdmin}
         verificationHistory={verificationHistory}
         onVerificationHistoryChange={setVerificationHistory}

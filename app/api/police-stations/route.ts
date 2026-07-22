@@ -11,6 +11,9 @@ export async function GET(request: NextRequest) {
     const forTransfer =
       new URL(request.url).searchParams.get("forTransfer") === "1" ||
       new URL(request.url).searchParams.get("forTransfer") === "true";
+    const allStations =
+      new URL(request.url).searchParams.get("all") === "1" ||
+      new URL(request.url).searchParams.get("all") === "true";
 
     const items = await PoliceStationModel.findAllActive();
     const mapStation = (s: (typeof items)[number]) => ({
@@ -25,6 +28,11 @@ export async function GET(request: NextRequest) {
           .filter((s) => !s._id!.equals(scopePsId))
           .map(mapStation)
       );
+    }
+
+    // Case police station / history: always full list for authenticated users
+    if (allStations || !scopePsId) {
+      return jsonOk(items.map(mapStation));
     }
 
     if (scopePsId) {

@@ -108,12 +108,13 @@ function TableHeader({ widths, labels }: { widths: string[]; labels: string[] })
 }
 
 function HistorySection({ rows }: { rows: CriminalHistoryRecord[] }) {
-  const widths = ["8%", "10%", "22%", "22%", "18%", "20%"];
+  const widths = ["6%", "8%", "16%", "16%", "12%", "14%", "28%"];
   const headers = [
     "S.No",
     "Year",
     "Crime Type",
     "Case PS",
+    "FIR No",
     "Date of FIR",
     "Section / Act",
   ];
@@ -139,10 +140,11 @@ function HistorySection({ rows }: { rows: CriminalHistoryRecord[] }) {
           <Text style={[styles.td, { width: widths[1] }]}>{dash(row.year)}</Text>
           <Text style={[styles.td, { width: widths[2] }]}>{dash(row.crimeType)}</Text>
           <Text style={[styles.td, { width: widths[3] }]}>{dash(row.casePoliceStation)}</Text>
-          <Text style={[styles.td, { width: widths[4] }]}>
+          <Text style={[styles.td, { width: widths[4] }]}>{dash(row.firNo)}</Text>
+          <Text style={[styles.td, { width: widths[5] }]}>
             {formatFirDate(row.firDate) || "—"}
           </Text>
-          <Text style={[styles.td, { width: widths[5], borderRightWidth: 0 }]}>
+          <Text style={[styles.td, { width: widths[6], borderRightWidth: 0 }]}>
             {dash(row.sectionAct)}
           </Text>
         </View>
@@ -264,6 +266,24 @@ export function CriminalReportDocument({
     dash(b.aadhaarNumber),
     dash(b.propertyDetails),
     dash(b.firDetails),
+  ]);
+
+  const socialRows: string[][] = (criminal.socialMediaAccounts ?? []).map((s) => [
+    dash(s.platform),
+    dash(s.idDetails),
+  ]);
+
+  const jailVisitorRows: string[][] = (criminal.jailVisitors ?? []).map((v, i) => [
+    String(i + 1),
+    dash(v.name),
+    dash(v.fatherName),
+    dash(v.address),
+    dash(v.mobileNumber),
+    dash(v.idProof),
+    dash(v.idNumber),
+    dash(v.reasonOfVisit),
+    dash(v.vehicle),
+    dash(v.remarks),
   ]);
 
   const phys = criminal.physicalDescription;
@@ -404,7 +424,36 @@ export function CriminalReportDocument({
         </View>
 
         <View style={styles.section}>
-          <SectionHeading>11. स्वीकारोक्ति बयान:-</SectionHeading>
+          <SectionHeading>11. सोशल मीडिया अकाउंट्स:-</SectionHeading>
+          <SimpleTable
+            widths={["40%", "60%"]}
+            headers={["प्लेटफ़ॉर्म", "ID विवरण"]}
+            rows={socialRows}
+          />
+        </View>
+
+        <View style={styles.section}>
+          <SectionHeading>12. जेल में नियमित मिलने वाले:-</SectionHeading>
+          <SimpleTable
+            widths={["5%", "10%", "10%", "14%", "9%", "9%", "9%", "12%", "10%", "12%"]}
+            headers={[
+              "क्र.",
+              "नाम",
+              "पिता",
+              "पता",
+              "मो०",
+              "ID Proof",
+              "ID No",
+              "कारण",
+              "वाहन",
+              "टिप्पणी",
+            ]}
+            rows={jailVisitorRows}
+          />
+        </View>
+
+        <View style={styles.section}>
+          <SectionHeading>13. स्वीकारोक्ति बयान:-</SectionHeading>
           <Text style={[styles.bodyText, { minHeight: 40 }]}>
             {criminal.confessionDocument
               ? dash(confessionDocumentFileName(criminal.confessionDocument))

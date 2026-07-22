@@ -48,7 +48,16 @@ export async function buildCriminalFilter(
 
   const criminalStatus = get("criminalStatus");
   if (criminalStatus && criminalStatus !== "all") {
-    conditions.push({ criminalStatus });
+    const statusAliases: Record<string, string[]> = {
+      absconder: ["absconder", "absconding"],
+      jail: ["jail", "arrested"],
+      wanted: ["wanted", "active", "unknown", "deceased"],
+      on_bail: ["on_bail", "released"],
+    };
+    const values = statusAliases[criminalStatus] ?? [criminalStatus];
+    conditions.push({
+      criminalStatus: values.length === 1 ? values[0] : { $in: values },
+    });
   }
 
   const historyCrimeType = get("historyCrimeType");

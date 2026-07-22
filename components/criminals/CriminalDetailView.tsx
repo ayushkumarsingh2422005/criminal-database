@@ -13,7 +13,7 @@ import { EXTENDED_FIELDS } from "@/lib/criminal-extended-fields";
 import { formatDateDisplay } from "@/lib/date-utils";
 import { aggregateCrimeTypes } from "@/lib/criminal-history-utils";
 import type { CriminalHistoryRecord, CriminalRecord } from "@/lib/criminal-mapper";
-import type { BailerInfo, CriminalVehicle, RelatedPerson } from "@/models/Criminal";
+import type { BailerInfo, CriminalVehicle, JailVisitor, RelatedPerson, SocialMediaAccount } from "@/models/Criminal";
 import { VerificationStatusBadge } from "@/components/criminals/VerificationStatusBadge";
 import { confessionDocumentFileName } from "@/lib/confession-document";
 import { CriminalStatusBadge } from "@/components/criminals/CriminalStatusBadge";
@@ -93,13 +93,14 @@ function HistoryTable({ rows }: { rows: CriminalHistoryRecord[] }) {
   }
   return (
     <section className="overflow-x-auto">
-      <table className="w-full min-w-[720px] border-collapse text-sm">
+      <table className="w-full min-w-[800px] border-collapse text-sm">
         <thead>
           <tr className="border-b border-[var(--color-border)] bg-slate-50 text-left text-xs font-semibold uppercase tracking-wide text-slate-600">
             <th className="px-3 py-2">{EXTENDED_FIELDS.sNo.en}</th>
             <th className="px-3 py-2">{EXTENDED_FIELDS.year.en}</th>
             <th className="px-3 py-2">{EXTENDED_FIELDS.crimeType.en}</th>
             <th className="px-3 py-2">{EXTENDED_FIELDS.casePoliceStation.en}</th>
+            <th className="px-3 py-2">{EXTENDED_FIELDS.firNo.en}</th>
             <th className="px-3 py-2">{EXTENDED_FIELDS.firDate.en}</th>
             <th className="px-3 py-2">{EXTENDED_FIELDS.sectionAct.en}</th>
           </tr>
@@ -111,6 +112,7 @@ function HistoryTable({ rows }: { rows: CriminalHistoryRecord[] }) {
               <td className="px-3 py-2">{row.year || "—"}</td>
               <td className="px-3 py-2">{row.crimeType || "—"}</td>
               <td className="px-3 py-2">{row.casePoliceStation || "—"}</td>
+              <td className="px-3 py-2">{row.firNo || "—"}</td>
               <td className="px-3 py-2">{formatDateDisplay(row.firDate) || "—"}</td>
               <td className="px-3 py-2">{row.sectionAct || "—"}</td>
             </tr>
@@ -180,6 +182,74 @@ function VehiclesTable({ rows }: { rows: CriminalVehicle[] }) {
             <tr key={i} className="border-b border-[var(--color-border)]">
               <td className="px-3 py-2">{row.vehicleNumber || "—"}</td>
               <td className="px-3 py-2">{row.otherDetails || "—"}</td>
+              <td className="px-3 py-2">{row.remarks || "—"}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </section>
+  );
+}
+
+function SocialMediaTable({ rows }: { rows: SocialMediaAccount[] }) {
+  if (rows.length === 0) {
+    return <p className="text-sm text-[var(--color-muted)]">No social media accounts on file.</p>;
+  }
+  return (
+    <section className="overflow-x-auto">
+      <table className="w-full border-collapse text-sm">
+        <thead>
+          <tr className="border-b border-[var(--color-border)] bg-slate-50 text-left text-xs font-semibold uppercase tracking-wide text-slate-600">
+            <th className="px-3 py-2">{EXTENDED_FIELDS.socialPlatform.en}</th>
+            <th className="px-3 py-2">{EXTENDED_FIELDS.socialIdDetails.en}</th>
+          </tr>
+        </thead>
+        <tbody>
+          {rows.map((row, i) => (
+            <tr key={i} className="border-b border-[var(--color-border)]">
+              <td className="px-3 py-2">{row.platform || "—"}</td>
+              <td className="px-3 py-2">{row.idDetails || "—"}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </section>
+  );
+}
+
+function JailVisitorsTable({ rows }: { rows: JailVisitor[] }) {
+  if (rows.length === 0) {
+    return <p className="text-sm text-[var(--color-muted)]">No jail visitor records on file.</p>;
+  }
+  return (
+    <section className="overflow-x-auto">
+      <table className="w-full min-w-[960px] border-collapse text-sm">
+        <thead>
+          <tr className="border-b border-[var(--color-border)] bg-slate-50 text-left text-xs font-semibold uppercase tracking-wide text-slate-600">
+            <th className="px-3 py-2">#</th>
+            <th className="px-3 py-2">Name</th>
+            <th className="px-3 py-2">Father&apos;s Name</th>
+            <th className="px-3 py-2">Address</th>
+            <th className="px-3 py-2">Mobile</th>
+            <th className="px-3 py-2">{EXTENDED_FIELDS.idProof.en}</th>
+            <th className="px-3 py-2">{EXTENDED_FIELDS.idNumber.en}</th>
+            <th className="px-3 py-2">{EXTENDED_FIELDS.reasonOfVisit.en}</th>
+            <th className="px-3 py-2">{EXTENDED_FIELDS.visitorVehicle.en}</th>
+            <th className="px-3 py-2">{EXTENDED_FIELDS.visitorRemarks.en}</th>
+          </tr>
+        </thead>
+        <tbody>
+          {rows.map((row, i) => (
+            <tr key={i} className="border-b border-[var(--color-border)] align-top">
+              <td className="px-3 py-2">{i + 1}</td>
+              <td className="px-3 py-2">{row.name || "—"}</td>
+              <td className="px-3 py-2">{row.fatherName || "—"}</td>
+              <td className="px-3 py-2 whitespace-pre-wrap">{row.address || "—"}</td>
+              <td className="px-3 py-2">{row.mobileNumber || "—"}</td>
+              <td className="px-3 py-2">{row.idProof || "—"}</td>
+              <td className="px-3 py-2">{row.idNumber || "—"}</td>
+              <td className="px-3 py-2">{row.reasonOfVisit || "—"}</td>
+              <td className="px-3 py-2">{row.vehicle || "—"}</td>
               <td className="px-3 py-2">{row.remarks || "—"}</td>
             </tr>
           ))}
@@ -579,6 +649,18 @@ export function CriminalDetailView({
           </Card>
           <Card title={EXTENDED_FIELDS.bailers.en} subtitle={EXTENDED_FIELDS.bailers.hi}>
             <BailersTable rows={criminal.bailers} />
+          </Card>
+          <Card
+            title={EXTENDED_FIELDS.socialMedia.en}
+            subtitle={EXTENDED_FIELDS.socialMedia.hi}
+          >
+            <SocialMediaTable rows={criminal.socialMediaAccounts ?? []} />
+          </Card>
+          <Card
+            title={EXTENDED_FIELDS.jailVisitors.en}
+            subtitle={EXTENDED_FIELDS.jailVisitors.hi}
+          >
+            <JailVisitorsTable rows={criminal.jailVisitors ?? []} />
           </Card>
         </section>
       )}

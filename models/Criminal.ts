@@ -22,8 +22,26 @@ export interface CriminalHistoryEntry {
   crimeType?: string;
   /** Case police station — reference to `police_stations` (name resolved at read time). */
   casePoliceStationId?: ObjectId;
+  firNo?: string;
   firDate?: string;
   sectionAct?: string;
+}
+
+export interface SocialMediaAccount {
+  platform?: string;
+  idDetails?: string;
+}
+
+export interface JailVisitor {
+  name?: string;
+  fatherName?: string;
+  address?: string;
+  mobileNumber?: string;
+  idProof?: string;
+  idNumber?: string;
+  reasonOfVisit?: string;
+  vehicle?: string;
+  remarks?: string;
 }
 
 export interface CriminalVehicle {
@@ -95,6 +113,8 @@ export interface Criminal {
   closeRelatives: RelatedPerson[];
   gangMembers: RelatedPerson[];
   bailers: BailerInfo[];
+  socialMediaAccounts: SocialMediaAccount[];
+  jailVisitors: JailVisitor[];
   /** Public path to uploaded confession document (PDF, Word, or scan). */
   confessionDocument?: string;
   /** @deprecated Replaced by confessionDocument — legacy free-text or path. */
