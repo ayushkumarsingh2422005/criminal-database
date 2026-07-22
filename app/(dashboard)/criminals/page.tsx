@@ -81,7 +81,9 @@ export default function CriminalManagementPage() {
         subtitle={
           isScopedAdmin
             ? `अपराधी प्रबंधन — ${session.policeStationName ?? "your PS"} only`
-            : "अपराधी प्रबंधन — add, edit, delete records with photos in /public."
+            : session.role === "superadmin"
+              ? "अपराधी प्रबंधन — all police stations (full access)"
+              : "अपराधी प्रबंधन — add, edit, delete records with photos in /public."
         }
         actions={
           <Button

@@ -6,6 +6,14 @@ import { redirect } from "next/navigation";
 
 const panels = [
   {
+    href: "/criminals",
+    title: "Criminal Management",
+    description: "Add, edit, and manage criminal records across all police stations.",
+    icon: "📁",
+    color: "bg-slate-50 text-slate-700",
+    superadminOnly: true,
+  },
+  {
     href: "/admin/users",
     title: "Admin Management",
     description: "Create and manage admin accounts. Superadmin only.",

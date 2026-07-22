@@ -12,14 +12,17 @@ type NavItem = {
   href: string;
   label: string;
   superadminOnly?: boolean;
+  /** Visible to PS admin and superadmin (not IO). */
   adminOnly?: boolean;
+  /** Visible only to PS admin (needs assigned police station). */
+  psAdminOnly?: boolean;
   ioHidden?: boolean;
 };
 
 const navItems: NavItem[] = [
   { href: "/search", label: "Search" },
   { href: "/criminals", label: "Criminal Management", adminOnly: true, ioHidden: true },
-  { href: "/transfer", label: "Transfer", adminOnly: true, ioHidden: true },
+  { href: "/transfer", label: "Transfer", psAdminOnly: true, ioHidden: true },
   {
     href: "/investigation-officers",
     label: "Investigation Officers",
@@ -32,7 +35,8 @@ const navItems: NavItem[] = [
 function canSeeNavItem(item: NavItem, role: AppSessionUser["role"]) {
   if (item.ioHidden && role === "io") return false;
   if (item.superadminOnly) return role === "superadmin";
-  if (item.adminOnly) return role === "admin";
+  if (item.psAdminOnly) return role === "admin";
+  if (item.adminOnly) return role === "admin" || role === "superadmin";
   return true;
 }
 
