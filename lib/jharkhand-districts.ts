@@ -27,7 +27,15 @@ export const JHARKHAND_DISTRICTS = [
   { value: "पश्चिमी सिंहभूम", labelEn: "West Singhbhum", labelHi: "पश्चिमी सिंहभूम" },
 ] as const;
 
+/** Select value when district is not in the Jharkhand list — actual name stored separately. */
+export const OTHER_DISTRICT_VALUE = "__other__";
+
 export type JharkhandDistrictValue = (typeof JHARKHAND_DISTRICTS)[number]["value"];
+
+export function isJharkhandDistrictValue(value?: string): boolean {
+  if (!value?.trim()) return false;
+  return JHARKHAND_DISTRICTS.some((d) => d.value === value.trim());
+}
 
 export function districtOptionLabel(d: (typeof JHARKHAND_DISTRICTS)[number]): string {
   return `${d.labelEn} (${d.labelHi})`;
@@ -38,13 +46,17 @@ export function districtSelectOptions(emptyLabel?: string): { value: string; lab
     value: d.value,
     label: districtOptionLabel(d),
   }));
+  const other = {
+    value: OTHER_DISTRICT_VALUE,
+    label: "Other / अन्य (enter manually)",
+  };
   if (emptyLabel) {
-    return [{ value: "", label: emptyLabel }, ...options];
+    return [{ value: "", label: emptyLabel }, ...options, other];
   }
-  return [{ value: "", label: "Select district / जिला चुनें" }, ...options];
+  return [{ value: "", label: "Select district / जिला चुनें" }, ...options, other];
 }
 
-/** Match stored district text to a predefined option (legacy free-text values). */
+/** Match stored district text to a predefined Jharkhand option (legacy free-text values). */
 export function normalizeDistrictValue(value?: string): string {
   if (!value?.trim()) return "";
   const trimmed = value.trim();
@@ -54,4 +66,40 @@ export function normalizeDistrictValue(value?: string): string {
   const byEn = JHARKHAND_DISTRICTS.find((d) => d.labelEn.toLowerCase() === lower);
   if (byEn) return byEn.value;
   return trimmed;
+}
+
+/** Split stored DB value into select + optional custom field for forms. */
+export function splitDistrictForForm(stored?: string): {
+  districtSelect: string;
+  districtCustom: string;
+} {
+  if (!stored?.trim()) {
+    return { districtSelect: "", districtCustom: "" };
+  }
+  const normalized = normalizeDistrictValue(stored);
+  if (isJharkhandDistrictValue(normalized)) {
+    return { districtSelect: normalized, districtCustom: "" };
+  }
+  return { districtSelect: OTHER_DISTRICT_VALUE, districtCustom: stored.trim() };
+}
+
+/** Value to persist on save from form select + custom input. */
+export function resolveDistrictForSave(
+  districtSelect: string,
+  districtCustom: string
+): string {
+  if (districtSelect === OTHER_DISTRICT_VALUE) {
+    return districtCustom.trim();
+  }
+  return districtSelect.trim();
+}
+
+export function districtDisplayLabel(stored?: string): string {
+  if (!stored?.trim()) return "";
+  const normalized = normalizeDistrictValue(stored);
+  if (isJharkhandDistrictValue(normalized)) {
+    const row = JHARKHAND_DISTRICTS.find((d) => d.value === normalized);
+    return row ? districtOptionLabel(row) : normalized;
+  }
+  return stored.trim();
 }

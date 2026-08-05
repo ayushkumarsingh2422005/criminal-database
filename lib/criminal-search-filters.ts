@@ -61,3 +61,18 @@ export function filtersToSearchParams(
   });
   return params;
 }
+
+/** Same filter params as search, without pagination — for CSV export. */
+export function filtersToExportParams(
+  filters: CriminalSearchFilters,
+  columns?: string[]
+): URLSearchParams {
+  const params = new URLSearchParams();
+  Object.entries(filters).forEach(([k, v]) => {
+    if (v && v !== "all" && v !== "any") params.set(k, v);
+  });
+  if (columns?.length) {
+    params.set("columns", columns.join(","));
+  }
+  return params;
+}

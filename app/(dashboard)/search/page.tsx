@@ -9,15 +9,20 @@ import { IconButton } from "@/components/ui/IconButton";
 import { IconChevronLeft, IconChevronRight } from "@/components/ui/icons";
 import { SectionTitle } from "@/components/ui/FieldLabel";
 import { CriminalTable } from "@/components/criminals/CriminalTable";
+import { CsvExportPanel } from "@/components/criminals/CsvExportPanel";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { fieldLabel } from "@/lib/criminal-fields";
 import { EXTENDED_FIELDS, extLabel } from "@/lib/criminal-extended-fields";
+import { DistrictField } from "@/components/criminals/DistrictField";
 import {
   emptySearchFilters,
   filtersToSearchParams,
   type CriminalSearchFilters,
 } from "@/lib/criminal-search-filters";
-import { districtSelectOptions } from "@/lib/jharkhand-districts";
+import {
+  OTHER_DISTRICT_VALUE,
+  resolveDistrictForSave,
+} from "@/lib/jharkhand-districts";
 import { criminalStatusSelectOptions } from "@/lib/criminal-status";
 import { useCaseTypes, usePoliceStations } from "@/lib/hooks/use-lookups";
 import { useAppSession } from "@/components/session/SessionProvider";
@@ -25,18 +30,27 @@ import type { CriminalRecord } from "@/lib/criminal-mapper";
 
 export default function SearchPage() {
   const session = useAppSession();
-  const isScopedAdmin = session.role === "admin" && !!session.policeStationId;
   const isIo = session.role === "io";
 
   const [filters, setFilters] = useState<CriminalSearchFilters>(emptySearchFilters);
+  const [districtSelect, setDistrictSelect] = useState("");
+  const [districtCustom, setDistrictCustom] = useState("");
   const [items, setItems] = useState<CriminalRecord[]>([]);
   const [loading, setLoading] = useState(false);
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
+  const [total, setTotal] = useState(0);
   const [limit, setLimit] = useState(10);
   const { items: caseTypes } = useCaseTypes();
   const { items: policeStations } = usePoliceStations();
-  const districtOptions = districtSelectOptions("All districts / सभी जिले");
+
+  function districtFilterValue(select: string, custom: string) {
+    return resolveDistrictForSave(select, custom);
+  }
+
+  function applyDistrictFilter(select: string, custom: string) {
+    return { ...filters, district: districtFilterValue(select, custom) };
+  }
 
   const set =
     (key: keyof CriminalSearchFilters) =>
@@ -56,6 +70,7 @@ export default function SearchPage() {
     if (res.ok) {
       setItems(data.items);
       setTotalPages(data.totalPages);
+      setTotal(data.total ?? 0);
       setPage(data.page);
     }
   }
@@ -67,12 +82,16 @@ export default function SearchPage() {
 
   function handleSearch(e: FormEvent) {
     e.preventDefault();
-    fetchResults(1);
+    const activeFilters = applyDistrictFilter(districtSelect, districtCustom);
+    setFilters(activeFilters);
+    fetchResults(1, activeFilters);
   }
 
   function handleReset() {
     const cleared = emptySearchFilters();
     setFilters(cleared);
+    setDistrictSelect("");
+    setDistrictCustom("");
     setPage(1);
     fetchResults(1, cleared);
   }
@@ -84,9 +103,9 @@ export default function SearchPage() {
         subtitle={
           isIo
             ? "Assigned criminals only — view, upload photos, and verify."
-            : isScopedAdmin
-            ? `Records for your police station only: ${session.policeStationName ?? "assigned PS"}`
-            : "अपराधी खोज — filter by personal details, criminal history, vehicles, associates, and more."
+            : session.role === "admin"
+              ? `Search all criminals — edit only for ${session.policeStationName ?? "your PS"}`
+              : "अपराधी खोज — filter by personal details, criminal history, vehicles, associates, and more."
         }
       />
 
@@ -121,7 +140,7 @@ export default function SearchPage() {
                 value={filters.aadhaarNumber}
                 onChange={set("aadhaarNumber")}
               />
-              {!isScopedAdmin && (
+              {!isIo && (
                 <>
                   <Select
                     label={fieldLabel("addressPoliceStation")}
@@ -144,11 +163,18 @@ export default function SearchPage() {
                   />
                 </>
               )}
-              <Select
+              <DistrictField
                 label={fieldLabel("district")}
-                value={filters.district}
-                onChange={set("district")}
-                options={districtOptions}
+                districtSelect={districtSelect}
+                districtCustom={districtCustom}
+                onDistrictSelectChange={(value) => {
+                  setDistrictSelect(value);
+                  if (value !== OTHER_DISTRICT_VALUE) {
+                    setDistrictCustom("");
+                  }
+                }}
+                onDistrictCustomChange={setDistrictCustom}
+                emptyLabel="All districts / सभी जिले"
               />
               <Select
                 label={fieldLabel("criminalStatus")}
@@ -186,7 +212,7 @@ export default function SearchPage() {
                 onChange={set("sectionAct")}
                 placeholder="379 IPC"
               />
-              {!isScopedAdmin && (
+              {!isIo && (
                 <Select
                   label={extLabel("casePoliceStation")}
                   value={filters.historyCasePS}
@@ -271,6 +297,14 @@ export default function SearchPage() {
             </section>
           </footer>
         </form>
+        <section className="mt-6">
+          <CsvExportPanel
+            filters={filters}
+            districtSelect={districtSelect}
+            districtCustom={districtCustom}
+            resultCount={total}
+          />
+        </section>
       </Card>
 
       <Card title="Search Results" subtitle={`Page ${page} of ${totalPages || 1}`}>

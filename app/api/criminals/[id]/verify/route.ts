@@ -5,7 +5,7 @@ import { CriminalModel, getCriminalCollection } from "@/models/Criminal";
 import { toCriminalRecord } from "@/lib/criminal-mapper";
 import { enrichCriminalsFromDocs } from "@/lib/police-station-ref";
 import { enrichCriminalRecord } from "@/lib/enrich-criminal-records";
-import { assertCriminalAccess } from "@/lib/admin-scope";
+import { assertCriminalAccess, assertCriminalMutateAccess } from "@/lib/admin-scope";
 import { parseVerifiedAtFromClient } from "@/lib/verification";
 
 export async function POST(
@@ -20,7 +20,7 @@ export async function POST(
     }
 
     const existing = await CriminalModel.findById(id);
-    await assertCriminalAccess(session, existing);
+    await assertCriminalMutateAccess(session, existing);
 
     const body = (await request.json().catch(() => ({}))) as {
       verifiedAt?: string;

@@ -6,7 +6,7 @@ import { PHOTO_KEYS, type PhotoKey } from "@/lib/criminal-fields";
 import { toCriminalRecord } from "@/lib/criminal-mapper";
 import { enrichCriminalsFromDocs } from "@/lib/police-station-ref";
 import { enrichCriminalRecord } from "@/lib/enrich-criminal-records";
-import { assertCriminalAccess } from "@/lib/admin-scope";
+import { assertCriminalMutateAccess } from "@/lib/admin-scope";
 
 export async function PATCH(
   request: NextRequest,
@@ -20,7 +20,7 @@ export async function PATCH(
     }
 
     const existing = await CriminalModel.findById(id);
-    await assertCriminalAccess(session, existing);
+    await assertCriminalMutateAccess(session, existing);
 
     const body = (await request.json()) as { photos?: CriminalPhotos };
     const incoming = body.photos ?? {};

@@ -6,7 +6,7 @@ import { Select } from "@/components/ui/Select";
 import { Button } from "@/components/ui/Button";
 import { FieldLabel, SectionTitle } from "@/components/ui/FieldLabel";
 import { CRIMINAL_FIELDS, PHOTO_KEYS, fieldLabel } from "@/lib/criminal-fields";
-import { districtSelectOptions, normalizeDistrictValue } from "@/lib/jharkhand-districts";
+import { resolveDistrictForSave, splitDistrictForForm } from "@/lib/jharkhand-districts";
 import {
   DEFAULT_STATE,
   normalizeStateValue,
@@ -22,6 +22,7 @@ import {
   normalizeCriminalStatus,
 } from "@/lib/criminal-status";
 import { PhotoUpload } from "./PhotoUpload";
+import { DistrictField } from "./DistrictField";
 import {
   CriminalExtendedForm,
   initialExtended,
@@ -49,20 +50,23 @@ export function CriminalForm({
   const [pid, setPid] = useState(initial?.pid ?? "");
   const [photos, setPhotos] = useState(initial?.photos ?? {});
   const [aadhaarVerified, setAadhaarVerified] = useState(initial?.aadhaarVerified ?? false);
-  const districtOptions = districtSelectOptions();
   const stateOptions = stateSelectOptions();
+  const permanentDistrictInit = splitDistrictForForm(initial?.permanentAddress?.district);
   const [permanent, setPermanent] = useState({
     line: initial?.permanentAddress?.line ?? "",
     policeStationId:
       initial?.permanentAddress?.policeStationId ?? (isScopedAdmin ? scopedPsId : ""),
-    district: normalizeDistrictValue(initial?.permanentAddress?.district),
+    district: permanentDistrictInit.districtSelect,
+    districtCustom: permanentDistrictInit.districtCustom,
     state: normalizeStateValue(initial?.permanentAddress?.state) || DEFAULT_STATE,
   });
+  const presentDistrictInit = splitDistrictForForm(initial?.presentAddress?.district);
   const [present, setPresent] = useState({
     line: initial?.presentAddress?.line ?? "",
     policeStationId:
       initial?.presentAddress?.policeStationId ?? (isScopedAdmin ? scopedPsId : ""),
-    district: normalizeDistrictValue(initial?.presentAddress?.district),
+    district: presentDistrictInit.districtSelect,
+    districtCustom: presentDistrictInit.districtCustom,
     state: normalizeStateValue(initial?.presentAddress?.state) || DEFAULT_STATE,
   });
   const [assignedIoId, setAssignedIoId] = useState(initial?.assignedIoId ?? "");
@@ -103,8 +107,18 @@ export function CriminalForm({
         fatherName: fd.get("fatherName"),
         fatherNameAliases: fd.get("fatherNameAliases"),
         mobileNumber: fd.get("mobileNumber"),
-        permanentAddress: permanent,
-        presentAddress: present,
+        permanentAddress: {
+          line: permanent.line,
+          policeStationId: permanent.policeStationId,
+          district: resolveDistrictForSave(permanent.district, permanent.districtCustom),
+          state: permanent.state,
+        },
+        presentAddress: {
+          line: present.line,
+          policeStationId: present.policeStationId,
+          district: resolveDistrictForSave(present.district, present.districtCustom),
+          state: present.state,
+        },
         livelihoodMeans: fd.get("livelihoodMeans"),
         livelihoodVerification: fd.get("livelihoodVerification"),
         photos,
@@ -241,14 +255,17 @@ export function CriminalForm({
               options={psOptions}
             />
           )}
-          <Select
+          <DistrictField
             label={fieldLabel("district")}
             name="permanentDistrict"
-            value={permanent.district}
-            onChange={(e) =>
-              setPermanent((p) => ({ ...p, district: e.target.value }))
+            districtSelect={permanent.district}
+            districtCustom={permanent.districtCustom}
+            onDistrictSelectChange={(value) =>
+              setPermanent((p) => ({ ...p, district: value }))
             }
-            options={districtOptions}
+            onDistrictCustomChange={(value) =>
+              setPermanent((p) => ({ ...p, districtCustom: value }))
+            }
           />
           <Select
             label={fieldLabel("state")}
@@ -321,14 +338,17 @@ export function CriminalForm({
               options={psOptions}
             />
           )}
-          <Select
+          <DistrictField
             label={fieldLabel("district")}
             name="presentDistrict"
-            value={present.district}
-            onChange={(e) =>
-              setPresent((p) => ({ ...p, district: e.target.value }))
+            districtSelect={present.district}
+            districtCustom={present.districtCustom}
+            onDistrictSelectChange={(value) =>
+              setPresent((p) => ({ ...p, district: value }))
             }
-            options={districtOptions}
+            onDistrictCustomChange={(value) =>
+              setPresent((p) => ({ ...p, districtCustom: value }))
+            }
           />
           <Select
             label={fieldLabel("state")}

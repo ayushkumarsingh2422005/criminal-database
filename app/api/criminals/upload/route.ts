@@ -4,7 +4,7 @@ import path from "path";
 import { requireAuth, jsonError, jsonOk } from "@/lib/api";
 import { PHOTO_KEYS, type PhotoKey } from "@/lib/criminal-fields";
 import { CriminalModel } from "@/models/Criminal";
-import { assertCriminalAccess } from "@/lib/admin-scope";
+import { assertCriminalAccess, assertCriminalMutateAccess } from "@/lib/admin-scope";
 import { AuthError, isIo } from "@/lib/auth";
 
 export async function POST(request: NextRequest) {
@@ -25,7 +25,11 @@ export async function POST(request: NextRequest) {
         throw new AuthError("Criminal record not found", 404);
       }
     } else {
-      await assertCriminalAccess(session, existing);
+      if (isIo(session)) {
+        await assertCriminalAccess(session, existing);
+      } else {
+        await assertCriminalMutateAccess(session, existing);
+      }
     }
 
     const ext = file.name.split(".").pop()?.toLowerCase() || "jpg";

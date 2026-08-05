@@ -10,12 +10,16 @@ import { CriminalForm } from "@/components/criminals/CriminalForm";
 import { PageHeader } from "@/components/layout/PageHeader";
 import type { CriminalRecord } from "@/lib/criminal-mapper";
 import { useAppSession } from "@/components/session/SessionProvider";
+import { canManageCriminalRecord } from "@/lib/criminal-access-shared";
 
 export default function CriminalManagementPage() {
   const session = useAppSession();
   const router = useRouter();
   const searchParams = useSearchParams();
   const isScopedAdmin = session.role === "admin" && !!session.policeStationId;
+
+  const canManageRecord = (c: CriminalRecord) =>
+    canManageCriminalRecord(session.role, session.policeStationId, c);
 
   useEffect(() => {
     if (session.role === "io") router.replace("/search");
@@ -80,7 +84,7 @@ export default function CriminalManagementPage() {
         title="Criminal Management"
         subtitle={
           isScopedAdmin
-            ? `अपराधी प्रबंधन — ${session.policeStationName ?? "your PS"} only`
+            ? `View all records — add, edit, and delete only for ${session.policeStationName ?? "your PS"}`
             : session.role === "superadmin"
               ? "अपराधी प्रबंधन — all police stations (full access)"
               : "अपराधी प्रबंधन — add, edit, delete records with photos in /public."
@@ -103,6 +107,7 @@ export default function CriminalManagementPage() {
           loading={loading}
           showActions
           linkToDetail
+          canManageRecord={canManageRecord}
           onEdit={(c) => {
             setEditing(c);
             setFormOpen(true);

@@ -17,6 +17,8 @@ import type { BailerInfo, CriminalVehicle, JailVisitor, RelatedPerson, SocialMed
 import { VerificationStatusBadge } from "@/components/criminals/VerificationStatusBadge";
 import { confessionDocumentFileName } from "@/lib/confession-document";
 import { CriminalStatusBadge } from "@/components/criminals/CriminalStatusBadge";
+import { canManageCriminalRecord } from "@/lib/criminal-access-shared";
+import { useAppSession } from "@/components/session/SessionProvider";
 import { criminalStatusLabel } from "@/lib/criminal-status";
 import { VerificationPanel } from "@/components/criminals/VerificationPanel";
 import { VerifyCriminalButton } from "@/components/criminals/VerifyCriminalButton";
@@ -301,8 +303,15 @@ export function CriminalDetailView({
   ioMode?: boolean;
 }) {
   const router = useRouter();
+  const session = useAppSession();
   const [criminal, setCriminal] = useState(initialCriminal);
   const [tab, setTab] = useState<TabId>(ioMode ? "records" : "overview");
+  const canManage = canManageCriminalRecord(
+    session.role,
+    session.policeStationId,
+    criminal
+  );
+  const viewOnly = !ioMode && !canManage && session.role === "admin";
 
   useEffect(() => {
     setCriminal(initialCriminal);
@@ -362,6 +371,9 @@ export function CriminalDetailView({
               <VerificationStatusBadge status={criminal.verificationStatus} />
             ) : null}
             <CriminalStatusBadge status={criminal.criminalStatus} />
+            {viewOnly ? (
+              <Badge variant="default">View only / केवल देखें</Badge>
+            ) : null}
             <Badge variant="default">PID {criminal.pid}</Badge>
           </section>
         </section>
@@ -372,13 +384,15 @@ export function CriminalDetailView({
           {!ioMode ? (
             <>
               <DownloadPdfButton criminalId={criminal.id} pid={criminal.pid} />
-              <IconButton
-                label="Edit record"
-                variant="primary"
-                href={`/criminals?edit=${criminal.id}`}
-              >
-                <IconPencil />
-              </IconButton>
+              {canManage ? (
+                <IconButton
+                  label="Edit record"
+                  variant="primary"
+                  href={`/criminals?edit=${criminal.id}`}
+                >
+                  <IconPencil />
+                </IconButton>
+              ) : null}
             </>
           ) : (
             <IconButton
@@ -738,12 +752,14 @@ export function CriminalDetailView({
         </section>
       )}
 
-      <VerifyCriminalButton
-        variant="fab"
-        criminalId={criminal.id}
-        onVerified={handleVerified}
-        withRemark={ioMode}
-      />
+      {(ioMode || canManage) && (
+        <VerifyCriminalButton
+          variant="fab"
+          criminalId={criminal.id}
+          onVerified={handleVerified}
+          withRemark={ioMode}
+        />
+      )}
     </section>
   );
 }

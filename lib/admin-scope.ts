@@ -45,8 +45,7 @@ export async function buildSessionCriminalScopeFilter(
     return mergeCriminalFilters(ioFilter, buildPoliceStationScopeFilter(psId));
   }
 
-  const psId = await getScopedPoliceStationId(session);
-  if (psId) return buildPoliceStationScopeFilter(psId);
+  // Superadmin and PS admin: no list filter — all criminals visible (write still scoped).
   return {};
 }
 
@@ -116,11 +115,45 @@ export async function assertCriminalAccess(
     return;
   }
 
+  // Superadmin and PS admin may view any criminal record.
+}
+
+/** IO: assigned criminals only. Admins: modify only records under their PS (superadmin: any). */
+export async function assertCriminalMutateAccess(
+  session: SessionPayload,
+  criminal: Criminal | null
+): Promise<void> {
+  if (isIo(session)) {
+    await assertCriminalAccess(session, criminal);
+    return;
+  }
+  await assertCriminalWriteAccess(session, criminal);
+}
+
+/** Edit, delete, verify, upload — only for records under the admin's PS (or any for superadmin). */
+export async function assertCriminalWriteAccess(
+  session: SessionPayload,
+  criminal: Criminal | null
+): Promise<void> {
+  if (!criminal) {
+    throw new AuthError("Not found", 404);
+  }
+
+  if (isIo(session)) {
+    throw new AuthError(
+      "Investigation officers have read-only access to criminal records",
+      403
+    );
+  }
+
   const psId = await getScopedPoliceStationId(session);
   if (!psId) return;
 
   if (!criminalBelongsToPoliceStation(criminal, psId)) {
-    throw new AuthError("You do not have access to this record", 403);
+    throw new AuthError(
+      "You can only modify records for your police station. View-only access for other stations.",
+      403
+    );
   }
 }
 

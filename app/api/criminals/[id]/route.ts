@@ -6,6 +6,7 @@ import { parseCriminalBody, toCriminalRecord } from "@/lib/criminal-mapper";
 import { enrichCriminalsFromDocs } from "@/lib/police-station-ref";
 import {
   assertCriminalAccess,
+  assertCriminalWriteAccess,
   applySessionWriteScope,
 } from "@/lib/admin-scope";
 import { assertCanWriteCriminal } from "@/lib/auth";
@@ -46,7 +47,7 @@ export async function PATCH(
     }
 
     const existing = await CriminalModel.findById(id);
-    await assertCriminalAccess(session, existing);
+    await assertCriminalWriteAccess(session, existing);
 
     const body = await request.json();
     let parsed = await parseCriminalBody(body);
@@ -79,7 +80,7 @@ export async function DELETE(
     }
 
     const existing = await CriminalModel.findById(id);
-    await assertCriminalAccess(session, existing);
+    await assertCriminalWriteAccess(session, existing);
 
     const result = await CriminalModel.delete(id);
     if (result.deletedCount === 0) {

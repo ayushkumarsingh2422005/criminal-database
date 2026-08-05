@@ -26,6 +26,7 @@ export function CriminalTable({
   onDelete,
   showActions = false,
   linkToDetail = true,
+  canManageRecord,
 }: {
   items: CriminalRecord[];
   loading?: boolean;
@@ -34,6 +35,7 @@ export function CriminalTable({
   onDelete?: (c: CriminalRecord) => void;
   showActions?: boolean;
   linkToDetail?: boolean;
+  canManageRecord?: (c: CriminalRecord) => boolean;
 }) {
   if (loading) {
     return (
@@ -151,12 +153,12 @@ export function CriminalTable({
                   </IconButton>
                 )}
                 <DownloadPdfButton criminalId={c.id} pid={c.pid} />
-                {showActions && onEdit && (
+                {showActions && onEdit && (!canManageRecord || canManageRecord(c)) && (
                   <IconButton label="Edit criminal" onClick={() => onEdit(c)}>
                     <IconPencil />
                   </IconButton>
                 )}
-                {showActions && onDelete && (
+                {showActions && onDelete && (!canManageRecord || canManageRecord(c)) && (
                   <IconButton
                     label="Delete criminal"
                     variant="danger"

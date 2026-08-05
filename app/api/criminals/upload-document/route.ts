@@ -3,7 +3,7 @@ import { writeFile, mkdir } from "fs/promises";
 import path from "path";
 import { requireAuth, jsonError, jsonOk } from "@/lib/api";
 import { CriminalModel } from "@/models/Criminal";
-import { assertCriminalAccess } from "@/lib/admin-scope";
+import { assertCriminalWriteAccess } from "@/lib/admin-scope";
 import { AuthError, isIo } from "@/lib/auth";
 
 const ALLOWED_DOCUMENT_TYPES = ["confession"] as const;
@@ -34,7 +34,7 @@ export async function POST(request: NextRequest) {
     if (!existing) {
       return jsonOk({ error: "Criminal record not found for this PID" }, 404);
     }
-    await assertCriminalAccess(session, existing);
+    await assertCriminalWriteAccess(session, existing);
 
     const ext = file.name.split(".").pop()?.toLowerCase() || "pdf";
     if (!ALLOWED_EXTENSIONS.includes(ext)) {
