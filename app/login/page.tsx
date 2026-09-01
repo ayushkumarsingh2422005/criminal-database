@@ -1,6 +1,7 @@
 "use client";
 
 import { FormEvent, useState } from "react";
+import Image from "next/image";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Input } from "@/components/ui/Input";
 import { Button } from "@/components/ui/Button";
@@ -34,7 +35,7 @@ export default function LoginPage() {
       return;
     }
 
-    const from = searchParams.get("from") || "/search";
+    const from = searchParams.get("from") || "/";
     router.push(from);
     router.refresh();
   }
@@ -43,9 +44,14 @@ export default function LoginPage() {
     <main className="flex min-h-full flex-1 items-center justify-center p-4">
       <section className="w-full max-w-md rounded-2xl border border-[var(--color-border)] bg-white p-8 shadow-lg">
         <header className="mb-8 text-center">
-          <span className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-[var(--color-primary)] text-lg font-bold text-white">
-            CD
-          </span>
+          <Image
+            src="/Jharkhand_Police_Logo_(India).svg.webp"
+            alt="Jharkhand Police"
+            width={72}
+            height={72}
+            unoptimized
+            className="mx-auto mb-4 h-16 w-auto object-contain drop-shadow"
+          />
           <h1 className="text-2xl font-bold text-slate-900">Criminal Database</h1>
           <p className="mt-1 text-sm text-[var(--color-muted)]">
             Admin-only access. Sign in to continue.

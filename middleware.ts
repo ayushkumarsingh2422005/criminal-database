@@ -10,7 +10,10 @@ export async function middleware(request: NextRequest) {
   if (
     pathname.startsWith("/_next") ||
     pathname.startsWith("/favicon") ||
-    pathname.endsWith(".ico")
+    pathname.startsWith("/images/") ||
+    pathname.endsWith(".ico") ||
+    (!pathname.startsWith("/criminals/") &&
+      /\.(jpe?g|png|webp|svg|gif|avif)$/i.test(pathname))
   ) {
     return NextResponse.next();
   }
@@ -36,7 +39,7 @@ export async function middleware(request: NextRequest) {
   const session = token ? await verifySessionToken(token) : null;
 
   if (pathname === "/login" && session) {
-    return NextResponse.redirect(new URL("/search", request.url));
+    return NextResponse.redirect(new URL("/", request.url));
   }
 
   if (isPublic) {

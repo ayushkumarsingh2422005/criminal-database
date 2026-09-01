@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname, useRouter } from "next/navigation";
 import { IconButton } from "@/components/ui/IconButton";
 import { IconLogOut } from "@/components/ui/icons";
@@ -20,6 +21,7 @@ type NavItem = {
 };
 
 const navItems: NavItem[] = [
+  { href: "/", label: "Home" },
   { href: "/search", label: "Search" },
   { href: "/criminals", label: "Criminal Management", adminOnly: true, ioHidden: true },
   { href: "/transfer", label: "Transfer", psAdminOnly: true, ioHidden: true },
@@ -53,10 +55,15 @@ export function AppHeader({ user }: { user: AppSessionUser }) {
   return (
     <header className="sticky top-0 z-50 w-full border-b border-[var(--color-border)] bg-white shadow-sm">
       <AppContainer className="flex items-center justify-between gap-4 py-3">
-        <section className="flex items-center gap-3">
-          <span className="flex h-10 w-10 items-center justify-center rounded-full bg-[var(--color-primary)] text-sm font-bold text-white">
-            CD
-          </span>
+        <Link href="/" className="flex items-center gap-3 transition hover:opacity-90">
+          <Image
+            src="/Jharkhand_Police_Logo_(India).svg.webp"
+            alt="Jharkhand Police"
+            width={40}
+            height={40}
+            unoptimized
+            className="h-10 w-auto object-contain"
+          />
           <section>
             <h1 className="text-base font-bold text-slate-900 sm:text-lg">
               Criminal Database
@@ -65,13 +72,13 @@ export function AppHeader({ user }: { user: AppSessionUser }) {
               Admin search & management
             </p>
           </section>
-        </section>
+        </Link>
 
         <nav className="hidden items-center gap-1 md:flex">
           {navItems
             .filter((item) => canSeeNavItem(item, user.role))
             .map((item) => {
-            const active = pathname.startsWith(item.href);
+            const active = item.href === "/" ? pathname === "/" : pathname.startsWith(item.href);
             return (
               <Link
                 key={item.href}
@@ -109,7 +116,7 @@ export function AppHeader({ user }: { user: AppSessionUser }) {
           {navItems
             .filter((item) => canSeeNavItem(item, user.role))
             .map((item) => {
-            const active = pathname.startsWith(item.href);
+            const active = item.href === "/" ? pathname === "/" : pathname.startsWith(item.href);
             return (
               <Link
                 key={item.href}
