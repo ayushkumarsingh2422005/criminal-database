@@ -6,7 +6,6 @@ import Image from "next/image";
 import { useRouter } from "next/navigation";
 import type { AppSessionUser } from "@/lib/types";
 import {
-  JharkhandPoliceEmblem,
   IconSearchProfile,
   IconPendingVerification,
   IconActiveMonitoring,
@@ -142,13 +141,13 @@ export function HomePageView({
                 <span>CRIMINALS</span>
               </Link>
 
-              {/* <Link
+              <Link
                 href="/admin/verification"
                 className="flex items-center gap-1.5 rounded-md px-3 py-1.5 text-xs font-bold uppercase tracking-wider text-slate-300 transition hover:bg-white/10 hover:text-white"
               >
                 <IconNavVerification className="h-3.5 w-3.5 text-slate-400" />
                 <span>VERIFICATION</span>
-              </Link> */}
+              </Link>
 
               <Link
                 href="/search"
@@ -284,24 +283,24 @@ export function HomePageView({
         {/* ── 3 QUICK ACTION CARDS ── */}
         <section className="-mt-8 relative z-20 grid grid-cols-1 gap-4 sm:grid-cols-3">
           {/* Card 1: Criminal Search */}
-          <div className="flex flex-col justify-between rounded-xl border border-slate-200 bg-white p-4 shadow-sm transition hover:shadow-md">
-            <div className="flex items-center gap-3.5">
-              <div className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full bg-[#0d3b66] text-white shadow-inner">
-                <IconSearchProfile className="h-6 w-6 text-white" />
+          <div className="flex flex-col justify-between rounded-xl border border-slate-200 bg-white p-5 shadow-sm transition hover:shadow-md">
+            <div className="flex items-center gap-4">
+              <div className="flex h-16 w-16 sm:h-18 sm:w-18 flex-shrink-0 items-center justify-center rounded-full bg-[#0d3460] text-white shadow-md">
+                <IconSearchProfile className="h-9 w-9 sm:h-10 sm:w-10 text-white" />
               </div>
               <div>
-                <h2 className="text-sm font-bold tracking-wide text-slate-900">
+                <h2 className="text-base font-bold tracking-wide text-slate-900">
                   CRIMINAL SEARCH
                 </h2>
-                <p className="text-xs text-slate-500">
+                <p className="mt-0.5 text-xs text-slate-500">
                   Search & view criminal profiles and history
                 </p>
               </div>
             </div>
-            <div className="mt-4">
+            <div className="mt-5">
               <Link
                 href="/search"
-                className="inline-flex items-center justify-center rounded-md bg-[#0f2e5a] px-4 py-1.5 text-xs font-bold uppercase tracking-wider text-white shadow-sm transition hover:bg-[#164282] active:scale-95"
+                className="inline-flex items-center justify-center rounded-md bg-[#0f2e5a] px-4 py-2 text-xs font-bold uppercase tracking-wider text-white shadow-sm transition hover:bg-[#164282] active:scale-95"
               >
                 <span>SEARCH NOW</span>
                 <span className="ml-1.5">→</span>
@@ -310,24 +309,24 @@ export function HomePageView({
           </div>
 
           {/* Card 2: Verification Pending */}
-          <div className="flex flex-col justify-between rounded-xl border border-amber-200/80 bg-[#fffdf5] p-4 shadow-sm transition hover:shadow-md">
-            <div className="flex items-center gap-3.5">
-              <div className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full bg-[#b45309] text-white shadow-inner">
-                <IconPendingVerification className="h-6 w-6 text-white" />
+          <div className="flex flex-col justify-between rounded-xl border border-amber-200/80 bg-[#fffdf5] p-5 shadow-sm transition hover:shadow-md">
+            <div className="flex items-center gap-4">
+              <div className="flex h-16 w-16 sm:h-18 sm:w-18 flex-shrink-0 items-center justify-center rounded-full bg-[#b47b19] text-white shadow-md">
+                <IconPendingVerification className="h-9 w-9 sm:h-10 sm:w-10 text-white" />
               </div>
               <div>
-                <h2 className="text-sm font-bold tracking-wide text-amber-900">
+                <h2 className="text-base font-bold tracking-wide text-amber-900">
                   VERIFICATION PENDING
                 </h2>
-                <p className="text-xs text-slate-500">
+                <p className="mt-0.5 text-xs text-slate-500">
                   Cases pending dual physical verification
                 </p>
               </div>
             </div>
-            <div className="mt-4">
+            <div className="mt-5">
               <Link
                 href="/admin/verification"
-                className="inline-flex items-center justify-center rounded-md bg-[#b45309] px-4 py-1.5 text-xs font-bold uppercase tracking-wider text-white shadow-sm transition hover:bg-[#92400e] active:scale-95"
+                className="inline-flex items-center justify-center rounded-md bg-[#b45309] px-4 py-2 text-xs font-bold uppercase tracking-wider text-white shadow-sm transition hover:bg-[#92400e] active:scale-95"
               >
                 <span>VIEW PENDING</span>
                 <span className="ml-1.5">→</span>
@@ -336,24 +335,24 @@ export function HomePageView({
           </div>
 
           {/* Card 3: Active Monitoring */}
-          <div className="flex flex-col justify-between rounded-xl border border-emerald-200/80 bg-[#f7fdf9] p-4 shadow-sm transition hover:shadow-md">
-            <div className="flex items-center gap-3.5">
-              <div className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full bg-[#15803d] text-white shadow-inner">
-                <IconActiveMonitoring className="h-6 w-6 text-white" />
+          <div className="flex flex-col justify-between rounded-xl border border-emerald-200/80 bg-[#f7fdf9] p-5 shadow-sm transition hover:shadow-md">
+            <div className="flex items-center gap-4">
+              <div className="flex h-16 w-16 sm:h-18 sm:w-18 flex-shrink-0 items-center justify-center rounded-full bg-[#1b7a3e] text-white shadow-md">
+                <IconActiveMonitoring className="h-9 w-9 sm:h-10 sm:w-10 text-white" />
               </div>
               <div>
-                <h2 className="text-sm font-bold tracking-wide text-emerald-900">
+                <h2 className="text-base font-bold tracking-wide text-emerald-900">
                   ACTIVE MONITORING
                 </h2>
-                <p className="text-xs text-slate-500">
+                <p className="mt-0.5 text-xs text-slate-500">
                   Criminals under active monitoring & surveillance
                 </p>
               </div>
             </div>
-            <div className="mt-4">
+            <div className="mt-5">
               <Link
                 href="/criminals"
-                className="inline-flex items-center justify-center rounded-md bg-[#15803d] px-4 py-1.5 text-xs font-bold uppercase tracking-wider text-white shadow-sm transition hover:bg-[#166534] active:scale-95"
+                className="inline-flex items-center justify-center rounded-md bg-[#15803d] px-4 py-2 text-xs font-bold uppercase tracking-wider text-white shadow-sm transition hover:bg-[#166534] active:scale-95"
               >
                 <span>VIEW LIST</span>
                 <span className="ml-1.5">→</span>
@@ -378,10 +377,10 @@ export function HomePageView({
               {/* Box 1: Total Charge-Sheeted */}
               <Link
                 href="/search"
-                className="group flex flex-col items-center rounded-lg border border-blue-100 bg-[#f8faff] p-3 text-center transition hover:border-blue-300 hover:bg-blue-50/70"
+                className="group flex flex-col items-center rounded-lg border border-blue-100 bg-[#f8faff] p-3 text-center transition hover:border-blue-300 hover:bg-blue-50/70 shadow-sm"
               >
                 <div className="mb-1 text-blue-600 transition group-hover:scale-105">
-                  <IconChargeSheetUsers className="h-8 w-8 text-blue-600" />
+                  <IconChargeSheetUsers className="h-11 w-11 sm:h-12 sm:w-12 text-blue-600" />
                 </div>
                 <div className="text-2xl font-black text-slate-900 sm:text-3xl">
                   {stats.totalCriminals.toLocaleString("en-IN")}
@@ -394,10 +393,10 @@ export function HomePageView({
               {/* Box 2: Within Ramgarh */}
               <Link
                 href="/search"
-                className="group flex flex-col items-center rounded-lg border border-emerald-100 bg-[#f7fdf9] p-3 text-center transition hover:border-emerald-300 hover:bg-emerald-50/70"
+                className="group flex flex-col items-center rounded-lg border border-emerald-100 bg-[#f7fdf9] p-3 text-center transition hover:border-emerald-300 hover:bg-emerald-50/70 shadow-sm"
               >
                 <div className="mb-1 text-emerald-600 transition group-hover:scale-105">
-                  <IconRamgarhBuilding className="h-8 w-8 text-emerald-600" />
+                  <IconRamgarhBuilding className="h-11 w-11 sm:h-12 sm:w-12 text-emerald-600" />
                 </div>
                 <div className="text-2xl font-black text-slate-900 sm:text-3xl">
                   {stats.withinRamgarh.toLocaleString("en-IN")}
@@ -410,10 +409,10 @@ export function HomePageView({
               {/* Box 3: Other Districts */}
               <Link
                 href="/search"
-                className="group flex flex-col items-center rounded-lg border border-purple-100 bg-[#faf5ff] p-3 text-center transition hover:border-purple-300 hover:bg-purple-50/70"
+                className="group flex flex-col items-center rounded-lg border border-purple-100 bg-[#faf5ff] p-3 text-center transition hover:border-purple-300 hover:bg-purple-50/70 shadow-sm"
               >
                 <div className="mb-1 text-purple-600 transition group-hover:scale-105">
-                  <IconJharkhandDistrictsPin className="h-8 w-8 text-purple-600" />
+                  <IconJharkhandDistrictsPin className="h-11 w-11 sm:h-12 sm:w-12 text-purple-600" />
                 </div>
                 <div className="text-2xl font-black text-slate-900 sm:text-3xl">
                   {stats.otherDistricts.toLocaleString("en-IN")}
@@ -426,10 +425,10 @@ export function HomePageView({
               {/* Box 4: Outside Jharkhand */}
               <Link
                 href="/search"
-                className="group flex flex-col items-center rounded-lg border border-orange-100 bg-[#fff7ed] p-3 text-center transition hover:border-orange-300 hover:bg-orange-50/70"
+                className="group flex flex-col items-center rounded-lg border border-orange-100 bg-[#fff7ed] p-3 text-center transition hover:border-orange-300 hover:bg-orange-50/70 shadow-sm"
               >
                 <div className="mb-1 text-orange-600 transition group-hover:scale-105">
-                  <IconIndiaMapOutline className="h-8 w-8 text-orange-600" />
+                  <IconIndiaMapOutline className="h-11 w-11 sm:h-12 sm:w-12 text-orange-600" />
                 </div>
                 <div className="text-2xl font-black text-slate-900 sm:text-3xl">
                   {stats.outsideJharkhand.toLocaleString("en-IN")}
@@ -441,31 +440,31 @@ export function HomePageView({
             </div>
 
             {/* Divider: Crime Categories Covered */}
-            <div className="relative my-5">
+            <div className="relative my-6">
               <div className="absolute inset-0 flex items-center">
                 <div className="w-full border-t border-slate-200" />
               </div>
               <div className="relative flex justify-center text-xs">
-                <span className="bg-white px-3 font-bold uppercase tracking-wider text-slate-500">
+                <span className="bg-white px-3 font-bold uppercase tracking-wider text-slate-600">
                   CRIME CATEGORIES COVERED
                 </span>
               </div>
             </div>
 
-            {/* 12 Crime Category Badges */}
-            <div className="grid grid-cols-3 gap-y-4 gap-x-2 sm:grid-cols-4 md:grid-cols-6">
+            {/* 12 Crime Category Badges (Prominent, High-Contrast & Larger) */}
+            <div className="grid grid-cols-3 gap-y-5 gap-x-2 sm:grid-cols-4 md:grid-cols-6">
               {CRIME_CATEGORIES.map((cat) => {
                 const Icon = cat.icon;
                 return (
                   <Link
                     key={cat.label}
                     href={`/search?caseType=${encodeURIComponent(cat.query)}`}
-                    className="group flex flex-col items-center text-center transition hover:scale-105"
+                    className="group flex flex-col items-center justify-center p-2 rounded-lg text-center transition hover:bg-slate-50"
                   >
-                    <div className="flex h-10 w-10 items-center justify-center rounded-full bg-slate-100 text-slate-700 transition group-hover:bg-[#0f2e5a] group-hover:text-white">
-                      <Icon className="h-5 w-5" />
+                    <div className="flex h-12 w-12 items-center justify-center text-slate-900 transition duration-200 group-hover:scale-115 group-hover:text-[#0f2e5a]">
+                      <Icon className="h-10 w-10 sm:h-11 sm:w-11" />
                     </div>
-                    <span className="mt-1.5 text-[11px] font-semibold text-slate-700 group-hover:text-[#0f2e5a]">
+                    <span className="mt-1.5 text-center text-xs font-semibold text-slate-800 transition group-hover:text-[#0f2e5a] group-hover:font-bold leading-tight">
                       {cat.label}
                     </span>
                   </Link>
@@ -483,23 +482,23 @@ export function HomePageView({
               </div>
               <div className="p-5">
                 {/* Diagram: Case PS + Address PS */}
-                <div className="flex items-center justify-center gap-3">
+                <div className="flex items-center justify-center gap-4">
                   <div className="flex flex-col items-center">
-                    <div className="flex h-11 w-11 items-center justify-center rounded-lg bg-sky-50 text-[#0f2e5a]">
-                      <IconCasePoliceStation className="h-6 w-6 text-[#0f2e5a]" />
+                    <div className="flex h-14 w-14 items-center justify-center rounded-xl bg-sky-50 text-[#0f2e5a] shadow-sm">
+                      <IconCasePoliceStation className="h-8 w-8 text-[#0f2e5a]" />
                     </div>
-                    <span className="mt-1 max-w-[85px] text-center text-[10px] font-bold leading-tight uppercase text-slate-700">
+                    <span className="mt-1.5 max-w-[95px] text-center text-[10px] font-bold leading-tight uppercase text-slate-800">
                       CASE POLICE STATION
                     </span>
                   </div>
 
-                  <span className="text-xl font-bold text-slate-400">+</span>
+                  <span className="text-2xl font-bold text-slate-400 pb-4">+</span>
 
                   <div className="flex flex-col items-center">
-                    <div className="flex h-11 w-11 items-center justify-center rounded-lg bg-sky-50 text-[#0f2e5a]">
-                      <IconAddressPoliceStation className="h-6 w-6 text-[#0f2e5a]" />
+                    <div className="flex h-14 w-14 items-center justify-center rounded-xl bg-sky-50 text-[#0f2e5a] shadow-sm">
+                      <IconAddressPoliceStation className="h-8 w-8 text-[#0f2e5a]" />
                     </div>
-                    <span className="mt-1 max-w-[85px] text-center text-[10px] font-bold leading-tight uppercase text-slate-700">
+                    <span className="mt-1.5 max-w-[95px] text-center text-[10px] font-bold leading-tight uppercase text-slate-800">
                       ADDRESS POLICE STATION
                     </span>
                   </div>
@@ -514,10 +513,10 @@ export function HomePageView({
             </div>
 
             {/* OUR MISSION CARD */}
-            <div className="rounded-xl border border-sky-200 bg-[#f0f9ff] p-4.5 shadow-sm">
-              <div className="flex items-start gap-3.5">
-                <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-sky-100 text-sky-700">
-                  <IconMissionTarget className="h-6 w-6 text-sky-700" />
+            <div className="rounded-xl border border-sky-200 bg-[#f0f9ff] p-5 shadow-sm">
+              <div className="flex items-start gap-4">
+                <div className="flex h-13 w-13 flex-shrink-0 items-center justify-center rounded-full bg-sky-100 text-sky-700 shadow-sm">
+                  <IconMissionTarget className="h-8 w-8 text-sky-700" />
                 </div>
                 <div>
                   <h3 className="text-xs font-extrabold uppercase tracking-wider text-sky-950">
@@ -535,68 +534,68 @@ export function HomePageView({
       </main>
 
       {/* ────────────────── 5-PILLAR FEATURE STRIP ────────────────── */}
-      <section className="mt-6 w-full border-t border-slate-800 bg-[#081a30] py-5 text-white">
-        <div className="mx-auto grid max-w-7xl grid-cols-2 gap-4 px-4 sm:px-6 md:grid-cols-5 lg:px-8">
+      <section className="mt-6 w-full border-t border-slate-800 bg-[#081a30] py-6 text-white">
+        <div className="mx-auto grid max-w-7xl grid-cols-2 gap-5 px-4 sm:px-6 md:grid-cols-5 lg:px-8">
           {/* Pillar 1 */}
-          <div className="flex items-start gap-2.5">
-            <IconPillarSearch className="mt-0.5 h-5 w-5 flex-shrink-0 text-sky-400" />
+          <div className="flex items-start gap-3">
+            <IconPillarSearch className="mt-0.5 h-7 w-7 sm:h-8 sm:w-8 flex-shrink-0 text-sky-400" />
             <div>
               <h4 className="text-[11px] font-bold uppercase tracking-wider text-white">
                 QUICK IDENTIFICATION
               </h4>
-              <p className="text-[10px] leading-snug text-slate-400">
+              <p className="mt-0.5 text-[10px] leading-snug text-slate-300">
                 Rapid identification of active criminals
               </p>
             </div>
           </div>
 
           {/* Pillar 2 */}
-          <div className="flex items-start gap-2.5">
-            <IconPillarAnalysis className="mt-0.5 h-5 w-5 flex-shrink-0 text-sky-400" />
+          <div className="flex items-start gap-3">
+            <IconPillarAnalysis className="mt-0.5 h-7 w-7 sm:h-8 sm:w-8 flex-shrink-0 text-sky-400" />
             <div>
               <h4 className="text-[11px] font-bold uppercase tracking-wider text-white">
                 CRIMINAL ANALYSIS
               </h4>
-              <p className="text-[10px] leading-snug text-slate-400">
+              <p className="mt-0.5 text-[10px] leading-snug text-slate-300">
                 Structured data for better investigation & analysis
               </p>
             </div>
           </div>
 
           {/* Pillar 3 */}
-          <div className="flex items-start gap-2.5">
-            <IconPillarMonitoring className="mt-0.5 h-5 w-5 flex-shrink-0 text-sky-400" />
+          <div className="flex items-start gap-3">
+            <IconPillarMonitoring className="mt-0.5 h-7 w-7 sm:h-8 sm:w-8 flex-shrink-0 text-sky-400" />
             <div>
               <h4 className="text-[11px] font-bold uppercase tracking-wider text-white">
                 CONTINUOUS MONITORING
               </h4>
-              <p className="text-[10px] leading-snug text-slate-400">
+              <p className="mt-0.5 text-[10px] leading-snug text-slate-300">
                 Regular verification & monitoring including bail released criminals
               </p>
             </div>
           </div>
 
           {/* Pillar 4 */}
-          <div className="flex items-start gap-2.5">
-            <IconPillarCoordination className="mt-0.5 h-5 w-5 flex-shrink-0 text-sky-400" />
+          <div className="flex items-start gap-3">
+            <IconPillarCoordination className="mt-0.5 h-7 w-7 sm:h-8 sm:w-8 flex-shrink-0 text-sky-400" />
             <div>
               <h4 className="text-[11px] font-bold uppercase tracking-wider text-white">
                 INTER-STATION COORDINATION
               </h4>
-              <p className="text-[10px] leading-snug text-slate-400">
+              <p className="mt-0.5 text-[10px] leading-snug text-slate-300">
                 Better information sharing & coordination across PS
               </p>
             </div>
           </div>
 
           {/* Pillar 5 */}
-          <div className="col-span-2 flex items-start gap-2.5 md:col-span-1">
-            <IconPillarDetection className="mt-0.5 h-5 w-5 flex-shrink-0 text-sky-400" />
+          <div className="col-span-2 flex items-start gap-3 md:col-span-1">
+            <IconPillarDetection className="mt-0.5 h-7 w-7 sm:h-8 sm:w-8 flex-shrink-0 text-sky-400" />
             <div>
               <h4 className="text-[11px] font-bold uppercase tracking-wider text-white">
                 FASTER DETECTION
               </h4>
-              <p className="text-[10px] leading-snug text-slate-400">
+              <p className="mt-0.5 text-[10px] leading-snug text-slate-300">
                 Support for quick detection & effective investigation
               </p>
             </div>
