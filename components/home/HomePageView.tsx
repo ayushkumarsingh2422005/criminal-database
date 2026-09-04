@@ -227,16 +227,16 @@ export function HomePageView({
         {/* Background photo with gradient overlays */}
         <div className="absolute inset-0 z-0">
           <Image
-            src="/images/ramgarh-police-building.png"
+            src="/images/ramgarh-police-building.jpeg"
             alt="Ramgarh Police Station"
             fill
             priority
             unoptimized
-            className="object-cover object-center opacity-40 mix-blend-luminosity brightness-75 contrast-125"
+            className="object-cover object-top opacity-70 brightness-100 contrast-110"
           />
-          {/* Subtle tech grid / radial gradient overlay */}
-          <div className="absolute inset-0 bg-gradient-to-r from-[#071728] via-[#071728]/90 to-[#071728]/75" />
-          <div className="absolute inset-0 bg-gradient-to-t from-[#071728] via-transparent to-transparent opacity-80" />
+          {/* Keep left readable for text; leave center/right lighter so building shows */}
+          <div className="absolute inset-0 bg-gradient-to-r from-[#071728]/95 via-[#071728]/45 to-[#071728]/25" />
+          <div className="absolute inset-0 bg-gradient-to-t from-[#071728]/70 via-transparent to-transparent" />
         </div>
 
         <div className="relative z-10 mx-auto flex max-w-7xl flex-col items-center justify-between px-4 py-8 sm:px-6 md:flex-row md:py-12 lg:px-8">
@@ -261,18 +261,29 @@ export function HomePageView({
             </div>
           </div>
 
-          {/* Right Hero Cyber Shield Padlock graphic */}
-          <div className="mt-6 flex flex-shrink-0 items-center justify-center md:mt-0">
-            <div className="relative flex h-44 w-44 items-center justify-center sm:h-52 sm:w-52 lg:h-56 lg:w-56">
-              <div className="absolute inset-0 rounded-2xl bg-sky-500/10 blur-xl filter" />
-              <Image
-                src="/images/cyber-shield-lock-Photoroom.png"
-                alt="Secure Cyber Police Shield"
-                width={220}
-                height={220}
-                unoptimized
-                className="relative rounded-2xl object-contain drop-shadow-[0_0_25px_rgba(56,189,248,0.4)]"
-              />
+          {/* Right Hero: SP / IPS Officer portrait */}
+          <div className="mt-6 flex flex-shrink-0 flex-col items-center md:mt-0">
+            <div className="relative">
+              <div className="absolute -inset-2 rounded-2xl bg-sky-300/30 blur-xl" />
+              <div className="relative overflow-hidden rounded-2xl border-2 border-amber-300 bg-[#1a3a5c] shadow-[0_12px_40px_rgba(0,0,0,0.35)]">
+                <Image
+                  src="/images/ips.png"
+                  alt="Superintendent of Police, Ramgarh"
+                  width={280}
+                  height={280}
+                  priority
+                  unoptimized
+                  className="h-44 w-44 object-cover object-top brightness-110 contrast-105 sm:h-52 sm:w-52 lg:h-56 lg:w-56"
+                />
+                <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/20 via-black/5 to-transparent px-3 pb-2.5 pt-8 text-center">
+                  <p className="text-[10px] font-extrabold uppercase tracking-wider text-amber-100 drop-shadow-[0_1px_3px_rgba(0,0,0,0.9)] sm:text-[11px]">
+                    Superintendent of Police
+                  </p>
+                  <p className="text-[10px] font-semibold uppercase tracking-wide text-white drop-shadow-[0_1px_3px_rgba(0,0,0,0.9)] sm:text-xs">
+                    Ramgarh District
+                  </p>
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -428,7 +439,16 @@ export function HomePageView({
                 className="group flex flex-col items-center rounded-lg border border-orange-100 bg-[#fff7ed] p-3 text-center transition hover:border-orange-300 hover:bg-orange-50/70 shadow-sm"
               >
                 <div className="mb-1 text-orange-600 transition group-hover:scale-105">
-                  <IconIndiaMapOutline className="h-11 w-11 sm:h-12 sm:w-12 text-orange-600" />
+                  {/* <IconIndiaMapOutline className="h-11 w-11 sm:h-12 sm:w-12 text-orange-600" /> */}
+                  <Image
+                    src="/images/india.png"
+                    alt="India"
+                    width={280}
+                    height={280}
+                    priority
+                    unoptimized
+                    className="h-11 w-11 sm:h-12 sm:w-12 object-contain object-top brightness-110 contrast-105"
+                  />
                 </div>
                 <div className="text-2xl font-black text-slate-900 sm:text-3xl">
                   {stats.outsideJharkhand.toLocaleString("en-IN")}
