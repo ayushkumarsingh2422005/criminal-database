@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
@@ -77,6 +77,20 @@ export function HomePageView({
   },
 }: HomePageViewProps) {
   const router = useRouter();
+  const [spImageOpen, setSpImageOpen] = useState(false);
+
+  useEffect(() => {
+    if (!spImageOpen) return;
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setSpImageOpen(false);
+    };
+    document.body.style.overflow = "hidden";
+    window.addEventListener("keydown", onKeyDown);
+    return () => {
+      document.body.style.overflow = "";
+      window.removeEventListener("keydown", onKeyDown);
+    };
+  }, [spImageOpen]);
 
   async function handleLogout() {
     await fetch("/api/auth/logout", { method: "POST" });
@@ -265,7 +279,12 @@ export function HomePageView({
           <div className="mt-6 flex flex-shrink-0 flex-col items-center md:mt-0">
             <div className="relative">
               <div className="absolute -inset-2 rounded-2xl bg-sky-300/30 blur-xl" />
-              <div className="relative overflow-hidden rounded-2xl border-2 border-amber-300 bg-[#1a3a5c] shadow-[0_12px_40px_rgba(0,0,0,0.35)]">
+              <button
+                type="button"
+                onClick={() => setSpImageOpen(true)}
+                aria-label="View full photograph of Superintendent of Police"
+                className="group relative overflow-hidden rounded-2xl border-2 border-amber-300 bg-[#1a3a5c] shadow-[0_12px_40px_rgba(0,0,0,0.35)] transition hover:border-amber-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-300"
+              >
                 <Image
                   src="/images/ips.png"
                   alt="Superintendent of Police, Ramgarh"
@@ -273,7 +292,7 @@ export function HomePageView({
                   height={280}
                   priority
                   unoptimized
-                  className="h-44 w-44 object-cover object-top brightness-110 contrast-105 sm:h-52 sm:w-52 lg:h-56 lg:w-56"
+                  className="h-44 w-44 object-cover object-top brightness-110 contrast-105 transition group-hover:brightness-115 sm:h-52 sm:w-52 lg:h-56 lg:w-56"
                 />
                 <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/20 via-black/5 to-transparent px-3 pb-2.5 pt-8 text-center">
                   <p className="text-[10px] font-extrabold uppercase tracking-wider text-amber-100 drop-shadow-[0_1px_3px_rgba(0,0,0,0.9)] sm:text-[11px]">
@@ -283,11 +302,56 @@ export function HomePageView({
                     Ramgarh District
                   </p>
                 </div>
-              </div>
+                <span className="absolute right-2 top-2 rounded bg-black/50 px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wide text-white opacity-0 transition group-hover:opacity-100">
+                  View
+                </span>
+              </button>
             </div>
           </div>
         </div>
       </section>
+
+      {/* SP full-image lightbox */}
+      {spImageOpen ? (
+        <div
+          className="fixed inset-0 z-[200] flex items-center justify-center bg-black/85 p-4 pt-16 backdrop-blur-sm sm:p-6 sm:pt-20"
+          role="dialog"
+          aria-modal="true"
+          aria-label="Superintendent of Police photograph"
+          onClick={() => setSpImageOpen(false)}
+        >
+          <div
+            className="relative max-h-[88vh] w-full max-w-3xl"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="relative overflow-hidden rounded-xl border border-amber-300/60 bg-[#0b1a2c] shadow-2xl">
+              <button
+                type="button"
+                onClick={() => setSpImageOpen(false)}
+                aria-label="Close photograph"
+                className="absolute right-3 top-3 z-10 inline-flex items-center gap-1.5 rounded-full bg-white px-3.5 py-1.5 text-sm font-bold text-slate-900 shadow-lg transition hover:bg-amber-100"
+              >
+                <span aria-hidden="true">✕</span>
+                Close
+              </button>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src="/images/ips.png"
+                alt="Superintendent of Police, Ramgarh — full photograph"
+                className="mx-auto max-h-[78vh] w-auto max-w-full object-contain"
+              />
+              <div className="border-t border-white/10 px-4 py-2.5 text-center">
+                <p className="text-xs font-extrabold uppercase tracking-wider text-amber-200">
+                  Superintendent of Police
+                </p>
+                <p className="text-[11px] font-semibold uppercase tracking-wide text-slate-200">
+                  Ramgarh District
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      ) : null}
 
       {/* ────────────────── MAIN BODY CONTAINER ────────────────── */}
       <main className="mx-auto w-full max-w-7xl flex-1 px-4 py-5 sm:px-6 lg:px-8">
