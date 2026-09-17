@@ -25,14 +25,14 @@ export async function POST(request: NextRequest) {
 
     if (!file || !pid || !ALLOWED_DOCUMENT_TYPES.includes(documentType)) {
       return jsonOk(
-        { error: "File, PID, and valid document type are required" },
+        { error: "File, ID (PID/Dagi number), and valid document type are required" },
         400
       );
     }
 
-    const existing = await CriminalModel.findByPid(pid);
+    const existing = await CriminalModel.findByStorageKey(pid);
     if (!existing) {
-      return jsonOk({ error: "Criminal record not found for this PID" }, 404);
+      return jsonOk({ error: "Record not found for this PID/Dagi number" }, 404);
     }
     await assertCriminalWriteAccess(session, existing);
 

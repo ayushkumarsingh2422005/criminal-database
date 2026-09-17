@@ -17,6 +17,7 @@ import {
 } from "@/lib/admin-scope";
 import { toCriminalRecord } from "@/lib/criminal-mapper";
 import { enrichCriminalRecord, loadPoliceStationNameMap } from "@/lib/police-station-ref";
+import { recordPrimaryId } from "@/lib/record-type";
 
 export function requireTransferAdmin(session: SessionPayload): void {
   if (isSuperAdmin(session)) {
@@ -88,7 +89,7 @@ async function enrichTransfer(
     createdAt: transfer.createdAt,
     respondedAt: transfer.respondedAt,
     criminalId: transfer.criminalId.toString(),
-    criminalPid: record.pid,
+    criminalPid: recordPrimaryId(record),
     criminalName: record.name,
     fromPoliceStationId: transfer.fromPoliceStationId.toString(),
     fromPoliceStationName: fromPs?.name ?? "—",

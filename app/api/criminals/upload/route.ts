@@ -16,10 +16,10 @@ export async function POST(request: NextRequest) {
     const photoType = String(formData.get("photoType") ?? "") as PhotoKey;
 
     if (!file || !pid || !PHOTO_KEYS.includes(photoType)) {
-      return jsonOk({ error: "File, PID, and valid photo type are required" }, 400);
+      return jsonOk({ error: "File, ID (PID/Dagi number), and valid photo type are required" }, 400);
     }
 
-    const existing = await CriminalModel.findByPid(pid);
+    const existing = await CriminalModel.findByStorageKey(pid);
     if (!existing) {
       if (isIo(session)) {
         throw new AuthError("Criminal record not found", 404);

@@ -12,6 +12,7 @@ import {
 import { assertCanWriteCriminal } from "@/lib/auth";
 import { applyVerificationWritePolicy } from "@/lib/verification-write";
 import { DEFAULT_VERIFICATION_SEED_DATE } from "@/lib/verification";
+import { validateRecordTypeIds, applyValidatedRecordIds } from "@/lib/record-type-validation";
 
 export async function GET(request: NextRequest) {
   try {
@@ -55,14 +56,11 @@ export async function POST(request: NextRequest) {
     parsed = await applySessionWriteScope(session, parsed);
     parsed = applyVerificationWritePolicy(session, null, parsed, body);
 
-    if (!parsed.pid || !parsed.name) {
-      return jsonOk({ error: "PID and Name are required" }, 400);
+    const validated = await validateRecordTypeIds(parsed);
+    if (!validated.ok) {
+      return jsonOk({ error: validated.error }, validated.status);
     }
-
-    const existing = await CriminalModel.findByPid(parsed.pid);
-    if (existing) {
-      return jsonOk({ error: "A criminal with this PID already exists" }, 409);
-    }
+    parsed = applyValidatedRecordIds(parsed, validated);
 
     const criminal: Criminal = {
       ...parsed,

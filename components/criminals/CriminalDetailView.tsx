@@ -20,6 +20,12 @@ import { CriminalStatusBadge } from "@/components/criminals/CriminalStatusBadge"
 import { canManageCriminalRecord } from "@/lib/criminal-access-shared";
 import { useAppSession } from "@/components/session/SessionProvider";
 import { criminalStatusLabel } from "@/lib/criminal-status";
+import {
+  normalizeRecordType,
+  recordIdFieldLabel,
+  recordPrimaryId,
+  recordTypeLabel,
+} from "@/lib/record-type";
 import { VerificationPanel } from "@/components/criminals/VerificationPanel";
 import { VerifyCriminalButton } from "@/components/criminals/VerifyCriminalButton";
 import { IoPhotoPanel } from "@/components/criminals/IoPhotoPanel";
@@ -329,6 +335,10 @@ export function CriminalDetailView({
     "—";
   const crimeTypes = aggregateCrimeTypes(criminal.criminalHistory);
   const crimeSummary = crimeTypes.join(" • ") || "—";
+  const primaryId = recordPrimaryId(criminal);
+  const idLabels = recordIdFieldLabel(criminal.recordType);
+  const typeLabel = recordTypeLabel(criminal.recordType);
+  const isDagi = normalizeRecordType(criminal.recordType) === "dagi";
 
   return (
     <section className="w-full space-y-6">
@@ -354,7 +364,7 @@ export function CriminalDetailView({
         <section>
           <h1 className="text-3xl font-bold text-slate-900">{criminal.name}</h1>
           <p className="mt-1 text-sm text-[var(--color-muted)]">
-            {ps} • PID {criminal.pid}
+            {ps} • {isDagi ? "Dagi" : "PID"} {primaryId}
             {criminal.mobileNumber ? ` • ${criminal.mobileNumber}` : ""}
             {crimeSummary !== "—" ? ` • ${crimeSummary}` : ""}
           </p>
@@ -374,7 +384,10 @@ export function CriminalDetailView({
             {viewOnly ? (
               <Badge variant="default">View only / केवल देखें</Badge>
             ) : null}
-            <Badge variant="default">PID {criminal.pid}</Badge>
+            <Badge variant={isDagi ? "warning" : "default"}>{typeLabel}</Badge>
+            <Badge variant="default">
+              {isDagi ? "Dagi" : "PID"} {primaryId}
+            </Badge>
           </section>
         </section>
         <section className="flex flex-wrap items-center gap-1">
@@ -383,7 +396,7 @@ export function CriminalDetailView({
           </IconButton>
           {!ioMode ? (
             <>
-              <DownloadPdfButton criminalId={criminal.id} pid={criminal.pid} />
+              <DownloadPdfButton criminalId={criminal.id} pid={primaryId} />
               {canManage ? (
                 <IconButton
                   label="Edit record"
@@ -408,7 +421,7 @@ export function CriminalDetailView({
 
       {/* Stats bar */}
       <section className="flex w-full flex-wrap overflow-hidden rounded-xl border border-[var(--color-border)] bg-white shadow-sm sm:flex-nowrap">
-        <StatBox label="PID Number" value={criminal.pid} />
+        <StatBox label={idLabels.en} value={primaryId} />
         <StatBox label="Police Station (PS)" value={ps} />
         <StatBox
           label="Criminal History"
@@ -417,6 +430,10 @@ export function CriminalDetailView({
         <StatBox label="Crime Types" value={String(crimeTypes.length)} />
         <StatBox label="Mobile" value={criminal.mobileNumber ?? "—"} />
         <StatBox label="District" value={district} />
+        <StatBox
+          label="Record Type"
+          value={typeLabel}
+        />
         <StatBox
           label="Criminal Status"
           value={criminalStatusLabel(criminal.criminalStatus)}
@@ -449,14 +466,19 @@ export function CriminalDetailView({
         <section className="grid gap-6 lg:grid-cols-2">
           <Card title="Criminal Summary" subtitle="अपराधी सारांश">
             <SummaryRow
+              labelEn={CRIMINAL_FIELDS.recordType.en}
+              labelHi={CRIMINAL_FIELDS.recordType.hi}
+              value={typeLabel}
+            />
+            <SummaryRow
+              labelEn={idLabels.en}
+              labelHi={idLabels.hi}
+              value={primaryId}
+            />
+            <SummaryRow
               labelEn={CRIMINAL_FIELDS.name.en}
               labelHi={CRIMINAL_FIELDS.name.hi}
               value={criminal.name}
-            />
-            <SummaryRow
-              labelEn={CRIMINAL_FIELDS.pid.en}
-              labelHi={CRIMINAL_FIELDS.pid.hi}
-              value={criminal.pid}
             />
             <SummaryRow
               labelEn={CRIMINAL_FIELDS.crimeTypes.en}

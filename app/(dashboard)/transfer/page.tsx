@@ -196,7 +196,7 @@ export default function TransferPage() {
                 { value: "", label: "Select criminal record" },
                 ...criminals.map((c) => ({
                   value: c.id,
-                  label: `${c.pid} — ${c.name}`,
+                  label: `${c.pid || c.dagiNumber || "—"} — ${c.name}`,
                 })),
               ]}
             />

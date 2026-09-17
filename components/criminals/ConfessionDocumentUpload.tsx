@@ -83,7 +83,7 @@ export function ConfessionDocumentUpload({
         ) : null}
       </section>
       {!pid ? (
-        <p className="mt-1 text-xs text-amber-600">Enter PID first to upload document</p>
+        <p className="mt-1 text-xs text-amber-600">Enter PID / Dagi number first to upload document</p>
       ) : null}
     </article>
   );

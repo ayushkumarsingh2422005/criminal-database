@@ -3,6 +3,7 @@
 export interface CriminalSearchFilters {
   name: string;
   pid: string;
+  recordType: string;
   mobileNumber: string;
   fatherName: string;
   district: string;
@@ -28,6 +29,7 @@ export interface CriminalSearchFilters {
 export const emptySearchFilters = (): CriminalSearchFilters => ({
   name: "",
   pid: "",
+  recordType: "all",
   mobileNumber: "",
   fatherName: "",
   district: "",

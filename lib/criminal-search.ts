@@ -41,7 +41,25 @@ export async function buildCriminalFilter(
   const conditions: Filter<Criminal>[] = [];
 
   pushRegex(conditions, "name", get("name"));
-  pushRegex(conditions, "pid", get("pid"));
+
+  const idQuery = get("pid");
+  if (idQuery?.trim()) {
+    const rx = regex(idQuery.trim());
+    conditions.push({
+      $or: [{ pid: rx }, { dagiNumber: rx }],
+    });
+  }
+
+  const recordType = get("recordType");
+  if (recordType && recordType !== "all") {
+    if (recordType === "dagi") {
+      conditions.push({ recordType: "dagi" });
+    } else if (recordType === "criminal") {
+      // Legacy docs without recordType count as criminal
+      conditions.push({ recordType: { $ne: "dagi" } });
+    }
+  }
+
   pushRegex(conditions, "mobileNumber", get("mobileNumber"));
   pushRegex(conditions, "fatherName", get("fatherName"));
   pushRegex(conditions, "aadhaarNumber", get("aadhaarNumber"));

@@ -12,6 +12,7 @@ import {
 import { assertCanWriteCriminal } from "@/lib/auth";
 import { applyVerificationWritePolicy } from "@/lib/verification-write";
 import { enrichCriminalRecord } from "@/lib/enrich-criminal-records";
+import { validateRecordTypeIds, applyValidatedRecordIds } from "@/lib/record-type-validation";
 
 export async function GET(
   request: NextRequest,
@@ -53,6 +54,13 @@ export async function PATCH(
     let parsed = await parseCriminalBody(body);
     parsed = await applySessionWriteScope(session, parsed);
     parsed = applyVerificationWritePolicy(session, existing, parsed, body);
+
+    const validated = await validateRecordTypeIds(parsed, id);
+    if (!validated.ok) {
+      return jsonOk({ error: validated.error }, validated.status);
+    }
+    parsed = applyValidatedRecordIds(parsed, validated);
+
     const update = { ...parsed, updatedAt: new Date() };
 
     const result = await CriminalModel.update(id, update);

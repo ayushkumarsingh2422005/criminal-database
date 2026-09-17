@@ -23,6 +23,8 @@ export const CRIMINAL_FIELDS = {
     hi: "अपराध शैली / अपराध के प्रकार",
   },
   pid: { en: "PID Number", hi: "PID नंबर" },
+  dagiNumber: { en: "Dagi Number", hi: "दागी नंबर" },
+  recordType: { en: "Record Type", hi: "रिकॉर्ड प्रकार" },
   name: { en: "Name", hi: "नाम" },
   nameAliases: { en: "Aliases", hi: "उर्फ / अन्य नाम" },
   dateOfBirth: { en: "Date of Birth", hi: "जन्म तिथि" },

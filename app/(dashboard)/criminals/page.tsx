@@ -1,16 +1,21 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Card } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
 import { Modal } from "@/components/ui/Modal";
+import { Select } from "@/components/ui/Select";
 import { CriminalTable } from "@/components/criminals/CriminalTable";
 import { CriminalForm } from "@/components/criminals/CriminalForm";
 import { PageHeader } from "@/components/layout/PageHeader";
 import type { CriminalRecord } from "@/lib/criminal-mapper";
 import { useAppSession } from "@/components/session/SessionProvider";
 import { canManageCriminalRecord } from "@/lib/criminal-access-shared";
+import {
+  normalizeRecordType,
+  recordTypeSelectOptions,
+} from "@/lib/record-type";
 
 export default function CriminalManagementPage() {
   const session = useAppSession();
@@ -31,14 +36,17 @@ export default function CriminalManagementPage() {
   const [loading, setLoading] = useState(true);
   const [formOpen, setFormOpen] = useState(false);
   const [editing, setEditing] = useState<CriminalRecord | null>(null);
+  const [typeFilter, setTypeFilter] = useState("all");
 
   const load = useCallback(async () => {
     setLoading(true);
-    const res = await fetch("/api/criminals?limit=100");
+    const params = new URLSearchParams({ limit: "100" });
+    if (typeFilter !== "all") params.set("recordType", typeFilter);
+    const res = await fetch(`/api/criminals?${params}`);
     const data = await res.json();
     setItems(data.items ?? []);
     setLoading(false);
-  }, []);
+  }, [typeFilter]);
 
   useEffect(() => {
     load();
@@ -78,16 +86,24 @@ export default function CriminalManagementPage() {
     if (res.ok) await load();
   }
 
+  const formTitle = useMemo(() => {
+    if (!editing) return "Add Record / नया जोड़ें";
+    const type = normalizeRecordType(editing.recordType);
+    return type === "dagi"
+      ? "Edit Dagi / दागी संपादित करें"
+      : "Edit Criminal / अपराधी संपादित करें";
+  }, [editing]);
+
   return (
     <section className="w-full space-y-6">
       <PageHeader
-        title="Criminal Management"
+        title="Criminal / Dagi Management"
         subtitle={
           isScopedAdmin
             ? `View all records — add, edit, and delete only for ${session.policeStationName ?? "your PS"}`
             : session.role === "superadmin"
-              ? "अपराधी प्रबंधन — all police stations (full access)"
-              : "अपराधी प्रबंधन — add, edit, delete records with photos in /public."
+              ? "अपराधी / दागी प्रबंधन — all police stations (full access)"
+              : "अपराधी / दागी प्रबंधन — add, edit, delete records with photos in /public."
         }
         actions={
           <Button
@@ -96,12 +112,20 @@ export default function CriminalManagementPage() {
               setFormOpen(true);
             }}
           >
-            + Add Criminal
+            + Add Record
           </Button>
         }
       />
 
-      <Card title="All Criminal Records" subtitle="सभी अपराधी रिकॉर्ड">
+      <Card title="All Records" subtitle="सभी रिकॉर्ड — Criminal & Dagi">
+        <div className="mb-4 max-w-xs">
+          <Select
+            label="Record Type / रिकॉर्ड प्रकार"
+            value={typeFilter}
+            onChange={(e) => setTypeFilter(e.target.value)}
+            options={recordTypeSelectOptions()}
+          />
+        </div>
         <CriminalTable
           items={items}
           loading={loading}
@@ -122,7 +146,7 @@ export default function CriminalManagementPage() {
           setFormOpen(false);
           setEditing(null);
         }}
-        title={editing ? "Edit Criminal / संपादित करें" : "Add Criminal / नया जोड़ें"}
+        title={formTitle}
         size="xl"
       >
         <CriminalForm

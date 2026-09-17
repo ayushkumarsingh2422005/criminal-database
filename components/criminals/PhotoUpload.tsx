@@ -66,7 +66,7 @@ export function PhotoUpload({
         {uploading && <span className="text-xs text-[var(--color-muted)]">Uploading...</span>}
       </section>
       {!pid && (
-        <p className="mt-1 text-xs text-amber-600">Enter PID first to upload photos</p>
+        <p className="mt-1 text-xs text-amber-600">Enter PID / Dagi number first to upload photos</p>
       )}
     </article>
   );

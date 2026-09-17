@@ -21,6 +21,12 @@ import {
   criminalStatusSelectOptions,
   normalizeCriminalStatus,
 } from "@/lib/criminal-status";
+import {
+  normalizeRecordType,
+  recordStorageKey,
+  recordTypeSelectOptions,
+  type RecordType,
+} from "@/lib/record-type";
 import { PhotoUpload } from "./PhotoUpload";
 import { DistrictField } from "./DistrictField";
 import {
@@ -47,7 +53,11 @@ export function CriminalForm({
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [recordType, setRecordType] = useState<RecordType>(
+    normalizeRecordType(initial?.recordType)
+  );
   const [pid, setPid] = useState(initial?.pid ?? "");
+  const [dagiNumber, setDagiNumber] = useState(initial?.dagiNumber ?? "");
   const [photos, setPhotos] = useState(initial?.photos ?? {});
   const [aadhaarVerified, setAadhaarVerified] = useState(initial?.aadhaarVerified ?? false);
   const stateOptions = stateSelectOptions();
@@ -98,7 +108,9 @@ export function CriminalForm({
 
     try {
       await onSubmit({
-        pid: fd.get("pid"),
+        recordType,
+        pid: recordType === "criminal" ? pid : "",
+        dagiNumber: recordType === "dagi" ? dagiNumber : undefined,
         name: fd.get("name"),
         nameAliases: fd.get("nameAliases"),
         dateOfBirth: fd.get("dateOfBirth"),
@@ -134,7 +146,15 @@ export function CriminalForm({
     }
   }
 
-  const saveLabel = initial?.id ? "Update Criminal" : "Add Criminal";
+  const storageId = recordStorageKey({ recordType, pid, dagiNumber });
+  const saveLabel =
+    initial?.id
+      ? recordType === "dagi"
+        ? "Update Dagi"
+        : "Update Criminal"
+      : recordType === "dagi"
+        ? "Add Dagi"
+        : "Add Criminal";
   const saveLabelHi = initial?.id ? "अपडेट करें" : "जोड़ें";
 
   return (
@@ -145,15 +165,33 @@ export function CriminalForm({
 
       <section className="space-y-6 pr-1">
 
-      <section className="space-y-3">
-        <Input
-          label={`${CRIMINAL_FIELDS.pid.en} (${CRIMINAL_FIELDS.pid.hi})`}
-          name="pid"
-          value={pid}
-          onChange={(e) => setPid(e.target.value)}
-          required
-          placeholder="e.g., 269517"
+      <section className="grid gap-4 sm:grid-cols-2">
+        <Select
+          label={fieldLabel("recordType")}
+          name="recordType"
+          value={recordType}
+          onChange={(e) => setRecordType(normalizeRecordType(e.target.value))}
+          options={recordTypeSelectOptions().filter((o) => o.value !== "all")}
         />
+        {recordType === "dagi" ? (
+          <Input
+            label={fieldLabel("dagiNumber")}
+            name="dagiNumber"
+            value={dagiNumber}
+            onChange={(e) => setDagiNumber(e.target.value)}
+            required
+            placeholder="e.g., DGI-001"
+          />
+        ) : (
+          <Input
+            label={fieldLabel("pid")}
+            name="pid"
+            value={pid}
+            onChange={(e) => setPid(e.target.value)}
+            required
+            placeholder="e.g., 269517"
+          />
+        )}
       </section>
 
       <section className="space-y-3">
@@ -392,13 +430,19 @@ export function CriminalForm({
       <section className="space-y-3">
         <SectionTitle en={CRIMINAL_FIELDS.photos.en} hi={CRIMINAL_FIELDS.photos.hi} />
         <p className="text-xs text-[var(--color-muted)]">
-          Images are saved to <code className="rounded bg-slate-100 px-1">public/criminals/{"{PID}"}/</code>
+          Images are saved to{" "}
+          <code className="rounded bg-slate-100 px-1">
+            public/criminals/{"{"}
+            {recordType === "dagi" ? "Dagi number" : "PID"}
+            {"}"}/
+          </code>
+          . Enter the {recordType === "dagi" ? "Dagi number" : "PID"} above first.
         </p>
         <section className="grid gap-3 sm:grid-cols-2">
           {PHOTO_KEYS.map((key) => (
             <PhotoUpload
               key={key}
-              pid={pid}
+              pid={storageId}
               photoKey={key}
               currentPath={photos[key]}
               onUploaded={(path) => setPhotos((p) => ({ ...p, [key]: path }))}
@@ -410,7 +454,7 @@ export function CriminalForm({
       <CriminalExtendedForm
         value={extended}
         onChange={setExtended}
-        pid={pid}
+        pid={storageId}
         policeStationOptions={allPsOptions}
         isSuperAdmin={isSuperAdmin}
         verificationHistory={verificationHistory}

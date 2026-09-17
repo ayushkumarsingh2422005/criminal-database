@@ -17,6 +17,10 @@ import type { CriminalRecord } from "@/lib/criminal-mapper";
 import { VerificationStatusCell } from "@/components/criminals/VerificationStatusCell";
 import { CriminalStatusBadge } from "@/components/criminals/CriminalStatusBadge";
 import { DownloadPdfButton } from "./DownloadPdfButton";
+import {
+  normalizeRecordType,
+  recordPrimaryId,
+} from "@/lib/record-type";
 
 export function CriminalTable({
   items,
@@ -48,7 +52,7 @@ export function CriminalTable({
   if (items.length === 0) {
     return (
       <p className="py-12 text-center text-sm text-[var(--color-muted)]">
-        No criminal records found.
+        No records found.
       </p>
     );
   }
@@ -56,7 +60,8 @@ export function CriminalTable({
   return (
     <DataTable>
       <DataTableHead>
-        <DataTableHeaderCell>{fieldLabel("pid")}</DataTableHeaderCell>
+        <DataTableHeaderCell>Type / प्रकार</DataTableHeaderCell>
+        <DataTableHeaderCell>PID / Dagi No.</DataTableHeaderCell>
         <DataTableHeaderCell>{fieldLabel("name")}</DataTableHeaderCell>
         <DataTableHeaderCell>{fieldLabel("criminalStatus")}</DataTableHeaderCell>
         <DataTableHeaderCell>{fieldLabel("crimeTypes")}</DataTableHeaderCell>
@@ -68,18 +73,32 @@ export function CriminalTable({
         </DataTableHeaderCell>
       </DataTableHead>
       <DataTableBody>
-        {items.map((c) => (
+        {items.map((c) => {
+          const primaryId = recordPrimaryId(c);
+          const type = normalizeRecordType(c.recordType);
+          return (
           <DataTableRow key={c.id}>
+            <DataTableCell>
+              <span
+                className={`inline-flex rounded-full px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide ${
+                  type === "dagi"
+                    ? "bg-amber-100 text-amber-900"
+                    : "bg-sky-100 text-sky-900"
+                }`}
+              >
+                {type === "dagi" ? "Dagi" : "Criminal"}
+              </span>
+            </DataTableCell>
             <DataTableCell className="font-mono">
               {linkToDetail ? (
                 <Link
                   href={`/criminals/${c.id}`}
                   className="font-medium text-[var(--color-primary)] hover:underline"
                 >
-                  {c.pid}
+                  {primaryId}
                 </Link>
               ) : (
-                c.pid
+                primaryId
               )}
             </DataTableCell>
             <DataTableCell className="font-medium">
@@ -152,7 +171,7 @@ export function CriminalTable({
                     <IconEye />
                   </IconButton>
                 )}
-                <DownloadPdfButton criminalId={c.id} pid={c.pid} />
+                <DownloadPdfButton criminalId={c.id} pid={primaryId} />
                 {showActions && onEdit && (!canManageRecord || canManageRecord(c)) && (
                   <IconButton label="Edit criminal" onClick={() => onEdit(c)}>
                     <IconPencil />
@@ -170,7 +189,8 @@ export function CriminalTable({
               </ActionIcons>
             </DataTableCell>
           </DataTableRow>
-        ))}
+          );
+        })}
       </DataTableBody>
     </DataTable>
   );

@@ -6,6 +6,7 @@ import { CRIMINAL_FIELDS, PHOTO_KEYS } from "@/lib/criminal-fields";
 import { PhotoUpload } from "@/components/criminals/PhotoUpload";
 import type { CriminalRecord } from "@/lib/criminal-mapper";
 import type { CriminalPhotos } from "@/models/Criminal";
+import { recordStorageKey } from "@/lib/record-type";
 
 export function IoPhotoPanel({
   criminal,
@@ -17,6 +18,7 @@ export function IoPhotoPanel({
   const [photos, setPhotos] = useState<CriminalPhotos>(criminal.photos ?? {});
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
+  const storageId = recordStorageKey(criminal);
 
   async function savePhotos(next: CriminalPhotos) {
     setSaving(true);
@@ -56,7 +58,7 @@ export function IoPhotoPanel({
         {PHOTO_KEYS.map((key) => (
           <PhotoUpload
             key={key}
-            pid={criminal.pid}
+            pid={storageId}
             photoKey={key}
             currentPath={photos[key]}
             onUploaded={(path) => handleUploaded(key, path)}

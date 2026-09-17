@@ -1,6 +1,7 @@
 import type { CriminalRecord } from "@/lib/criminal-mapper";
 import type { AdminRole } from "@/models/Admin";
 import { criminalStatusLabel } from "@/lib/criminal-status";
+import { recordTypeLabel } from "@/lib/record-type";
 import { VERIFICATION_STATUS_LABELS } from "@/lib/verification-shared";
 import { confessionDocumentFileName } from "@/lib/confession-document";
 
@@ -191,7 +192,9 @@ function buildColumns(groups: CsvExportGroup[]): CsvColumn[] {
     if (set.has(group)) cols.push({ key, header, group });
   };
 
+  add("basic", "recordType", "Record type");
   add("basic", "pid", "PID");
+  add("basic", "dagiNumber", "Dagi number");
   add("basic", "name", "Name");
   add("basic", "nameAliases", "Name aliases");
   add("basic", "dateOfBirth", "Date of birth");
@@ -262,8 +265,12 @@ function cellValue(record: CriminalRecord, key: string): string {
   const photos = record.photos ?? {};
 
   switch (key) {
+    case "recordType":
+      return recordTypeLabel(record.recordType);
     case "pid":
-      return record.pid;
+      return record.pid ?? "";
+    case "dagiNumber":
+      return record.dagiNumber ?? "";
     case "name":
       return record.name ?? "";
     case "nameAliases":

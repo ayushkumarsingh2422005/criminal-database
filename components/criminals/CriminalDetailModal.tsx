@@ -8,6 +8,11 @@ import { CRIMINAL_FIELDS, PHOTO_KEYS, photoLabel } from "@/lib/criminal-fields";
 import { formatDateDisplay } from "@/lib/date-utils";
 import { aggregateCrimeTypes } from "@/lib/criminal-history-utils";
 import type { CriminalRecord } from "@/lib/criminal-mapper";
+import {
+  recordIdFieldLabel,
+  recordPrimaryId,
+  recordTypeLabel,
+} from "@/lib/record-type";
 
 export type { CriminalRecord };
 
@@ -63,6 +68,9 @@ export function CriminalDetailModal({
 }) {
   if (!criminal) return null;
   const crimeTypes = aggregateCrimeTypes(criminal.criminalHistory);
+  const primaryId = recordPrimaryId(criminal);
+  const idLabels = recordIdFieldLabel(criminal.recordType);
+  const typeLabel = recordTypeLabel(criminal.recordType);
 
   return (
     <Modal open={open} onClose={onClose} title="Criminal Record / आपराधिक विवरण" size="xl">
@@ -84,9 +92,14 @@ export function CriminalDetailModal({
             )}
           </section>
           <DetailField
-            en={CRIMINAL_FIELDS.pid.en}
-            hi={CRIMINAL_FIELDS.pid.hi}
-            value={criminal.pid}
+            en={CRIMINAL_FIELDS.recordType.en}
+            hi={CRIMINAL_FIELDS.recordType.hi}
+            value={typeLabel}
+          />
+          <DetailField
+            en={idLabels.en}
+            hi={idLabels.hi}
+            value={primaryId}
           />
         </section>
 
@@ -192,7 +205,7 @@ export function CriminalDetailModal({
           {!PHOTO_KEYS.some((k) => criminal.photos[k]) && (
             <p className="text-sm text-[var(--color-muted)]">
               No photos uploaded. Store images in{" "}
-              <code className="rounded bg-slate-100 px-1">/public/criminals/{criminal.pid}/</code>
+              <code className="rounded bg-slate-100 px-1">/public/criminals/{primaryId}/</code>
             </p>
           )}
         </section>

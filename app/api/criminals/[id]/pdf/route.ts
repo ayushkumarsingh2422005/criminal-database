@@ -7,6 +7,7 @@ import { enrichCriminalsFromDocs } from "@/lib/police-station-ref";
 import { assertCriminalAccess } from "@/lib/admin-scope";
 import { enrichCriminalRecord } from "@/lib/enrich-criminal-records";
 import { generateCriminalPdf } from "@/lib/pdf/generate-criminal-pdf";
+import { recordPrimaryId } from "@/lib/record-type";
 
 export async function GET(
   request: NextRequest,
@@ -34,7 +35,7 @@ export async function GET(
       status: 200,
       headers: {
         "Content-Type": "application/pdf",
-        "Content-Disposition": `attachment; filename="criminal-${record.pid}.pdf"`,
+        "Content-Disposition": `attachment; filename="record-${recordPrimaryId(record)}.pdf"`,
         "Cache-Control": "no-store",
       },
     });

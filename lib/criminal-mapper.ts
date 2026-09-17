@@ -22,6 +22,7 @@ import {
 import type { CriminalVerificationMeta } from "@/lib/criminal-verification-types";
 import { resolveConfessionDocumentPath } from "@/lib/confession-document";
 import { normalizeCriminalStatus } from "@/lib/criminal-status";
+import { normalizeRecordType } from "@/lib/record-type";
 
 export type CriminalHistoryRecord = {
   sNo?: number;
@@ -38,6 +39,8 @@ export type CriminalHistoryRecord = {
 interface CriminalRecordBase {
   id: string;
   pid: string;
+  dagiNumber?: string;
+  recordType: "criminal" | "dagi";
   name: string;
   nameAliases?: string;
   dateOfBirth?: string;
@@ -128,7 +131,9 @@ export function toCriminalRecord(c: Criminal): CriminalRecord {
   const n = normalizeCriminal(c as unknown as Record<string, unknown>);
   return {
     id: c._id!.toString(),
-    pid: n.pid,
+    pid: n.pid ?? "",
+    dagiNumber: n.dagiNumber,
+    recordType: normalizeRecordType(n.recordType),
     name: n.name,
     nameAliases: n.nameAliases,
     dateOfBirth: n.dateOfBirth,
@@ -191,6 +196,10 @@ export async function parseCriminalBody(
 
   return {
     pid: String(body.pid ?? "").trim(),
+    dagiNumber: body.dagiNumber ? String(body.dagiNumber).trim() : undefined,
+    recordType: normalizeRecordType(
+      body.recordType ? String(body.recordType) : undefined
+    ),
     name: String(body.name ?? "").trim(),
     criminalStatus: normalizeCriminalStatus(
       body.criminalStatus ? String(body.criminalStatus) : undefined

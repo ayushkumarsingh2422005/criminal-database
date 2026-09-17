@@ -93,7 +93,12 @@ export interface VerificationInfo {
 
 export interface Criminal {
   _id?: ObjectId;
+  /** Charge-sheeted PID. Required when recordType is criminal; may be empty for dagi. */
   pid: string;
+  /** Assumed/suspected ID. Required when recordType is dagi. */
+  dagiNumber?: string;
+  /** Defaults to criminal for legacy documents. */
+  recordType?: "criminal" | "dagi";
   name: string;
   nameAliases?: string;
   dateOfBirth?: string;
@@ -164,6 +169,19 @@ export const CriminalModel = {
 
   async findByPid(pid: string) {
     return (await getCriminalCollection()).findOne({ pid });
+  },
+
+  async findByDagiNumber(dagiNumber: string) {
+    return (await getCriminalCollection()).findOne({ dagiNumber });
+  },
+
+  async findByStorageKey(key: string) {
+    const trimmed = key.trim();
+    if (!trimmed) return null;
+    const col = await getCriminalCollection();
+    return col.findOne({
+      $or: [{ pid: trimmed }, { dagiNumber: trimmed }],
+    });
   },
 
   async create(data: Criminal) {

@@ -24,6 +24,7 @@ import {
   resolveDistrictForSave,
 } from "@/lib/jharkhand-districts";
 import { criminalStatusSelectOptions } from "@/lib/criminal-status";
+import { recordTypeSelectOptions } from "@/lib/record-type";
 import { useCaseTypes, usePoliceStations } from "@/lib/hooks/use-lookups";
 import { useAppSession } from "@/components/session/SessionProvider";
 import type { CriminalRecord } from "@/lib/criminal-mapper";
@@ -114,11 +115,17 @@ export default function SearchPage() {
           <section className="space-y-4">
             <SectionTitle en="Personal & Address" hi="व्यक्तिगत व पता" />
             <section className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+              <Select
+                label={fieldLabel("recordType")}
+                value={filters.recordType}
+                onChange={set("recordType")}
+                options={recordTypeSelectOptions()}
+              />
               <Input
-                label={fieldLabel("pid")}
+                label="PID / Dagi Number"
                 value={filters.pid}
                 onChange={set("pid")}
-                placeholder="269517"
+                placeholder="PID or Dagi number"
               />
               <Input
                 label={fieldLabel("name")}
