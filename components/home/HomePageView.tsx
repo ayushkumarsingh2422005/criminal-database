@@ -140,14 +140,6 @@ export function HomePageView({
               </Link>
 
               <Link
-                href="/search"
-                className="flex items-center gap-1.5 rounded-md px-3 py-1.5 text-xs font-bold uppercase tracking-wider text-slate-300 transition hover:bg-white/10 hover:text-white"
-              >
-                <IconNavDashboard className="h-3.5 w-3.5 text-slate-400" />
-                <span>DASHBOARD</span>
-              </Link>
-
-              <Link
                 href="/criminals"
                 className="flex items-center gap-1.5 rounded-md px-3 py-1.5 text-xs font-bold uppercase tracking-wider text-slate-300 transition hover:bg-white/10 hover:text-white"
               >
@@ -168,7 +160,7 @@ export function HomePageView({
                 className="flex items-center gap-1.5 rounded-md px-3 py-1.5 text-xs font-bold uppercase tracking-wider text-slate-300 transition hover:bg-white/10 hover:text-white"
               >
                 <IconNavReports className="h-3.5 w-3.5 text-slate-400" />
-                <span>REPORTS</span>
+                <span>Search</span>
               </Link>
 
               <Link
@@ -217,9 +209,6 @@ export function HomePageView({
             <Link href="/" className="whitespace-nowrap rounded px-2.5 py-1 text-xs font-bold text-white bg-white/15">
               HOME
             </Link>
-            <Link href="/search" className="whitespace-nowrap rounded px-2.5 py-1 text-xs font-semibold text-slate-300">
-              DASHBOARD
-            </Link>
             <Link href="/criminals" className="whitespace-nowrap rounded px-2.5 py-1 text-xs font-semibold text-slate-300">
               CRIMINALS
             </Link>
@@ -227,7 +216,7 @@ export function HomePageView({
               VERIFICATION
             </Link>
             <Link href="/search" className="whitespace-nowrap rounded px-2.5 py-1 text-xs font-semibold text-slate-300">
-              REPORTS
+              Search
             </Link>
             <Link href="/admin" className="whitespace-nowrap rounded px-2.5 py-1 text-xs font-semibold text-slate-300">
               ADMIN
