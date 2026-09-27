@@ -180,45 +180,6 @@ export function CriminalForm({
           required
           placeholder="e.g., 269517"
         />
-
-        <label className="flex items-start gap-3 rounded-lg border border-[var(--color-border)] bg-amber-50/60 px-3 py-3 text-sm">
-          <input
-            type="checkbox"
-            className="mt-0.5 h-4 w-4"
-            checked={alsoDagi}
-            onChange={(e) =>
-              setRecordType(e.target.checked ? "dagi" : "criminal")
-            }
-          />
-          <span>
-            <span className="font-semibold text-slate-900">
-              Is also a Dagi / यह दागी भी है
-            </span>
-            <span className="mt-0.5 block text-xs text-[var(--color-muted)]">
-              {CRIMINAL_FIELDS.recordTypeNote.en} ({CRIMINAL_FIELDS.recordTypeNote.hi})
-            </span>
-          </span>
-        </label>
-
-        {alsoDagi ? (
-          <section className="grid gap-4 rounded-lg border border-amber-200 bg-amber-50/40 p-4 sm:grid-cols-2">
-            <Input
-              label={fieldLabel("dagiNumber")}
-              name="dagiNumber"
-              value={dagiNumber}
-              onChange={(e) => setDagiNumber(e.target.value)}
-              required
-              placeholder="e.g., DGI-001"
-            />
-            <Select
-              label="Dagi verification interval / दागी सत्यापन अंतराल"
-              name="dagiVerificationFrequencyDays"
-              value={dagiVerificationFrequencyDays}
-              onChange={(e) => setDagiVerificationFrequencyDays(e.target.value)}
-              options={dagiVerificationIntervalSelectOptions()}
-            />
-          </section>
-        ) : null}
       </section>
 
       <section className="space-y-3">
@@ -281,6 +242,48 @@ export function CriminalForm({
             options={criminalStatusSelectOptions().filter((o) => o.value !== "all")}
           />
         </section>
+      </section>
+
+      <section className="space-y-3">
+        <SectionTitle en="Dagi (if applicable)" hi="दागी (लागू हो तो)" />
+        <label className="flex items-start gap-3 rounded-lg border border-[var(--color-border)] bg-amber-50/60 px-3 py-3 text-sm">
+          <input
+            type="checkbox"
+            className="mt-0.5 h-4 w-4"
+            checked={alsoDagi}
+            onChange={(e) =>
+              setRecordType(e.target.checked ? "dagi" : "criminal")
+            }
+          />
+          <span>
+            <span className="font-semibold text-slate-900">
+              Is also a Dagi / यह दागी भी है
+            </span>
+            <span className="mt-0.5 block text-xs text-[var(--color-muted)]">
+              {CRIMINAL_FIELDS.recordTypeNote.en} ({CRIMINAL_FIELDS.recordTypeNote.hi})
+            </span>
+          </span>
+        </label>
+
+        {alsoDagi ? (
+          <section className="grid gap-4 rounded-lg border border-amber-200 bg-amber-50/40 p-4 sm:grid-cols-2">
+            <Input
+              label={`${CRIMINAL_FIELDS.dagiNumber.en} / दागी संख्या`}
+              name="dagiNumber"
+              value={dagiNumber}
+              onChange={(e) => setDagiNumber(e.target.value)}
+              required
+              placeholder="e.g., DGI-001"
+            />
+            <Select
+              label="Dagi verification interval / दागी सत्यापन अंतराल"
+              name="dagiVerificationFrequencyDays"
+              value={dagiVerificationFrequencyDays}
+              onChange={(e) => setDagiVerificationFrequencyDays(e.target.value)}
+              options={dagiVerificationIntervalSelectOptions()}
+            />
+          </section>
+        ) : null}
       </section>
 
       <section className="space-y-3">
