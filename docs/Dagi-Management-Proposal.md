@@ -12,9 +12,10 @@
 2. Check **“Is also a Dagi / यह दागी भी है”**
 3. Then enter:
    - **Dagi number** (manual)
-   - **Dagi verification interval** — only 3 options:
+   - **Dagi verification interval** — options:
      - **Monthly / मासिक** (30 days)
      - **Quarterly / त्रैमासिक** (90 days)
+     - **Half-yearly / छमाही** (180 days)
      - **Yearly / वार्षिक** (365 days)
 4. Dagi gets its **own verification** (history / overdue / verify button), same style as criminal verification
 

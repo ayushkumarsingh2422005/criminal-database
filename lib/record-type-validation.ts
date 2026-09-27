@@ -79,7 +79,7 @@ export async function validateRecordTypeIds(
       return {
         ok: false,
         error:
-          "Dagi verification interval must be Monthly (मासिक), Quarterly (त्रैमासिक), or Yearly (वार्षिक)",
+          "Dagi verification interval must be Monthly (मासिक), Quarterly (त्रैमासिक), Half-yearly (छमाही), or Yearly (वार्षिक)",
         status: 400,
       };
     }

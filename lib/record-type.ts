@@ -3,7 +3,7 @@
  * - Every person is a Criminal (PID required).
  * - Dagi is a subset of Criminal (checkbox: "is also a Dagi").
  * - When marked Dagi: Dagi number + verification interval
- *   (मासिक / त्रैमासिक / वार्षिक only).
+ *   (मासिक / त्रैमासिक / छमाही / वार्षिक).
  */
 
 /** Fixed Dagi verification intervals from SP note. */
@@ -19,6 +19,12 @@ export const DAGI_VERIFICATION_INTERVALS = [
     key: "quarterly",
     en: "Quarterly",
     hi: "त्रैमासिक",
+  },
+  {
+    value: 180,
+    key: "half_yearly",
+    en: "Half-yearly (6 months)",
+    hi: "छमाही",
   },
   {
     value: 365,
@@ -105,7 +111,7 @@ export function dagiVerificationIntervalLabel(days?: number | null): string {
   return `${row.en} / ${row.hi} (${row.value} days)`;
 }
 
-/** Only मासिक(30) / त्रैमासिक(90) / वार्षिक(365) are allowed. */
+/** Only मासिक(30) / त्रैमासिक(90) / छमाही(180) / वार्षिक(365) are allowed. */
 export function normalizeDagiVerificationFrequencyDays(
   value: unknown,
   fallback: DagiVerificationIntervalDays = DEFAULT_DAGI_VERIFICATION_FREQUENCY_DAYS
