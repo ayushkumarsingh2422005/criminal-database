@@ -259,9 +259,6 @@ export function CriminalForm({
             <span className="font-semibold text-slate-900">
               Is also a Dagi / यह दागी भी है
             </span>
-            <span className="mt-0.5 block text-xs text-[var(--color-muted)]">
-              {CRIMINAL_FIELDS.recordTypeNote.en} ({CRIMINAL_FIELDS.recordTypeNote.hi})
-            </span>
           </span>
         </label>
 
