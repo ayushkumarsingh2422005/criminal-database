@@ -13,6 +13,7 @@ import { assertCanWriteCriminal } from "@/lib/auth";
 import { applyVerificationWritePolicy } from "@/lib/verification-write";
 import { enrichCriminalRecord } from "@/lib/enrich-criminal-records";
 import { validateRecordTypeIds, applyValidatedRecordIds } from "@/lib/record-type-validation";
+import { DEFAULT_VERIFICATION_SEED_DATE } from "@/lib/verification";
 
 export async function GET(
   request: NextRequest,
@@ -60,6 +61,24 @@ export async function PATCH(
       return jsonOk({ error: validated.error }, validated.status);
     }
     parsed = applyValidatedRecordIds(parsed, validated);
+
+    // Preserve existing Dagi verification history unless explicitly provided
+    if (!Array.isArray(body.dagiVerificationHistory)) {
+      parsed.dagiVerificationHistory = existing?.dagiVerificationHistory ?? [];
+    }
+
+    // If newly marked as Dagi with empty history, seed one entry
+    if (
+      validated.recordType === "dagi" &&
+      !(parsed.dagiVerificationHistory?.length)
+    ) {
+      parsed.dagiVerificationHistory = [
+        {
+          verifiedAt: DEFAULT_VERIFICATION_SEED_DATE,
+          officerName: "System (initial dagi seed)",
+        },
+      ];
+    }
 
     const update = { ...parsed, updatedAt: new Date() };
 

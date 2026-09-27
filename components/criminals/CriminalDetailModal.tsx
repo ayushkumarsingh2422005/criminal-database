@@ -101,6 +101,11 @@ export function CriminalDetailModal({
             hi={idLabels.hi}
             value={primaryId}
           />
+          <DetailField
+            en={CRIMINAL_FIELDS.dagiNumber.en}
+            hi={CRIMINAL_FIELDS.dagiNumber.hi}
+            value={criminal.dagiNumber}
+          />
         </section>
 
         <section>

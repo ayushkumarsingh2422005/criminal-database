@@ -22,9 +22,10 @@ import {
   normalizeCriminalStatus,
 } from "@/lib/criminal-status";
 import {
+  DEFAULT_DAGI_VERIFICATION_FREQUENCY_DAYS,
+  isDagi,
   normalizeRecordType,
   recordStorageKey,
-  recordTypeSelectOptions,
   type RecordType,
 } from "@/lib/record-type";
 import { PhotoUpload } from "./PhotoUpload";
@@ -58,6 +59,13 @@ export function CriminalForm({
   );
   const [pid, setPid] = useState(initial?.pid ?? "");
   const [dagiNumber, setDagiNumber] = useState(initial?.dagiNumber ?? "");
+  const [dagiVerificationFrequencyDays, setDagiVerificationFrequencyDays] =
+    useState(
+      String(
+        initial?.dagiVerificationFrequencyDays ??
+          DEFAULT_DAGI_VERIFICATION_FREQUENCY_DAYS
+      )
+    );
   const [photos, setPhotos] = useState(initial?.photos ?? {});
   const [aadhaarVerified, setAadhaarVerified] = useState(initial?.aadhaarVerified ?? false);
   const stateOptions = stateSelectOptions();
@@ -109,8 +117,10 @@ export function CriminalForm({
     try {
       await onSubmit({
         recordType,
-        pid: recordType === "criminal" ? pid : "",
+        pid,
         dagiNumber: recordType === "dagi" ? dagiNumber : undefined,
+        dagiVerificationFrequencyDays:
+          recordType === "dagi" ? Number(dagiVerificationFrequencyDays) : undefined,
         name: fd.get("name"),
         nameAliases: fd.get("nameAliases"),
         dateOfBirth: fd.get("dateOfBirth"),
@@ -146,15 +156,9 @@ export function CriminalForm({
     }
   }
 
-  const storageId = recordStorageKey({ recordType, pid, dagiNumber });
-  const saveLabel =
-    initial?.id
-      ? recordType === "dagi"
-        ? "Update Dagi only"
-        : "Update Criminal + Dagi"
-      : recordType === "dagi"
-        ? "Add Dagi only"
-        : "Add Criminal + Dagi";
+  const storageId = recordStorageKey({ pid });
+  const alsoDagi = isDagi(recordType);
+  const saveLabel = initial?.id ? "Update Criminal" : "Add Criminal";
   const saveLabelHi = initial?.id ? "अपडेट करें" : "जोड़ें";
 
   return (
@@ -165,37 +169,59 @@ export function CriminalForm({
 
       <section className="space-y-6 pr-1">
 
-      <section className="grid gap-4 sm:grid-cols-2">
-        <Select
-          label={fieldLabel("recordType")}
-          name="recordType"
-          value={recordType}
-          onChange={(e) => setRecordType(normalizeRecordType(e.target.value))}
-          options={recordTypeSelectOptions().filter((o) => o.value !== "all")}
+      <section className="space-y-3">
+        <Input
+          label={fieldLabel("pid")}
+          name="pid"
+          value={pid}
+          onChange={(e) => setPid(e.target.value)}
+          required
+          placeholder="e.g., 269517"
         />
-        {recordType === "dagi" ? (
-          <Input
-            label={fieldLabel("dagiNumber")}
-            name="dagiNumber"
-            value={dagiNumber}
-            onChange={(e) => setDagiNumber(e.target.value)}
-            required
-            placeholder="e.g., DGI-001"
+
+        <label className="flex items-start gap-3 rounded-lg border border-[var(--color-border)] bg-amber-50/60 px-3 py-3 text-sm">
+          <input
+            type="checkbox"
+            className="mt-0.5 h-4 w-4"
+            checked={alsoDagi}
+            onChange={(e) =>
+              setRecordType(e.target.checked ? "dagi" : "criminal")
+            }
           />
-        ) : (
-          <Input
-            label={fieldLabel("pid")}
-            name="pid"
-            value={pid}
-            onChange={(e) => setPid(e.target.value)}
-            required
-            placeholder="e.g., 269517"
-          />
-        )}
+          <span>
+            <span className="font-semibold text-slate-900">
+              Is also a Dagi / यह दागी भी है
+            </span>
+            <span className="mt-0.5 block text-xs text-[var(--color-muted)]">
+              {CRIMINAL_FIELDS.recordTypeNote.en} ({CRIMINAL_FIELDS.recordTypeNote.hi})
+            </span>
+          </span>
+        </label>
+
+        {alsoDagi ? (
+          <section className="grid gap-4 rounded-lg border border-amber-200 bg-amber-50/40 p-4 sm:grid-cols-2">
+            <Input
+              label={fieldLabel("dagiNumber")}
+              name="dagiNumber"
+              value={dagiNumber}
+              onChange={(e) => setDagiNumber(e.target.value)}
+              required
+              placeholder="e.g., DGI-001"
+            />
+            <Input
+              label="Dagi verification interval (days) / दागी सत्यापन अंतराल (दिन)"
+              name="dagiVerificationFrequencyDays"
+              type="number"
+              min={1}
+              max={3650}
+              value={dagiVerificationFrequencyDays}
+              onChange={(e) => setDagiVerificationFrequencyDays(e.target.value)}
+              required
+              placeholder="30"
+            />
+          </section>
+        ) : null}
       </section>
-      <p className="text-xs text-[var(--color-muted)]">
-        {CRIMINAL_FIELDS.recordTypeNote.en} ({CRIMINAL_FIELDS.recordTypeNote.hi})
-      </p>
 
       <section className="space-y-3">
         <SectionTitle en="Personal Details" hi="व्यक्तिगत विवरण" />
@@ -434,12 +460,8 @@ export function CriminalForm({
         <SectionTitle en={CRIMINAL_FIELDS.photos.en} hi={CRIMINAL_FIELDS.photos.hi} />
         <p className="text-xs text-[var(--color-muted)]">
           Images are saved to{" "}
-          <code className="rounded bg-slate-100 px-1">
-            public/criminals/{"{"}
-            {recordType === "dagi" ? "Dagi number" : "PID"}
-            {"}"}/
-          </code>
-          . Enter the {recordType === "dagi" ? "Dagi number" : "PID"} above first.
+          <code className="rounded bg-slate-100 px-1">public/criminals/{"{PID}"}/</code>
+          . Enter the PID above first.
         </p>
         <section className="grid gap-3 sm:grid-cols-2">
           {PHOTO_KEYS.map((key) => (

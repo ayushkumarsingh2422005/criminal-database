@@ -22,7 +22,11 @@ import {
 import type { CriminalVerificationMeta } from "@/lib/criminal-verification-types";
 import { resolveConfessionDocumentPath } from "@/lib/confession-document";
 import { normalizeCriminalStatus } from "@/lib/criminal-status";
-import { normalizeRecordType } from "@/lib/record-type";
+import {
+  normalizeDagiVerificationFrequencyDays,
+  normalizeRecordType,
+} from "@/lib/record-type";
+import { sortVerificationHistory } from "@/lib/verification-shared";
 
 export type CriminalHistoryRecord = {
   sNo?: number;
@@ -41,6 +45,8 @@ interface CriminalRecordBase {
   pid: string;
   dagiNumber?: string;
   recordType: "criminal" | "dagi";
+  dagiVerificationFrequencyDays?: number;
+  dagiVerificationHistory?: VerificationRecord[];
   name: string;
   nameAliases?: string;
   dateOfBirth?: string;
@@ -134,6 +140,10 @@ export function toCriminalRecord(c: Criminal): CriminalRecord {
     pid: n.pid ?? "",
     dagiNumber: n.dagiNumber,
     recordType: normalizeRecordType(n.recordType),
+    dagiVerificationFrequencyDays: n.dagiVerificationFrequencyDays,
+    dagiVerificationHistory: sortVerificationHistory(
+      n.dagiVerificationHistory ?? []
+    ),
     name: n.name,
     nameAliases: n.nameAliases,
     dateOfBirth: n.dateOfBirth,
@@ -200,6 +210,16 @@ export async function parseCriminalBody(
     recordType: normalizeRecordType(
       body.recordType ? String(body.recordType) : undefined
     ),
+    dagiVerificationFrequencyDays:
+      body.dagiVerificationFrequencyDays != null &&
+      body.dagiVerificationFrequencyDays !== ""
+        ? normalizeDagiVerificationFrequencyDays(body.dagiVerificationFrequencyDays)
+        : undefined,
+    dagiVerificationHistory: Array.isArray(body.dagiVerificationHistory)
+      ? sortVerificationHistory(
+          body.dagiVerificationHistory as VerificationRecord[]
+        )
+      : undefined,
     name: String(body.name ?? "").trim(),
     criminalStatus: normalizeCriminalStatus(
       body.criminalStatus ? String(body.criminalStatus) : undefined

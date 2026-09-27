@@ -53,9 +53,10 @@ export async function buildCriminalFilter(
   const recordType = get("recordType");
   if (recordType && recordType !== "all") {
     if (recordType === "dagi") {
+      // Subset: only criminals marked as Dagi
       conditions.push({ recordType: "dagi" });
     } else if (recordType === "criminal") {
-      // Legacy docs without recordType count as criminal
+      // Criminals who are NOT marked Dagi (legacy docs count as non-dagi)
       conditions.push({ recordType: { $ne: "dagi" } });
     }
   }

@@ -7,4 +7,10 @@ export type CriminalVerificationMeta = {
   verificationFrequencyDays?: number;
   lastVerifiedAt?: string;
   nextVerificationDue?: string;
+  /** Dagi-specific verification (only when marked as Dagi) */
+  dagiVerificationHistory?: VerificationRecord[];
+  dagiVerificationStatus?: VerificationStatus;
+  dagiVerificationFrequencyDays?: number;
+  dagiLastVerifiedAt?: string;
+  dagiNextVerificationDue?: string;
 };

@@ -23,15 +23,18 @@ export const CRIMINAL_FIELDS = {
     hi: "अपराध शैली / अपराध के प्रकार",
   },
   recordType: {
-    en: "Record Type",
-    hi: "रिकॉर्ड प्रकार",
+    en: "Dagi mark",
+    hi: "दागी चिह्न",
   },
-  /** Clarifying note shown near the type field */
   recordTypeNote: {
-    en: "Criminal = Criminal + Dagi. Declaring Dagi = Dagi only.",
-    hi: "अपराधी = अपराधी + दागी। दागी चुनने पर = केवल दागी।",
+    en: "Dagi is a subset of Criminal. All Dagis are Criminals; not all Criminals are Dagis. When checked, enter Dagi number and Dagi verification interval.",
+    hi: "दागी अपराधी का उपसमूह है। सभी दागी अपराधी हैं। चिह्नित करने पर दागी नंबर और दागी सत्यापन अंतराल भरें।",
   },
   dagiNumber: { en: "Dagi Number", hi: "दागी नंबर" },
+  dagiVerificationFrequencyDays: {
+    en: "Dagi verification interval (days)",
+    hi: "दागी सत्यापन अंतराल (दिन)",
+  },
   pid: { en: "PID Number", hi: "PID नंबर" },
   name: { en: "Name", hi: "नाम" },
   nameAliases: { en: "Aliases", hi: "उर्फ / अन्य नाम" },

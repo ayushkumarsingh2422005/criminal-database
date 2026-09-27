@@ -13,7 +13,6 @@ import type { CriminalRecord } from "@/lib/criminal-mapper";
 import { useAppSession } from "@/components/session/SessionProvider";
 import { canManageCriminalRecord } from "@/lib/criminal-access-shared";
 import {
-  normalizeRecordType,
   recordTypeSelectOptions,
 } from "@/lib/record-type";
 
@@ -87,23 +86,20 @@ export default function CriminalManagementPage() {
   }
 
   const formTitle = useMemo(() => {
-    if (!editing) return "Add Record / नया जोड़ें";
-    const type = normalizeRecordType(editing.recordType);
-    return type === "dagi"
-      ? "Edit Dagi only / केवल दागी संपादित करें"
-      : "Edit Criminal + Dagi / अपराधी + दागी संपादित करें";
+    if (!editing) return "Add Criminal / नया जोड़ें";
+    return "Edit Criminal / अपराधी संपादित करें";
   }, [editing]);
 
   return (
     <section className="w-full space-y-6">
       <PageHeader
-        title="Criminal / Dagi Management"
+        title="Criminal Management"
         subtitle={
           isScopedAdmin
             ? `View all records — add, edit, and delete only for ${session.policeStationName ?? "your PS"}`
             : session.role === "superadmin"
-              ? "अपराधी / दागी प्रबंधन — Criminal = both; Dagi = Dagi only"
-              : "अपराधी / दागी प्रबंधन — Criminal = both; declaring Dagi = Dagi only"
+              ? "अपराधी प्रबंधन — Dagi is a subset of Criminal"
+              : "अपराधी प्रबंधन — all Dagis are Criminals; not all Criminals are Dagis"
         }
         actions={
           <Button
@@ -117,10 +113,10 @@ export default function CriminalManagementPage() {
         }
       />
 
-      <Card title="All Records" subtitle="Criminal + Dagi, or Dagi only">
+      <Card title="All Criminal Records" subtitle="Dagi = subset of Criminal">
         <div className="mb-4 max-w-xs">
           <Select
-            label="Record Type / रिकॉर्ड प्रकार"
+            label="Dagi filter / दागी फ़िल्टर"
             value={typeFilter}
             onChange={(e) => setTypeFilter(e.target.value)}
             options={recordTypeSelectOptions()}

@@ -13,7 +13,6 @@ import type { CriminalHistoryRecord, CriminalRecord } from "@/lib/criminal-mappe
 import type { BailerInfo, CriminalVehicle, RelatedPerson } from "@/models/Criminal";
 import { criminalStatusLabel } from "@/lib/criminal-status";
 import {
-  recordIdFieldLabel,
   recordPrimaryId,
   recordTypeLabel,
 } from "@/lib/record-type";
@@ -310,13 +309,14 @@ export function CriminalReportDocument({
 
         <View style={styles.section}>
           <Text style={styles.bodyText}>
-            <Text style={{ fontWeight: 700 }}>
-              2. {recordIdFieldLabel(criminal.recordType).hi}:-{" "}
-            </Text>
+            <Text style={{ fontWeight: 700 }}>2. PID नम्बर:- </Text>
             {recordPrimaryId(criminal)}
             {"    "}
             <Text style={{ fontWeight: 700 }}>Type / प्रकार - </Text>
             {recordTypeLabel(criminal.recordType)}
+            {criminal.recordType === "dagi" && criminal.dagiNumber
+              ? `    दागी नं०- ${criminal.dagiNumber}`
+              : ""}
             {"    "}
             <Text style={{ fontWeight: 700 }}>Aadhar No. - </Text>
             {dash(criminal.aadhaarNumber)}

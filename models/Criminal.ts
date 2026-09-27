@@ -93,12 +93,20 @@ export interface VerificationInfo {
 
 export interface Criminal {
   _id?: ObjectId;
-  /** Charge-sheeted PID. Required when recordType is criminal; may be empty for dagi. */
+  /** Charge-sheeted PID — always required (every record is a Criminal). */
   pid: string;
-  /** Assumed/suspected ID. Required when recordType is dagi. */
-  dagiNumber?: string;
-  /** Defaults to criminal for legacy documents. */
+  /**
+   * `criminal` = normal criminal (not Dagi).
+   * `dagi` = criminal who is also marked Dagi (subset).
+   * Defaults to criminal for legacy documents.
+   */
   recordType?: "criminal" | "dagi";
+  /** Required when marked as Dagi (subset of Criminal). */
+  dagiNumber?: string;
+  /** Per-record Dagi verification interval in days (only when marked Dagi). */
+  dagiVerificationFrequencyDays?: number;
+  /** Separate physical verification history for Dagi monitoring. */
+  dagiVerificationHistory?: VerificationRecord[];
   name: string;
   nameAliases?: string;
   dateOfBirth?: string;

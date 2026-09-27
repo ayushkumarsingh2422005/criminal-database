@@ -195,6 +195,7 @@ function buildColumns(groups: CsvExportGroup[]): CsvColumn[] {
   add("basic", "recordType", "Record type");
   add("basic", "pid", "PID");
   add("basic", "dagiNumber", "Dagi number");
+  add("basic", "dagiVerificationFrequencyDays", "Dagi verification interval (days)");
   add("basic", "name", "Name");
   add("basic", "nameAliases", "Name aliases");
   add("basic", "dateOfBirth", "Date of birth");
@@ -271,6 +272,10 @@ function cellValue(record: CriminalRecord, key: string): string {
       return record.pid ?? "";
     case "dagiNumber":
       return record.dagiNumber ?? "";
+    case "dagiVerificationFrequencyDays":
+      return record.dagiVerificationFrequencyDays != null
+        ? String(record.dagiVerificationFrequencyDays)
+        : "";
     case "name":
       return record.name ?? "";
     case "nameAliases":

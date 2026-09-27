@@ -18,8 +18,9 @@ import { VerificationStatusCell } from "@/components/criminals/VerificationStatu
 import { CriminalStatusBadge } from "@/components/criminals/CriminalStatusBadge";
 import { DownloadPdfButton } from "./DownloadPdfButton";
 import {
-  isDagiOnly,
+  isDagi,
   recordPrimaryId,
+  recordTypeBadgeLabel,
 } from "@/lib/record-type";
 
 export function CriminalTable({
@@ -60,8 +61,9 @@ export function CriminalTable({
   return (
     <DataTable>
       <DataTableHead>
-        <DataTableHeaderCell>Type / प्रकार</DataTableHeaderCell>
-        <DataTableHeaderCell>PID / Dagi No.</DataTableHeaderCell>
+        <DataTableHeaderCell>Type</DataTableHeaderCell>
+        <DataTableHeaderCell>{fieldLabel("pid")}</DataTableHeaderCell>
+        <DataTableHeaderCell>Dagi No.</DataTableHeaderCell>
         <DataTableHeaderCell>{fieldLabel("name")}</DataTableHeaderCell>
         <DataTableHeaderCell>{fieldLabel("criminalStatus")}</DataTableHeaderCell>
         <DataTableHeaderCell>{fieldLabel("crimeTypes")}</DataTableHeaderCell>
@@ -75,23 +77,23 @@ export function CriminalTable({
       <DataTableBody>
         {items.map((c) => {
           const primaryId = recordPrimaryId(c);
-          const dagiOnly = isDagiOnly(c.recordType);
+          const markedDagi = isDagi(c.recordType);
           return (
           <DataTableRow key={c.id}>
             <DataTableCell>
               <span
                 className={`inline-flex rounded-full px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide ${
-                  dagiOnly
+                  markedDagi
                     ? "bg-amber-100 text-amber-900"
                     : "bg-sky-100 text-sky-900"
                 }`}
                 title={
-                  dagiOnly
-                    ? "Dagi only — not charge-sheeted criminal"
-                    : "Criminal + Dagi"
+                  markedDagi
+                    ? "Dagi (subset of Criminal)"
+                    : "Criminal (not marked Dagi)"
                 }
               >
-                {dagiOnly ? "Dagi only" : "Criminal + Dagi"}
+                {recordTypeBadgeLabel(c.recordType)}
               </span>
             </DataTableCell>
             <DataTableCell className="font-mono">
@@ -105,6 +107,9 @@ export function CriminalTable({
               ) : (
                 primaryId
               )}
+            </DataTableCell>
+            <DataTableCell className="font-mono text-xs">
+              {markedDagi ? c.dagiNumber || "—" : "—"}
             </DataTableCell>
             <DataTableCell className="font-medium">
               {linkToDetail ? (
@@ -156,6 +161,22 @@ export function CriminalTable({
             </DataTableCell>
             <DataTableCell>
               <VerificationStatusCell criminal={c} />
+              {isDagi(c.recordType) && c.dagiVerificationStatus ? (
+                <section className="mt-2 border-t border-amber-100 pt-2">
+                  <p className="mb-1 text-[10px] font-bold uppercase tracking-wide text-amber-800">
+                    Dagi
+                  </p>
+                  <VerificationStatusCell
+                    criminal={{
+                      verificationHistory: c.dagiVerificationHistory ?? [],
+                      verificationStatus: c.dagiVerificationStatus,
+                      verificationFrequencyDays: c.dagiVerificationFrequencyDays,
+                      lastVerifiedAt: c.dagiLastVerifiedAt,
+                      nextVerificationDue: c.dagiNextVerificationDue,
+                    }}
+                  />
+                </section>
+              ) : null}
             </DataTableCell>
             <DataTableCell>
               <ActionIcons>

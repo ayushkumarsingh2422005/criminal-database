@@ -21,12 +21,13 @@ import { canManageCriminalRecord } from "@/lib/criminal-access-shared";
 import { useAppSession } from "@/components/session/SessionProvider";
 import { criminalStatusLabel } from "@/lib/criminal-status";
 import {
-  isDagiOnly,
+  isDagi,
   recordIdFieldLabel,
   recordPrimaryId,
   recordTypeLabel,
 } from "@/lib/record-type";
 import { VerificationPanel } from "@/components/criminals/VerificationPanel";
+import { DagiVerificationPanel } from "@/components/criminals/DagiVerificationPanel";
 import { VerifyCriminalButton } from "@/components/criminals/VerifyCriminalButton";
 import { IoPhotoPanel } from "@/components/criminals/IoPhotoPanel";
 import { DownloadPdfButton } from "./DownloadPdfButton";
@@ -338,7 +339,7 @@ export function CriminalDetailView({
   const primaryId = recordPrimaryId(criminal);
   const idLabels = recordIdFieldLabel(criminal.recordType);
   const typeLabel = recordTypeLabel(criminal.recordType);
-  const dagiOnly = isDagiOnly(criminal.recordType);
+  const markedDagi = isDagi(criminal.recordType);
 
   return (
     <section className="w-full space-y-6">
@@ -364,7 +365,10 @@ export function CriminalDetailView({
         <section>
           <h1 className="text-3xl font-bold text-slate-900">{criminal.name}</h1>
           <p className="mt-1 text-sm text-[var(--color-muted)]">
-            {ps} • {dagiOnly ? "Dagi" : "PID"} {primaryId}
+            {ps} • PID {primaryId}
+            {markedDagi && criminal.dagiNumber
+              ? ` • Dagi ${criminal.dagiNumber}`
+              : ""}
             {criminal.mobileNumber ? ` • ${criminal.mobileNumber}` : ""}
             {crimeSummary !== "—" ? ` • ${crimeSummary}` : ""}
           </p>
@@ -384,10 +388,11 @@ export function CriminalDetailView({
             {viewOnly ? (
               <Badge variant="default">View only / केवल देखें</Badge>
             ) : null}
-            <Badge variant={dagiOnly ? "warning" : "default"}>{typeLabel}</Badge>
-            <Badge variant="default">
-              {dagiOnly ? "Dagi" : "PID"} {primaryId}
-            </Badge>
+            <Badge variant={markedDagi ? "warning" : "default"}>{typeLabel}</Badge>
+            <Badge variant="default">PID {primaryId}</Badge>
+            {markedDagi && criminal.dagiNumber ? (
+              <Badge variant="warning">Dagi {criminal.dagiNumber}</Badge>
+            ) : null}
           </section>
         </section>
         <section className="flex flex-wrap items-center gap-1">
@@ -475,6 +480,13 @@ export function CriminalDetailView({
               labelHi={idLabels.hi}
               value={primaryId}
             />
+            {markedDagi ? (
+              <SummaryRow
+                labelEn={CRIMINAL_FIELDS.dagiNumber.en}
+                labelHi={CRIMINAL_FIELDS.dagiNumber.hi}
+                value={criminal.dagiNumber}
+              />
+            ) : null}
             <SummaryRow
               labelEn={CRIMINAL_FIELDS.name.en}
               labelHi={CRIMINAL_FIELDS.name.hi}
@@ -766,22 +778,31 @@ export function CriminalDetailView({
             <Card title="Verification" subtitle="सत्यापन">
               <VerificationPanel
                 criminal={criminal}
-                showVerifyButton={false}
+                showVerifyButton={ioMode || canManage}
                 onVerified={handleVerified}
               />
             </Card>
+            {markedDagi ? (
+              <Card title="Dagi Verification" subtitle="दागी सत्यापन">
+                <DagiVerificationPanel
+                  criminal={criminal}
+                  showVerifyButton={ioMode || canManage}
+                  onVerified={handleVerified}
+                />
+              </Card>
+            ) : null}
           </section>
         </section>
       )}
 
-      {(ioMode || canManage) && (
+      {(ioMode || canManage) && !markedDagi ? (
         <VerifyCriminalButton
           variant="fab"
           criminalId={criminal.id}
           onVerified={handleVerified}
           withRemark={ioMode}
         />
-      )}
+      ) : null}
     </section>
   );
 }

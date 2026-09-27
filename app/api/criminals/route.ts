@@ -62,6 +62,7 @@ export async function POST(request: NextRequest) {
     }
     parsed = applyValidatedRecordIds(parsed, validated);
 
+    const isDagiRecord = parsed.recordType === "dagi";
     const criminal: Criminal = {
       ...parsed,
       verificationHistory: parsed.verificationHistory?.length
@@ -72,6 +73,16 @@ export async function POST(request: NextRequest) {
               officerName: "System (initial seed)",
             },
           ],
+      dagiVerificationHistory: isDagiRecord
+        ? parsed.dagiVerificationHistory?.length
+          ? parsed.dagiVerificationHistory
+          : [
+              {
+                verifiedAt: DEFAULT_VERIFICATION_SEED_DATE,
+                officerName: "System (initial dagi seed)",
+              },
+            ]
+        : parsed.dagiVerificationHistory ?? [],
       createdAt: new Date(),
       updatedAt: new Date(),
       createdBy: session.sub,
