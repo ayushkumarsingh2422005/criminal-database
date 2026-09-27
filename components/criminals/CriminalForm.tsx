@@ -22,8 +22,9 @@ import {
   normalizeCriminalStatus,
 } from "@/lib/criminal-status";
 import {
-  DEFAULT_DAGI_VERIFICATION_FREQUENCY_DAYS,
+  dagiVerificationIntervalSelectOptions,
   isDagi,
+  normalizeDagiVerificationFrequencyDays,
   normalizeRecordType,
   recordStorageKey,
   type RecordType,
@@ -62,8 +63,9 @@ export function CriminalForm({
   const [dagiVerificationFrequencyDays, setDagiVerificationFrequencyDays] =
     useState(
       String(
-        initial?.dagiVerificationFrequencyDays ??
-          DEFAULT_DAGI_VERIFICATION_FREQUENCY_DAYS
+        normalizeDagiVerificationFrequencyDays(
+          initial?.dagiVerificationFrequencyDays
+        )
       )
     );
   const [photos, setPhotos] = useState(initial?.photos ?? {});
@@ -208,16 +210,12 @@ export function CriminalForm({
               required
               placeholder="e.g., DGI-001"
             />
-            <Input
-              label="Dagi verification interval (days) / दागी सत्यापन अंतराल (दिन)"
+            <Select
+              label="Dagi verification interval / दागी सत्यापन अंतराल"
               name="dagiVerificationFrequencyDays"
-              type="number"
-              min={1}
-              max={3650}
               value={dagiVerificationFrequencyDays}
               onChange={(e) => setDagiVerificationFrequencyDays(e.target.value)}
-              required
-              placeholder="30"
+              options={dagiVerificationIntervalSelectOptions()}
             />
           </section>
         ) : null}

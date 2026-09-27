@@ -1,7 +1,7 @@
 import type { CriminalRecord } from "@/lib/criminal-mapper";
 import type { AdminRole } from "@/models/Admin";
 import { criminalStatusLabel } from "@/lib/criminal-status";
-import { recordTypeLabel } from "@/lib/record-type";
+import { recordTypeLabel, dagiVerificationIntervalLabel } from "@/lib/record-type";
 import { VERIFICATION_STATUS_LABELS } from "@/lib/verification-shared";
 import { confessionDocumentFileName } from "@/lib/confession-document";
 
@@ -195,7 +195,7 @@ function buildColumns(groups: CsvExportGroup[]): CsvColumn[] {
   add("basic", "recordType", "Record type");
   add("basic", "pid", "PID");
   add("basic", "dagiNumber", "Dagi number");
-  add("basic", "dagiVerificationFrequencyDays", "Dagi verification interval (days)");
+  add("basic", "dagiVerificationFrequencyDays", "Dagi verification interval");
   add("basic", "name", "Name");
   add("basic", "nameAliases", "Name aliases");
   add("basic", "dateOfBirth", "Date of birth");
@@ -273,9 +273,7 @@ function cellValue(record: CriminalRecord, key: string): string {
     case "dagiNumber":
       return record.dagiNumber ?? "";
     case "dagiVerificationFrequencyDays":
-      return record.dagiVerificationFrequencyDays != null
-        ? String(record.dagiVerificationFrequencyDays)
-        : "";
+      return dagiVerificationIntervalLabel(record.dagiVerificationFrequencyDays);
     case "name":
       return record.name ?? "";
     case "nameAliases":

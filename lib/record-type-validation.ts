@@ -1,6 +1,7 @@
 import type { Criminal } from "@/models/Criminal";
 import { CriminalModel } from "@/models/Criminal";
 import {
+  isValidDagiVerificationFrequencyDays,
   normalizeDagiVerificationFrequencyDays,
   normalizeRecordType,
   type RecordType,
@@ -74,10 +75,11 @@ export async function validateRecordTypeIds(
       };
     }
     const days = Number(parsed.dagiVerificationFrequencyDays);
-    if (!Number.isFinite(days) || days < 1) {
+    if (!isValidDagiVerificationFrequencyDays(days)) {
       return {
         ok: false,
-        error: "Dagi verification interval (days) is required when marked as Dagi",
+        error:
+          "Dagi verification interval must be Monthly (मासिक), Quarterly (त्रैमासिक), or Yearly (वार्षिक)",
         status: 400,
       };
     }

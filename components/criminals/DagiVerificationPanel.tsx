@@ -5,6 +5,7 @@ import { VerificationStatusBadge } from "@/components/criminals/VerificationStat
 import { VerifyDagiButton } from "@/components/criminals/VerifyDagiButton";
 import { formatDateTimeDisplay } from "@/lib/date-utils";
 import type { CriminalRecord } from "@/lib/criminal-mapper";
+import { dagiVerificationIntervalLabel } from "@/lib/record-type";
 
 export function DagiVerificationPanel({
   criminal,
@@ -32,8 +33,8 @@ export function DagiVerificationPanel({
           {criminal.dagiNumber || "—"}
         </p>
         <p>
-          <span className="font-medium text-slate-700">Frequency / अंतराल: </span>
-          Every {criminal.dagiVerificationFrequencyDays ?? 30} days
+          <span className="font-medium text-slate-700">Interval / अंतराल: </span>
+          {dagiVerificationIntervalLabel(criminal.dagiVerificationFrequencyDays)}
         </p>
         <p>
           <span className="font-medium text-slate-700">Last verified / अंतिम सत्यापन: </span>

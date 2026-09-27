@@ -32,8 +32,8 @@ export const CRIMINAL_FIELDS = {
   },
   dagiNumber: { en: "Dagi Number", hi: "दागी नंबर" },
   dagiVerificationFrequencyDays: {
-    en: "Dagi verification interval (days)",
-    hi: "दागी सत्यापन अंतराल (दिन)",
+    en: "Dagi verification interval",
+    hi: "दागी सत्यापन अंतराल",
   },
   pid: { en: "PID Number", hi: "PID नंबर" },
   name: { en: "Name", hi: "नाम" },
