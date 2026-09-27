@@ -1,6 +1,20 @@
 export const RECORD_TYPES = [
-  { value: "criminal", en: "Criminal", hi: "अपराधी" },
-  { value: "dagi", en: "Dagi", hi: "दागी" },
+  {
+    value: "criminal",
+    en: "Criminal + Dagi",
+    hi: "अपराधी + दागी",
+    shortEn: "Criminal",
+    shortHi: "अपराधी",
+    hint: "Charge-sheeted person — counted as both Criminal and Dagi (uses PID)",
+  },
+  {
+    value: "dagi",
+    en: "Dagi only",
+    hi: "केवल दागी",
+    shortEn: "Dagi",
+    shortHi: "दागी",
+    hint: "Declared as Dagi only — not a charge-sheeted criminal (uses Dagi number)",
+  },
 ] as const;
 
 export type RecordType = (typeof RECORD_TYPES)[number]["value"];
@@ -21,6 +35,22 @@ export function recordTypeLabel(value?: string | null): string {
   return row ? `${row.en} / ${row.hi}` : normalized;
 }
 
+export function recordTypeShortLabel(value?: string | null): string {
+  const normalized = normalizeRecordType(value);
+  const row = RECORD_TYPES.find((t) => t.value === normalized);
+  return row ? row.shortEn : normalized;
+}
+
+/** True when declared as Dagi-only (not a charge-sheeted criminal). */
+export function isDagiOnly(value?: string | null): boolean {
+  return normalizeRecordType(value) === "dagi";
+}
+
+/** True when declared as Criminal (also counts as Dagi). */
+export function isCriminalRecord(value?: string | null): boolean {
+  return normalizeRecordType(value) === "criminal";
+}
+
 export function recordTypeSelectOptions(allLabel = "All types / सभी प्रकार") {
   return [
     { value: "all", label: allLabel },
@@ -29,6 +59,11 @@ export function recordTypeSelectOptions(allLabel = "All types / सभी प्
       label: `${t.en} (${t.hi})`,
     })),
   ];
+}
+
+export function recordTypeHint(value?: string | null): string {
+  const normalized = normalizeRecordType(value);
+  return RECORD_TYPES.find((t) => t.value === normalized)?.hint ?? "";
 }
 
 /** Folder / file key used under public/criminals/ */

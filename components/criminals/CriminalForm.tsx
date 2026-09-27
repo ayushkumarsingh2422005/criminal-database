@@ -150,11 +150,11 @@ export function CriminalForm({
   const saveLabel =
     initial?.id
       ? recordType === "dagi"
-        ? "Update Dagi"
-        : "Update Criminal"
+        ? "Update Dagi only"
+        : "Update Criminal + Dagi"
       : recordType === "dagi"
-        ? "Add Dagi"
-        : "Add Criminal";
+        ? "Add Dagi only"
+        : "Add Criminal + Dagi";
   const saveLabelHi = initial?.id ? "अपडेट करें" : "जोड़ें";
 
   return (
@@ -193,6 +193,9 @@ export function CriminalForm({
           />
         )}
       </section>
+      <p className="text-xs text-[var(--color-muted)]">
+        {CRIMINAL_FIELDS.recordTypeNote.en} ({CRIMINAL_FIELDS.recordTypeNote.hi})
+      </p>
 
       <section className="space-y-3">
         <SectionTitle en="Personal Details" hi="व्यक्तिगत विवरण" />

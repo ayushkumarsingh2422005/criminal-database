@@ -21,7 +21,7 @@ import { canManageCriminalRecord } from "@/lib/criminal-access-shared";
 import { useAppSession } from "@/components/session/SessionProvider";
 import { criminalStatusLabel } from "@/lib/criminal-status";
 import {
-  normalizeRecordType,
+  isDagiOnly,
   recordIdFieldLabel,
   recordPrimaryId,
   recordTypeLabel,
@@ -338,7 +338,7 @@ export function CriminalDetailView({
   const primaryId = recordPrimaryId(criminal);
   const idLabels = recordIdFieldLabel(criminal.recordType);
   const typeLabel = recordTypeLabel(criminal.recordType);
-  const isDagi = normalizeRecordType(criminal.recordType) === "dagi";
+  const dagiOnly = isDagiOnly(criminal.recordType);
 
   return (
     <section className="w-full space-y-6">
@@ -364,7 +364,7 @@ export function CriminalDetailView({
         <section>
           <h1 className="text-3xl font-bold text-slate-900">{criminal.name}</h1>
           <p className="mt-1 text-sm text-[var(--color-muted)]">
-            {ps} • {isDagi ? "Dagi" : "PID"} {primaryId}
+            {ps} • {dagiOnly ? "Dagi" : "PID"} {primaryId}
             {criminal.mobileNumber ? ` • ${criminal.mobileNumber}` : ""}
             {crimeSummary !== "—" ? ` • ${crimeSummary}` : ""}
           </p>
@@ -384,9 +384,9 @@ export function CriminalDetailView({
             {viewOnly ? (
               <Badge variant="default">View only / केवल देखें</Badge>
             ) : null}
-            <Badge variant={isDagi ? "warning" : "default"}>{typeLabel}</Badge>
+            <Badge variant={dagiOnly ? "warning" : "default"}>{typeLabel}</Badge>
             <Badge variant="default">
-              {isDagi ? "Dagi" : "PID"} {primaryId}
+              {dagiOnly ? "Dagi" : "PID"} {primaryId}
             </Badge>
           </section>
         </section>

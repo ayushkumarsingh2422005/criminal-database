@@ -18,7 +18,7 @@ import { VerificationStatusCell } from "@/components/criminals/VerificationStatu
 import { CriminalStatusBadge } from "@/components/criminals/CriminalStatusBadge";
 import { DownloadPdfButton } from "./DownloadPdfButton";
 import {
-  normalizeRecordType,
+  isDagiOnly,
   recordPrimaryId,
 } from "@/lib/record-type";
 
@@ -75,18 +75,23 @@ export function CriminalTable({
       <DataTableBody>
         {items.map((c) => {
           const primaryId = recordPrimaryId(c);
-          const type = normalizeRecordType(c.recordType);
+          const dagiOnly = isDagiOnly(c.recordType);
           return (
           <DataTableRow key={c.id}>
             <DataTableCell>
               <span
                 className={`inline-flex rounded-full px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide ${
-                  type === "dagi"
+                  dagiOnly
                     ? "bg-amber-100 text-amber-900"
                     : "bg-sky-100 text-sky-900"
                 }`}
+                title={
+                  dagiOnly
+                    ? "Dagi only — not charge-sheeted criminal"
+                    : "Criminal + Dagi"
+                }
               >
-                {type === "dagi" ? "Dagi" : "Criminal"}
+                {dagiOnly ? "Dagi only" : "Criminal + Dagi"}
               </span>
             </DataTableCell>
             <DataTableCell className="font-mono">

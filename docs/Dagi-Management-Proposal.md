@@ -88,18 +88,31 @@ Existing criminal records → treat as `recordType: criminal` (migration / defau
 
 ---
 
+## Confirmed approach (updated)
+
+| Type selected | Meaning | ID |
+|---|---|---|
+| **Criminal + Dagi** (default) | Person is **both** criminal and dagi | **PID** |
+| **Dagi only** | Declared as **dagi only** (not charge-sheeted criminal) | **Dagi number** (manual) |
+
+- Same form / fields / workflows for both
+- Type can be changed later on edit
+- Existing records = Criminal + Dagi
+
+---
+
 ## Confirmed answers
 
 1. **Dagi number format** — manual (user enters)
-2. **Can type change later?** — yes (Criminal ↔ Dagi on edit)
-3. **Existing records** — all treated as Criminal
+2. **Can type change later?** — yes
+3. **Existing records** — all treated as Criminal + Dagi
 
 ---
 
 ## One-line summary
 
-> Same criminal dossier as today; add one type field (Criminal / Dagi). Criminals use PID; Dagis use Dagi number (manual). Type can be changed later. Filter by type. Everything else remains the same.
+> Default type is Criminal + Dagi (PID). Declaring Dagi makes the record Dagi-only (Dagi number). Same dossier otherwise; filter by type.
 
 ---
 
-**Document status:** Confirmed — development in progress.
+**Document status:** Confirmed — implemented with this rule.

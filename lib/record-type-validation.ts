@@ -25,7 +25,11 @@ export async function validateRecordTypeIds(
 
   if (recordType === "criminal") {
     if (!pid) {
-      return { ok: false, error: "PID is required for Criminal records", status: 400 };
+      return {
+        ok: false,
+        error: "PID is required for Criminal + Dagi records",
+        status: 400,
+      };
     }
     const existing = await CriminalModel.findByPid(pid);
     if (existing && existing._id?.toString() !== excludeId) {
@@ -41,7 +45,7 @@ export async function validateRecordTypeIds(
   if (!dagiNumber) {
     return {
       ok: false,
-      error: "Dagi number is required for Dagi records",
+      error: "Dagi number is required for Dagi-only records",
       status: 400,
     };
   }

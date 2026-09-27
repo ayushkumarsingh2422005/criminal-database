@@ -22,9 +22,17 @@ export const CRIMINAL_FIELDS = {
     en: "Crime Type / Style",
     hi: "अपराध शैली / अपराध के प्रकार",
   },
-  pid: { en: "PID Number", hi: "PID नंबर" },
+  recordType: {
+    en: "Record Type",
+    hi: "रिकॉर्ड प्रकार",
+  },
+  /** Clarifying note shown near the type field */
+  recordTypeNote: {
+    en: "Criminal = Criminal + Dagi. Declaring Dagi = Dagi only.",
+    hi: "अपराधी = अपराधी + दागी। दागी चुनने पर = केवल दागी।",
+  },
   dagiNumber: { en: "Dagi Number", hi: "दागी नंबर" },
-  recordType: { en: "Record Type", hi: "रिकॉर्ड प्रकार" },
+  pid: { en: "PID Number", hi: "PID नंबर" },
   name: { en: "Name", hi: "नाम" },
   nameAliases: { en: "Aliases", hi: "उर्फ / अन्य नाम" },
   dateOfBirth: { en: "Date of Birth", hi: "जन्म तिथि" },

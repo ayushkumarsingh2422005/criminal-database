@@ -90,8 +90,8 @@ export default function CriminalManagementPage() {
     if (!editing) return "Add Record / नया जोड़ें";
     const type = normalizeRecordType(editing.recordType);
     return type === "dagi"
-      ? "Edit Dagi / दागी संपादित करें"
-      : "Edit Criminal / अपराधी संपादित करें";
+      ? "Edit Dagi only / केवल दागी संपादित करें"
+      : "Edit Criminal + Dagi / अपराधी + दागी संपादित करें";
   }, [editing]);
 
   return (
@@ -102,8 +102,8 @@ export default function CriminalManagementPage() {
           isScopedAdmin
             ? `View all records — add, edit, and delete only for ${session.policeStationName ?? "your PS"}`
             : session.role === "superadmin"
-              ? "अपराधी / दागी प्रबंधन — all police stations (full access)"
-              : "अपराधी / दागी प्रबंधन — add, edit, delete records with photos in /public."
+              ? "अपराधी / दागी प्रबंधन — Criminal = both; Dagi = Dagi only"
+              : "अपराधी / दागी प्रबंधन — Criminal = both; declaring Dagi = Dagi only"
         }
         actions={
           <Button
@@ -117,7 +117,7 @@ export default function CriminalManagementPage() {
         }
       />
 
-      <Card title="All Records" subtitle="सभी रिकॉर्ड — Criminal & Dagi">
+      <Card title="All Records" subtitle="Criminal + Dagi, or Dagi only">
         <div className="mb-4 max-w-xs">
           <Select
             label="Record Type / रिकॉर्ड प्रकार"
