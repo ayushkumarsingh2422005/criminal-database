@@ -69,7 +69,7 @@ export function CriminalDetailModal({
   if (!criminal) return null;
   const crimeTypes = aggregateCrimeTypes(criminal.criminalHistory);
   const primaryId = recordPrimaryId(criminal);
-  const idLabels = recordIdFieldLabel(criminal.recordType);
+  const idLabels = recordIdFieldLabel();
   const typeLabel = recordTypeLabel(criminal.recordType);
 
   return (

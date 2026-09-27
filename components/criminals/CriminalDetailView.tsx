@@ -337,7 +337,7 @@ export function CriminalDetailView({
   const crimeTypes = aggregateCrimeTypes(criminal.criminalHistory);
   const crimeSummary = crimeTypes.join(" • ") || "—";
   const primaryId = recordPrimaryId(criminal);
-  const idLabels = recordIdFieldLabel(criminal.recordType);
+  const idLabels = recordIdFieldLabel();
   const typeLabel = recordTypeLabel(criminal.recordType);
   const markedDagi = isDagi(criminal.recordType);
 
